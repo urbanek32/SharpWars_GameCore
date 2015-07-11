@@ -32,7 +32,7 @@ public class UserInput : MonoBehaviour {
 		}
 		else if(Input.GetMouseButtonDown(1))
 		{
-			//RightMouseClick();
+			RightMouseClick();
 		}
 	}
 
@@ -64,6 +64,15 @@ public class UserInput : MonoBehaviour {
 					}
 				}
 			}
+		}
+	}
+
+	private void RightMouseClick()
+	{
+		if(player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) && player.SelectedObject)
+		{
+			player.SelectedObject.SetSelection(false);
+			player.SelectedObject = null;
 		}
 	}
 
