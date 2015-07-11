@@ -19,8 +19,78 @@ public class UserInput : MonoBehaviour {
 		if(player && player.human) 
 		{
 			MoveCamera();
-			RotateCamera();
+			RotateCamera(); // useless?
+			MouseActivity();
 		}
+	}
+
+	private void MouseActivity()
+	{
+		if(Input.GetMouseButtonDown(0))
+		{
+			LeftMouseClick();
+		}
+		else if(Input.GetMouseButtonDown(1))
+		{
+			RightMouseClick();
+		}
+	}
+
+	private void LeftMouseClick()
+	{
+		// tylko gdy klikamy w obszarze gry, nie HUD
+		if(player.hud.MouseInBounds())
+		{
+			GameObject hitObj = FindHitObject();
+			Vector3 hitPoint = FindHitPoint();
+
+			if(hitObj && hitPoint != ResourceManager.InvalidPosition)
+			{
+				// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
+				// jednostka wykona akcje zwiazana z tym kliknieciem
+				if(player.SelectedObject)
+				{
+					player.SelectedObject().MouseClick(hitObject, hitPoint, player);
+				}
+				else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
+				{
+					WorldObject worldObject = hitObj.transform.root.GetComponent<WorldObject>();
+
+					if(worldObject)
+					{
+						// wiemy ze gracz nie ma zaznaczonych obiektów
+						player.SelectedObject = worldObject;
+						worldObject.SetSelection(true);
+					}
+				}
+			}
+		}
+	}
+
+	private Vector3 FindHitPoint()
+	{
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		RaycastHit hit;
+
+		if(Physics.Raycast(ray, out hit))
+		{
+			return hit.point;
+		}
+
+		return ResourceManager.InvalidPosition;
+	}
+
+	private GameObject FindHitObject()
+	{
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		RaycastHit hit;
+
+		if(Physics.Raycast(ray, out hit))
+		{
+			return hit.collider.gameObject;
+		}
+
+		return null;
 	}
 
 	private void MoveCamera()

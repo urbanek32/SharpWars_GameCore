@@ -37,6 +37,19 @@ public class WorldObject : MonoBehaviour {
 
 
 
+	private void ChangeSelection(WorldObject worldObject, Player controller)
+	{
+		SetSelection(false);
+
+		if(controller.SelectedObject)
+		{
+			controller.SelectedObject.SetSelection(false);
+		}
+
+		controller.SelectedObject = worldObject;
+		worldObject.SetSelection(true);
+	}
+
 	public void SetSelection(bool selected)
 	{
 		currentlySelected = selected;
@@ -52,6 +65,20 @@ public class WorldObject : MonoBehaviour {
 		//it is up to children with specific actions to determine what to do with each of those actions
 	}
 
+	public virtual void MouseClick(GameObject hitObject, Vector3 hitPoint, Player controller)
+	{
+		// tylko gdy aktualnie zaznaczony
+		if(currentlySelected && hitObject && hitObject.name != "Ground")
+		{
+			WorldObject worldObject = hitObject.transform.root.GetComponent< WorldObject >();
+
+			// kliknieto na inna zaznaczalna jednostke
+			if(worldObject)
+			{
+				ChangeSelection(worldObject, controller);
+			}
+		}
+	}
 
 
 
