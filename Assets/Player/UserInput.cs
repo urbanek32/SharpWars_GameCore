@@ -32,7 +32,7 @@ public class UserInput : MonoBehaviour {
 		}
 		else if(Input.GetMouseButtonDown(1))
 		{
-			RightMouseClick();
+			//RightMouseClick();
 		}
 	}
 
@@ -50,7 +50,7 @@ public class UserInput : MonoBehaviour {
 				// jednostka wykona akcje zwiazana z tym kliknieciem
 				if(player.SelectedObject)
 				{
-					player.SelectedObject().MouseClick(hitObject, hitPoint, player);
+					player.SelectedObject.MouseClick(hitObj, hitPoint, player);
 				}
 				else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
 				{
