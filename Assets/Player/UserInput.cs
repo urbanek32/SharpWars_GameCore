@@ -24,6 +24,37 @@ public class UserInput : MonoBehaviour {
 		}
 	}
 
+
+
+
+	private void MouseHover()
+	{
+		if(player.hud.MouseInBounds())
+		{
+			GameObject hoverObject = FindHitObject();
+			if(hoverObject)
+			{
+				if(player.SelectedObject)
+				{
+					player.SelectedObject.SetHoverState(hoverObject);
+				}
+				else if(hoverObject.name != "Ground")
+				{
+					Player owner = hoverObject.transform.root.GetComponent< Player >();
+					if(owner)
+					{
+						Unit unit = hoverObject.transform.parent.GetComponent< Unit >();
+						Building building = hoverObject.transform.parent.GetComponent< Building >();
+						if(owner.username == player.username && (unit || building))
+						{
+							player.hud.SetCursorState(CursorState.Select);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void MouseActivity()
 	{
 		if(Input.GetMouseButtonDown(0))
@@ -34,6 +65,8 @@ public class UserInput : MonoBehaviour {
 		{
 			RightMouseClick();
 		}
+
+		MouseHover();
 	}
 
 	private void LeftMouseClick()
@@ -54,7 +87,7 @@ public class UserInput : MonoBehaviour {
 				}
 				else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
 				{
-					WorldObject worldObject = hitObj.transform.root.GetComponent<WorldObject>();
+					WorldObject worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
 
 					if(worldObject)
 					{
