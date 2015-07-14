@@ -15,8 +15,8 @@ namespace RTS {
 		public static float RotateSpeed { get { return 100; } }
 		public static float RotateAmount { get { return 10; } }
 
-		public static float MinCameraHeight { get { return 100; } }
-		public static float MaxCameraHeight { get { return 400; } }
+		public static float MinCameraHeight { get { return 20; } }
+		public static float MaxCameraHeight { get { return 300; } }
 
 		public static Vector3 InvalidPosition { get { return invalidPosition; } }
 		public static GUISkin SelectBoxSkin { get { return selectBoxSkin; } }

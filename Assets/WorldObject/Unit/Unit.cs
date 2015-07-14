@@ -10,6 +10,8 @@ public class Unit : WorldObject {
 	private Vector3 destination;
 	private Quaternion targetRotation;
 
+	public float moveSpeed, rotateSpeed;
+
 
 	protected override void Awake() 
 	{
@@ -24,6 +26,15 @@ public class Unit : WorldObject {
 	protected override void Update () 
 	{
 		base.Update();
+
+		if(rotating)
+		{
+			TurnToTarget();
+		}
+		else if(moving)
+		{
+			MakeMove();
+		}
 	}
 	
 	protected override void OnGUI() 
@@ -33,6 +44,32 @@ public class Unit : WorldObject {
 
 
 	 
+
+	private void TurnToTarget()
+	{
+		transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed);
+
+		//sometimes it gets stuck exactly 180 degrees out in the calculation and does nothing, this check fixes that
+		Quaternion inverseTargetRotation = new Quaternion(-targetRotation.x, -targetRotation.y, -targetRotation.z, -targetRotation.w);
+		if(transform.rotation == targetRotation || transform.rotation == inverseTargetRotation) 
+		{
+			rotating = false;
+			moving = true;
+		}
+		CalculateBounds();
+	}
+
+	private void MakeMove()
+	{
+		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
+		if(transform.position == destination)
+		{
+			moving = false;
+		}
+		CalculateBounds();
+	}
+
+
 
 
 	public void StartMove(Vector3 destination)
@@ -53,7 +90,7 @@ public class Unit : WorldObject {
 			if(hitObject.name == "Ground" && hitPoint != ResourceManager.InvalidPosition) {
 				float x = hitPoint.x;
 				//makes sure that the unit stays on top of the surface it is on
-				float y = hitPoint.y + player.SelectedObject.transform.position.y;
+				float y = hitPoint.y;
 				float z = hitPoint.z;
 				Vector3 destination = new Vector3(x, y, z);
 				StartMove(destination);

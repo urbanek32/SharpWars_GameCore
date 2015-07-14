@@ -178,10 +178,10 @@ public class UserInput : MonoBehaviour {
 		//make sure movement is in the direction the camera is pointing
 		//but ignore the vertical tilt of the camera to get sensible scrolling
 		movement = Camera.main.transform.TransformDirection(movement);
-		movement.z = 0;
+		movement.y = 0;
 
 		// zoom in | zoom out
-		movement.z -= ResourceManager.ZoomSpeed * Input.GetAxis("Mouse ScrollWheel");
+		movement.y -= ResourceManager.ZoomSpeed * Input.GetAxis("Mouse ScrollWheel");
 
 		// obliczanie pozycji kamery na podstawie inputu
 		Vector3 origin = Camera.main.transform.position;
@@ -191,13 +191,13 @@ public class UserInput : MonoBehaviour {
 		destination.z += movement.z;
 
 		// limitowanie zooma
-		if(destination.z > ResourceManager.MaxCameraHeight)
+		if(destination.y > ResourceManager.MaxCameraHeight)
 		{
-			destination.z = ResourceManager.MaxCameraHeight;
+			destination.y = ResourceManager.MaxCameraHeight;
 		}
-		else if(destination.z < ResourceManager.MinCameraHeight)
+		else if(destination.y < ResourceManager.MinCameraHeight)
 		{
-			destination.z = ResourceManager.MinCameraHeight;
+			destination.y = ResourceManager.MinCameraHeight;
 		}
 
 		// przesuń kamere tylko gdy zmienila sie pozycja
