@@ -1,21 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-
+using RTS;
 
 public class HUD : MonoBehaviour {
 
-	public GUISkin resourceSkin, ordersSkin;
+	public GUISkin resourceSkin, ordersSkin, selectBoxSkin;
 
 	private Player player;
 
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 15;
 
+
 	// Use this for initialization
 	void Start () 
 	{
 		player = transform.root.GetComponent< Player >();
+
+		ResourceManager.StoreSelectBoxItems(selectBoxSkin);
 	}
 	
 	// called each frame to handle any drawing our script is responsible for
@@ -29,6 +32,11 @@ public class HUD : MonoBehaviour {
 	}
 
 
+	public Rect GetPlayingArea()
+	{
+		return new Rect(0, RESOURCE_BAR_HEIGHT, Screen.width - ORDERS_BAR_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT);
+	}
+
 	public bool MouseInBounds()
 	{
 		//Screen coordinates start in the lower-left corner of the screen
@@ -38,6 +46,9 @@ public class HUD : MonoBehaviour {
 		bool insideHeight = mousePos.y >= 0 && mousePos.y <= Screen.height - RESOURCE_BAR_HEIGHT;
 		return insideWidth && insideHeight;
 	}
+
+
+
 
 
 	private void DrawOrdersBar()
