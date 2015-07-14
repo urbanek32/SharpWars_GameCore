@@ -107,27 +107,39 @@ public class UserInput : MonoBehaviour {
 		float xpos = Input.mousePosition.x;
 		float ypos = Input.mousePosition.y;
 		Vector3 movement = new Vector3(0,0,0);
+		bool mouseScroll = false;
 
 		// ruszanie kamery w poziomie
 		if(xpos >= 0 && xpos < ResourceManager.ScrollWidth)
 		{
 			movement.x -= ResourceManager.ScrollSpeed;
+			player.hud.SetCursorState(CursorState.PanLeft);
+			mouseScroll = true;
 		}
-		else
-		if(xpos <= Screen.width && xpos > Screen.width - ResourceManager.ScrollWidth)
+		else if(xpos <= Screen.width && xpos > Screen.width - ResourceManager.ScrollWidth)
 		{
 			movement.x += ResourceManager.ScrollSpeed;
+			player.hud.SetCursorState(CursorState.PanRight);
+			mouseScroll = true;
 		}
 
 		// ruszanie kamery w pionie
 		if(ypos >= 0 && ypos < ResourceManager.ScrollWidth)
 		{
 			movement.y -= ResourceManager.ScrollSpeed;
+			player.hud.SetCursorState(CursorState.PanDown);
+			mouseScroll = true;
 		}
-		else
-		if(ypos <= Screen.height && ypos > Screen.height - ResourceManager.ScrollWidth)
+		else if(ypos <= Screen.height && ypos > Screen.height - ResourceManager.ScrollWidth)
 		{
 			movement.y += ResourceManager.ScrollSpeed;
+			player.hud.SetCursorState(CursorState.PanUp);
+			mouseScroll = true;
+		}
+
+		if(!mouseScroll)
+		{
+			player.hud.SetCursorState(CursorState.Select);
 		}
 
 		//make sure movement is in the direction the camera is pointing
@@ -150,8 +162,7 @@ public class UserInput : MonoBehaviour {
 		{
 			destination.z = ResourceManager.MaxCameraHeight;
 		}
-		else
-		if(destination.z < ResourceManager.MinCameraHeight)
+		else if(destination.z < ResourceManager.MinCameraHeight)
 		{
 			destination.z = ResourceManager.MinCameraHeight;
 		}
