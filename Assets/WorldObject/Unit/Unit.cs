@@ -2,6 +2,7 @@
 using System.Collections;
 
 using RTS;
+using NLua;
 
 public class Unit : WorldObject {
 
@@ -12,6 +13,7 @@ public class Unit : WorldObject {
 
 	public float moveSpeed, rotateSpeed;
 
+    public string userControlScript;
 
 	protected override void Awake() 
 	{
@@ -26,6 +28,12 @@ public class Unit : WorldObject {
 	protected override void Update () 
 	{
 		base.Update();
+
+        if (userControlScript.Length > 0 && UserInput.env != null)
+        {
+            UserInput.env["unit"] = this;
+            UserInput.env.DoString(userControlScript);
+        }
 
 		if(rotating)
 		{
@@ -70,10 +78,12 @@ public class Unit : WorldObject {
 	}
 
 
-
-
 	public void StartMove(Vector3 destination)
 	{
+        //if nothing to deal with
+        if (this.destination == destination)
+            return;
+
 		this.destination = destination;
 		targetRotation = Quaternion.LookRotation(destination - transform.position);
 		rotating = true;
