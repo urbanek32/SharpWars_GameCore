@@ -18,7 +18,7 @@ end
 ";
 
 	private Player player;
-    static public Lua env = new Lua();    //the environment of lua
+    static public Lua env;    //the environment of lua
 
 	// Use this for initialization
 	void Start () 
@@ -54,9 +54,6 @@ PanzerVor(vec)
     {
         env = new Lua();
         env.LoadCLRPackage();
-
-        env["this"] = this;
-        env["unit"] = null;
 
         try
         {

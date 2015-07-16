@@ -13,7 +13,27 @@ public class Unit : WorldObject {
 
 	public float moveSpeed, rotateSpeed;
 
-    public string userControlScript;
+    private string callingName;
+    private string _userControlScript;
+    public string userControlScript
+    {
+        get { return _userControlScript; }
+        set
+        {
+            if (value.Length == 0)
+            {
+                callingName = "";
+                _userControlScript = "";
+            }
+            else
+            {
+                callingName = "UnitFunc" + System.DateTime.Now.Ticks.ToString();
+                string _userControlScript = value;
+                string userFunc = "function " + callingName + "(u)\n unit = u\n" + _userControlScript + "\nend";
+                UserInput.env.DoString(userFunc);
+            }
+        }
+    }
 
 	protected override void Awake() 
 	{
@@ -29,10 +49,10 @@ public class Unit : WorldObject {
 	{
 		base.Update();
 
-        if (userControlScript.Length > 0 && UserInput.env != null)
+        if (callingName != null && callingName.Length > 0)
         {
-            UserInput.env["unit"] = this;
-            UserInput.env.DoString(userControlScript);
+            object[] arg = {this};
+            Call(callingName, arg);
         }
 
 		if(rotating)
@@ -119,5 +139,31 @@ public class Unit : WorldObject {
 		}
 
 	}
+
+    public System.Object[] Call(string function, params System.Object[] args)
+    {
+        System.Object[] result = new System.Object[0];
+        if (UserInput.env == null) return result;
+        LuaFunction lf = UserInput.env.GetFunction(function);
+        if (lf == null) return result;
+        try
+        {
+            // Note: calling a function that does not
+            // exist does not throw an exception.
+            if (args != null)
+            {
+                result = lf.Call(args);
+            }
+            else
+            {
+                result = lf.Call();
+            }
+        }
+        catch (NLua.Exceptions.LuaException e)
+        {
+            Debug.Log("[LUA-EX]" + e.ToString());
+        }
+        return result;
+    }
 
 }
