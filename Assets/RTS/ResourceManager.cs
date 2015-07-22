@@ -27,5 +27,7 @@ namespace RTS {
 		}
 
 		public static Bounds InvalidBounds { get { return invalidBounds; } }
+
+		public static int BuildSpeed { get { return 2; } }
 	}
 }
