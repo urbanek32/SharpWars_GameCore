@@ -136,6 +136,15 @@ public class WorldObject : MonoBehaviour {
 		}
 	}
 
+	public bool IsOwnedBy(Player owner)
+	{
+		if(player && player.Equals(owner)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 
 
 

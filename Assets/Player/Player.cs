@@ -53,7 +53,7 @@ public class Player : MonoBehaviour {
 
 	public void AddUnit(string unitName, Vector3 spawnPoint, Quaternion rotation)
 	{
-		Debug.Log("add " + unitName + "to player");
+		Debug.Log("add " + unitName + " to player");
 	}
 
 
