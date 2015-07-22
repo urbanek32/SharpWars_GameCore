@@ -14,6 +14,7 @@ public class HUD : MonoBehaviour {
 	public Texture2D[] moveCursors, attackCursors, harvestCursors;
 	public Texture2D[] resources;
 	public Texture2D buttonHover, buttonClick;
+	public Texture2D buildFrame, buildMask;
 
 	private Player player;
 	private CursorState activeCursorState;
@@ -30,6 +31,7 @@ public class HUD : MonoBehaviour {
 	private const int BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64;
 	private const int BUTTON_SPACING = 7;
 	private const int SCROLL_BAR_WIDTH = 22;
+	private const int BUILD_IMAGE_PADDING = 8;
 
 
 	// Use this for initialization
@@ -212,9 +214,8 @@ public class HUD : MonoBehaviour {
 	private void DrawOrdersBar()
 	{
 		GUI.skin = ordersSkin;
-		GUI.BeginGroup(new Rect(Screen.width-ORDERS_BAR_WIDTH,RESOURCE_BAR_HEIGHT,ORDERS_BAR_WIDTH,Screen.height-RESOURCE_BAR_HEIGHT));
-
-		GUI.Box(new Rect(0,0,ORDERS_BAR_WIDTH,Screen.height-RESOURCE_BAR_HEIGHT),"");
+		GUI.BeginGroup(new Rect(Screen.width - ORDERS_BAR_WIDTH - BUILD_IMAGE_WIDTH, RESOURCE_BAR_HEIGHT, ORDERS_BAR_WIDTH + BUILD_IMAGE_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT));
+		GUI.Box(new Rect(BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH, 0, ORDERS_BAR_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT),"");
 		string selectionName = "";
 		if(player.SelectedObject)
 		{
@@ -229,13 +230,20 @@ public class HUD : MonoBehaviour {
 				DrawActions(player.SelectedObject.GetActions());
 				// store the current selection
 				lastSelection = player.SelectedObject;
+
+				Building selectedBuilding = lastSelection.GetComponent< Building >();
+				if(selectedBuilding)
+				{
+					DrawBuildQueue(selectedBuilding.getBuildQueueValues(), selectedBuilding.getBuildPercentage());
+				}
 			}
 		}
 
 		if(!selectionName.Equals(""))
 		{
-			//int topPos = buildAreaHeight + BUTTON_SPACING;
-			GUI.Label(new Rect(0, 10, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT), selectionName);
+			int topPos = buildAreaHeight + BUTTON_SPACING;
+			int leftPos = BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH / 2;
+			GUI.Label(new Rect(leftPos, topPos, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT), selectionName);
 		}
 
 		GUI.EndGroup();
@@ -272,7 +280,7 @@ public class HUD : MonoBehaviour {
 		GUI.skin.button = buttons;
 		int numActions = actions.Length;
 		//define the area to draw the actions inside
-		GUI.BeginGroup(new Rect(0, 30, ORDERS_BAR_WIDTH, buildAreaHeight));
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, buildAreaHeight));
 		// draw scroll bar for the list of actions if need be
 		if(numActions >= MaxNumRows(buildAreaHeight)) 
 		{
@@ -321,6 +329,27 @@ public class HUD : MonoBehaviour {
 	private Rect GetScrollPos(int groupHeight)
 	{
 		return new Rect(BUTTON_SPACING, BUTTON_SPACING, SCROLL_BAR_WIDTH, groupHeight - 2 * BUTTON_SPACING);
+	}
+
+	private void DrawBuildQueue(string[] buildQueue, float buildPercentage)
+	{
+		for(int i = 0; i < buildQueue.Length; i++)
+		{
+			float topPos = i * BUILD_IMAGE_HEIGHT - (i+1) * BUILD_IMAGE_PADDING;
+			Rect buildPos = new Rect(BUILD_IMAGE_PADDING, topPos + 10, BUILD_IMAGE_WIDTH, BUILD_IMAGE_HEIGHT);
+			GUI.DrawTexture(buildPos, ResourceManager.GetBuildImage(buildQueue[i]));
+			GUI.DrawTexture(buildPos, buildFrame);
+			topPos += BUILD_IMAGE_PADDING;
+			float width = BUILD_IMAGE_WIDTH - 2 * BUILD_IMAGE_PADDING;
+			float height = BUILD_IMAGE_HEIGHT - 2 * BUILD_IMAGE_PADDING;
+			if(i == 0)
+			{
+				//shrink the build mask on the item currently being built to give an idea of progress
+				topPos += height * buildPercentage;
+				height *= (1 - buildPercentage);
+			}
+			GUI.DrawTexture(new Rect(2 * BUILD_IMAGE_PADDING, topPos + 10, width, height), buildMask);
+		}
 	}
 
 
