@@ -8,6 +8,7 @@ public class Building : WorldObject
 {
 	public float maxBuildProgress;
 	public Texture2D rallyPointImage;
+	public Texture2D sellImage;
 
 	protected Queue< string > buildQueue;
 
@@ -166,6 +167,20 @@ public class Building : WorldObject
 			}
 		}
 	}
+
+	public void Sell()
+	{
+		if(player)
+		{
+			player.AddResource(ResourceType.Money, sellValue);
+			if(currentlySelected)
+			{
+				SetSelection(false, playingArea);
+			}
+			Destroy(this.gameObject);
+		}
+	}
+
 
 
 
