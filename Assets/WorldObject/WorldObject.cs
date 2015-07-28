@@ -145,6 +145,11 @@ public class WorldObject : MonoBehaviour {
 		}
 	}
 
+	public Bounds GetSelectionBounds()
+	{
+		return selectionBounds;
+	}
+
 
 
 
