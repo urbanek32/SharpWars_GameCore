@@ -35,5 +35,10 @@ public class OreDeposit : Resource
 			}
 			CalculateBounds();
 		}
+
+		if(numBlocksToShow <= 0)
+		{
+			Destroy(this);
+		}
 	}
 }

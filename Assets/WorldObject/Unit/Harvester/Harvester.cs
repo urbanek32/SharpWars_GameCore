@@ -52,7 +52,7 @@ public class Harvester : Unit {
 						{
 							arm.GetComponent<Renderer>().enabled = false;
 						}
-						StartMove (resourceStore.transform.position, resourceStore.gameObject);;
+						StartMove(resourceStore.transform.position, resourceStore.gameObject);
 					}
 				}
 				else
@@ -147,6 +147,12 @@ public class Harvester : Unit {
 
 	}
 
+	public override void Init(Building creator)
+	{
+		base.Init(creator);
+		resourceStore = creator;
+	}
+
 
 
 	// Private Methods
@@ -154,7 +160,18 @@ public class Harvester : Unit {
 	private void StartHarvest(Resource resource)
 	{
 		resourceDeposit = resource;
-		StartMove(resource.transform.position, resource.gameObject);
+		if(currentLoad >= capacity)
+		{
+			StartMove(resourceStore.transform.position, resourceStore.gameObject);
+			harvesting = false;
+			emptying = true;
+		}
+		else
+		{
+			StartMove(resource.transform.position, resource.gameObject);
+			harvesting = true;
+			emptying = false;
+		}
 
 		//we can only collect one resource at a time, other resources are lost
 		if(harvestType == ResourceType.Unknown || harvestType != resource.GetResourceType()) 
@@ -162,14 +179,20 @@ public class Harvester : Unit {
 			harvestType = resource.GetResourceType();
 			currentLoad = 0.0f;
 		}
-		harvesting = true;
-		emptying = false;
+
 
 	}
 
 	private void StopHarvest()
 	{
+		harvesting = false;
+		emptying = false;
 
+		Arms[] arms = GetComponentsInChildren< Arms >();
+		foreach(Arms arm in arms)
+		{
+			arm.GetComponent<Renderer>().enabled = false;
+		}
 	}
 
 	private void Collect()

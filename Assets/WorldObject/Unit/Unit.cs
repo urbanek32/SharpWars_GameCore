@@ -140,6 +140,7 @@ public class Unit : WorldObject {
 		}
 		destination.y = destinationTarget.transform.position.y;
 
+		destinationTarget = null;
 	}
 
 
@@ -195,6 +196,11 @@ public class Unit : WorldObject {
 			if(hoverObject.name == "Ground") player.hud.SetCursorState(CursorState.Move);
 		}
 
+	}
+
+	public virtual void Init(Building creator)
+	{
+		//specific initialization for a unit can be specified here
 	}
 
     public System.Object[] Call(string function, params System.Object[] args)

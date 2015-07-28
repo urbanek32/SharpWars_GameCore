@@ -61,7 +61,7 @@ public class Building : WorldObject
 			{
 				if(player)
 				{
-					player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation);
+					player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, this);
 				}
 				currentBuildProgress = 0.0f;
 			}
