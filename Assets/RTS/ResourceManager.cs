@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace RTS {
 	public static class ResourceManager 
@@ -8,6 +9,8 @@ namespace RTS {
 		private static Vector3 invalidPosition = new Vector3(-99999, -99999, -99999);
 		private static Bounds invalidBounds = new Bounds(new Vector3(-99999, -99999, -99999), new Vector3(0,0,0));
 		private static GameObjectList gameObjectList;
+		private static Texture2D healthyTexture, damagedTexture, criticalTexture;
+		private static Dictionary< ResourceType, Texture2D > resourceHealthBarTextures;
 
 		public static int ScrollWidth { get { return 15; } }
 		public static float ScrollSpeed { get { return 100; } }
@@ -22,16 +25,18 @@ namespace RTS {
 		public static Vector3 InvalidPosition { get { return invalidPosition; } }
 		public static GUISkin SelectBoxSkin { get { return selectBoxSkin; } }
 
-		public static void StoreSelectBoxItems(GUISkin skin)
+		public static void StoreSelectBoxItems(GUISkin skin, Texture2D healthy, Texture2D damaged, Texture2D critical)
 		{
 			selectBoxSkin = skin;
+			healthyTexture = healthy;
+			damagedTexture = damaged;
+			criticalTexture = critical;
 		}
 
 		public static Bounds InvalidBounds { get { return invalidBounds; } }
 
 		public static int BuildSpeed { get { return 2; } }
-
-
+		
 		public static void SetGameObjectList(GameObjectList objectList)
 		{
 			gameObjectList = objectList;
@@ -55,6 +60,24 @@ namespace RTS {
 		public static Texture2D GetBuildImage(string name) 
 		{
 			return gameObjectList.GetBuildImage(name);
+		}
+
+		public static Texture2D HealthyTexture { get { return healthyTexture; } }
+		public static Texture2D DamagedTexture { get { return damagedTexture; } }
+		public static Texture2D CriticalTexture { get { return criticalTexture; } }
+
+		public static Texture2D GetResourceHealthBar(ResourceType resourceType)
+		{
+			if(resourceHealthBarTextures != null && resourceHealthBarTextures.ContainsKey(resourceType)) 
+			{
+				return resourceHealthBarTextures[resourceType];
+			}
+			return null;
+		}
+
+		public static void SetResourceHealthBarTextures(Dictionary< ResourceType, Texture2D > images) 
+		{
+			resourceHealthBarTextures = images;
 		}
 	}
 }
