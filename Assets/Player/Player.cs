@@ -91,6 +91,20 @@ public class Player : MonoBehaviour {
 			Destroy(newBuilding);
 		}
 	}
+
+	public bool IsFindingBuildingLocation()
+	{
+		return findingPlacement;
+	}
+
+	public void FindBuildingLocation()
+	{
+		Vector3 newLocation = WorkManager.FindHitPoint(Input.mousePosition);
+		newLocation.y = 0;
+		tempBuilding.transform.position = newLocation;
+	}
+
+
 	
 	
 	

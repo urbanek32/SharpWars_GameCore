@@ -50,23 +50,30 @@ PanzerVor(vec)
 	{
 		if(player.hud.MouseInBounds())
 		{
-			GameObject hoverObject = FindHitObject();
-			if(hoverObject)
+			if(player.IsFindingBuildingLocation())
 			{
-				if(player.SelectedObject)
+				player.FindBuildingLocation();
+			}
+			else
+			{
+				GameObject hoverObject = WorkManager.FindHitObject(Input.mousePosition);
+				if(hoverObject)
 				{
-					player.SelectedObject.SetHoverState(hoverObject);
-				}
-				else if(hoverObject.name != "Ground")
-				{
-					Player owner = hoverObject.transform.root.GetComponent< Player >();
-					if(owner)
+					if(player.SelectedObject)
 					{
-						Unit unit = hoverObject.transform.parent.GetComponent< Unit >();
-						Building building = hoverObject.transform.parent.GetComponent< Building >();
-						if(owner.username == player.username && (unit || building))
+						player.SelectedObject.SetHoverState(hoverObject);
+					}
+					else if(hoverObject.name != "Ground")
+					{
+						Player owner = hoverObject.transform.root.GetComponent< Player >();
+						if(owner)
 						{
-							player.hud.SetCursorState(CursorState.Select);
+							Unit unit = hoverObject.transform.parent.GetComponent< Unit >();
+							Building building = hoverObject.transform.parent.GetComponent< Building >();
+							if(owner.username == player.username && (unit || building))
+							{
+								player.hud.SetCursorState(CursorState.Select);
+							}
 						}
 					}
 				}
@@ -93,8 +100,8 @@ PanzerVor(vec)
 		// tylko gdy klikamy w obszarze gry, nie HUD
 		if(player.hud.MouseInBounds())
 		{
-			GameObject hitObj = FindHitObject();
-			Vector3 hitPoint = FindHitPoint();
+			GameObject hitObj = WorkManager.FindHitObject(Input.mousePosition);
+			Vector3 hitPoint = WorkManager.FindHitPoint(Input.mousePosition);
 
 			if(hitObj && hitPoint != ResourceManager.InvalidPosition)
 			{
@@ -128,31 +135,7 @@ PanzerVor(vec)
 		}
 	}
 
-	private Vector3 FindHitPoint()
-	{
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		RaycastHit hit;
 
-		if(Physics.Raycast(ray, out hit))
-		{
-			return hit.point;
-		}
-
-		return ResourceManager.InvalidPosition;
-	}
-
-	private GameObject FindHitObject()
-	{
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		RaycastHit hit;
-
-		if(Physics.Raycast(ray, out hit))
-		{
-			return hit.collider.gameObject;
-		}
-
-		return null;
-	}
 
 	private void MoveCamera()
 	{
