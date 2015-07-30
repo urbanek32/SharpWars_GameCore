@@ -62,7 +62,7 @@ public class Player : MonoBehaviour {
 		Unit unitObject = newUnit.GetComponent< Unit >();
 		if(unitObject)
 		{
-			unitObject.Init(creator);
+			unitObject.SetBuilding(creator);
 			if(spawnPoint != rallyPoint)
 			{
 				unitObject.StartMove(rallyPoint);
