@@ -11,8 +11,12 @@ public class Player : MonoBehaviour {
 	public HUD hud;
 	public WorldObject SelectedObject { get; set; }
 	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
+	public Material notAllowedMaterial, allowedMaterial;
 
 	private Dictionary< ResourceType, int > resources, resourceLimits;
+	private Building tempBuilding;
+	private Unit tempCreator;
+	private bool findingPlacement = false;
 
 	// works like constructor
 	void Awake() 
@@ -70,8 +74,26 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-
-
+	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
+	{
+		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(buildingName), buildPoint, new Quaternion());
+		tempBuilding = newBuilding.GetComponent< Building >();
+		if (tempBuilding) 
+		{
+			tempCreator = creator;
+			findingPlacement = true;
+			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
+			tempBuilding.SetColliders(false);
+			tempBuilding.SetPlayingArea(playingArea);
+		} 
+		else 
+		{
+			Destroy(newBuilding);
+		}
+	}
+	
+	
+	
 	private Dictionary< ResourceType, int > InitResourceList()
 	{
 		Dictionary< ResourceType, int > list = new Dictionary< ResourceType, int >();
