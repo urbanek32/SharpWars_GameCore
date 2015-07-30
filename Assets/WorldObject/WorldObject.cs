@@ -11,6 +11,7 @@ public class WorldObject : MonoBehaviour {
 	public string objectName;
 	public Texture2D buildImage;
 	public int cost, sellValue, hitPoints, maxHitPoints;
+	public string unitScript;
 
 	protected Player player;
 	protected string[] actions = {};

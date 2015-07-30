@@ -30,6 +30,9 @@ public class HUD : MonoBehaviour {
 	private int buildAreaHeight = 0;
 	private CursorState previousCursorState;
 
+	private bool scriptWindowOpen = false;
+	private string scriptString = "";
+
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 15;
 	private const int ICON_WIDTH = 32, ICON_HEIGHT = 32, TEXT_WIDTH = 128, TEXT_HEIGHT = 32;
@@ -93,6 +96,7 @@ public class HUD : MonoBehaviour {
 			DrawOrdersBar();
 			DrawResourceBar();
 			DrawMouseCursor();
+			DrawScriptWindow();
 		}
 	}
 
@@ -271,6 +275,7 @@ public class HUD : MonoBehaviour {
 				{
 					sliderValue = 0.0f;
 				}
+				DrawScriptButton();
 				DrawActions(player.SelectedObject.GetActions());
 				// store the current selection
 				lastSelection = player.SelectedObject;
@@ -325,7 +330,7 @@ public class HUD : MonoBehaviour {
 		GUI.skin.button = buttons;
 		int numActions = actions.Length;
 		//define the area to draw the actions inside
-		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, buildAreaHeight));
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 64, ORDERS_BAR_WIDTH, buildAreaHeight)); // 0->64 bo scriptWindow
 		// draw scroll bar for the list of actions if need be
 		if(numActions >= MaxNumRows(buildAreaHeight)) 
 		{
@@ -351,6 +356,31 @@ public class HUD : MonoBehaviour {
 			}
 		}
 		GUI.EndGroup();
+	}
+
+	private void DrawScriptButton()
+	{
+		GUIStyle buttons = new GUIStyle();
+		buttons.hover.background = buttonHover;
+		buttons.active.background = buttonClick;
+		buttons.alignment = TextAnchor.MiddleCenter;
+		GUI.skin.button = buttons;
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, 64)); // 0->64 bo scriptWindow
+		if(GUI.Button(new Rect(22, 10, 128, 60), "Skryptowe okno"))
+		{
+			scriptWindowOpen = !scriptWindowOpen;
+		}
+		GUI.EndGroup();
+	}
+
+	private void DrawScriptWindow()
+	{
+		if(scriptWindowOpen && player.SelectedObject)
+		{
+			GUI.SetNextControlName("ScriptTextArea");
+			player.SelectedObject.unitScript = GUI.TextArea(new Rect(Screen.width/2, 50, 400, 200), player.SelectedObject.unitScript);
+			GUI.FocusControl("ScriptTextArea");
+		}
 	}
 
 	private int MaxNumRows(int areaHeight)
