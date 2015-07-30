@@ -61,15 +61,40 @@ public class Worker : Unit {
 	{
 		base.StartMove(destination);
 		amountBuilt = 0.0f;
+		building = false;
 	}
 
+	public override void MouseClick(GameObject hitObject, Vector3 hitPoint, Player controller)
+	{
+		bool doBase = true;
 
+		//only handle input if owned by a human player and currently selected
+		if(player && player.human && currentlySelected && hitObject && hitObject.name != "Ground") 
+		{
+			Building building = hitObject.transform.parent.GetComponent< Building >();
+			if(building) 
+			{
+				if(building.UnderConstruction()) 
+				{
+					SetBuilding(building);
+					doBase = false;
+				}
+			}
+		}
 
-
-
+		if(doBase)
+		{
+			base.MouseClick(hitObject, hitPoint, controller);
+		}
+	}
+	
+	
+	
+	
+	
 	/*** Private Methods ***/
-
-
+	
+	
 	private void CreateBuilding(string buildingName)
 	{
 		Vector3 buildPoint = new Vector3(transform.position.x, transform.position.y, transform.position.z + 10);

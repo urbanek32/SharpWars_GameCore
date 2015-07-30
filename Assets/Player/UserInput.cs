@@ -140,8 +140,15 @@ PanzerVor(vec)
 	{
 		if(player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) && player.SelectedObject)
 		{
-			player.SelectedObject.SetSelection(false, player.hud.GetPlayingArea());
-			player.SelectedObject = null;
+			if(player.IsFindingBuildingLocation())
+			{
+				player.CancelBuildingPlacement();
+			}
+			else
+			{
+				player.SelectedObject.SetSelection(false, player.hud.GetPlayingArea());
+				player.SelectedObject = null;
+			}
 		}
 	}
 

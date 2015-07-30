@@ -173,6 +173,14 @@ public class Player : MonoBehaviour {
 		tempBuilding.StartConstruction();
 	}
 
+	public void CancelBuildingPlacement()
+	{
+		findingPlacement = false;
+		Destroy(tempBuilding.gameObject);
+		tempBuilding = null;
+		tempCreator = null;
+	}
+
 	
 	
 	
