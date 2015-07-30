@@ -42,6 +42,19 @@ public class Player : MonoBehaviour {
 		if(human)
 		{
 			hud.SetResourceValues(resources, resourceLimits);
+
+			if(findingPlacement)
+			{
+				tempBuilding.CalculateBounds();
+				if(CanPlaceBuilding())
+				{
+					tempBuilding.SetTransparentMaterial(allowedMaterial, false);
+				}
+				else
+				{
+					tempBuilding.SetTransparentMaterial(notAllowedMaterial, false);
+				}
+			}
 		}
 
 	}
@@ -104,7 +117,49 @@ public class Player : MonoBehaviour {
 		tempBuilding.transform.position = newLocation;
 	}
 
+	public bool CanPlaceBuilding()
+	{
+		bool canPlace = true;
 
+		Bounds placeBounds = tempBuilding.GetSelectionBounds();
+		//shorthand for the coordinates of the center of the selection bounds
+		float cx = placeBounds.center.x;
+		float cy = placeBounds.center.y;
+		float cz = placeBounds.center.z;
+		//shorthand for the coordinates of the extents of the selection box
+		float ex = placeBounds.extents.x;
+		float ey = placeBounds.extents.y;
+		float ez = placeBounds.extents.z;
+		
+		//Determine the screen coordinates for the corners of the selection bounds
+		List< Vector3 > corners = new List< Vector3 >();
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx+ex,cy+ey,cz+ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx+ex,cy+ey,cz-ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx+ex,cy-ey,cz+ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx-ex,cy+ey,cz+ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx+ex,cy-ey,cz-ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx-ex,cy-ey,cz+ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx-ex,cy+ey,cz-ez)));
+		corners.Add(Camera.main.WorldToScreenPoint(new Vector3(cx-ex,cy-ey,cz-ez)));
+		
+		foreach(Vector3 corner in corners) 
+		{
+			GameObject hitObject = WorkManager.FindHitObject(corner);
+			if(hitObject && hitObject.name != "Ground") 
+			{
+				WorldObject worldObject = hitObject.transform.parent.GetComponent< WorldObject >();
+				if(worldObject && placeBounds.Intersects(worldObject.GetSelectionBounds()))
+				{
+					canPlace = false;
+				}
+			}
+		}
+
+		return canPlace;
+		
+	}
+	
+	
 	
 	
 	
