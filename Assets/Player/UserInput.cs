@@ -28,7 +28,13 @@ public class UserInput : MonoBehaviour {
                 {
                     Unit u = (Unit)player.SelectedObject;
                     u.userControlScript = @"
-vec = Vector3(100, 0, 0)
+vec = Vector3(25, 0, 0)
+PanzerVor(vec)
+vec.z = 25
+PanzerVor(vec)
+vec.x = 0
+PanzerVor(vec)
+vec.z = 0
 PanzerVor(vec)
 ";
                 }

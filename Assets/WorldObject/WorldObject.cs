@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-
 using RTS;
-
+using STL;
+using NLua;
 
 public class WorldObject : MonoBehaviour {
 
@@ -22,7 +22,35 @@ public class WorldObject : MonoBehaviour {
 	protected float healthPercentage = 1.0f;
 
 	private List< Material > oldMaterials = new List< Material >();
+	//splited script <blocking func part, execution checker that return true or false>
+	protected List<Pair<LuaFunction, LuaFunction>> scriptExecutionQueue = new List<Pair<LuaFunction, LuaFunction>>();
+	protected string _userControlScript;
 
+
+    public string userControlScript
+    {
+        get { return _userControlScript; }
+        set
+        {
+            if (value.Length == 0)
+            {
+                scriptExecutionQueue.Clear();
+                _userControlScript = "";
+            }
+            else
+            {
+                string _userControlScript = value;
+                try
+                {
+                    scriptExecutionQueue = ScriptManager.RegisterUserIngameScript(_userControlScript);
+                }
+                catch (NLua.Exceptions.LuaException e)
+                {
+                    Debug.LogError("Custom script error: " + e.ToString());
+                }
+            }
+        }
+    }
 
 
 	protected virtual void Awake()
@@ -40,7 +68,7 @@ public class WorldObject : MonoBehaviour {
 	// Update is called once per frame
 	protected virtual void Update () 
 	{
-
+        ProcecssScriptQueue();
 	}
 
 	protected virtual void OnGUI()
@@ -233,12 +261,45 @@ public class WorldObject : MonoBehaviour {
 	{
 		this.playingArea = playingArea;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+    protected void ProcecssScriptQueue()
+    {
+        bool stop_executing = false;
+        if (scriptExecutionQueue.Count > 0)
+        {
+            ScriptManager.SetGlobal("this", this);
+        }
+
+        while (scriptExecutionQueue.Count > 0 && !stop_executing)
+        {
+            Pair<LuaFunction, LuaFunction> queue_item = scriptExecutionQueue[0];
+            queue_item.First.Call();
+
+            //if piece of code is non-blocking
+            if (queue_item.Second == null)
+            {
+                scriptExecutionQueue.RemoveAt(0);
+            }
+            else
+            {
+                System.Object[] result = queue_item.Second.Call();
+                bool b_result = (bool)result[0];
+                if (b_result)
+                {
+                    scriptExecutionQueue.RemoveAt(0);
+                }
+                else
+                {
+                    stop_executing = true;
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
 }

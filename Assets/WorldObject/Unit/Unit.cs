@@ -2,7 +2,6 @@
 using System.Collections;
 
 using RTS;
-using NLua;
 
 public class Unit : WorldObject {
 
@@ -14,35 +13,6 @@ public class Unit : WorldObject {
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
 
-    private LuaFunction scriptCallingFunc;
-    private string _userControlScript;
-
-
-
-    public string userControlScript
-    {
-        get { return _userControlScript; }
-        set
-        {
-            if (value.Length == 0)
-            {
-                scriptCallingFunc = null;
-                _userControlScript = "";
-            }
-            else
-            {
-                string _userControlScript = value;
-                try
-                {
-                    scriptCallingFunc = ScriptManager.RegisterUserIngameScript(_userControlScript);
-                }
-                catch (NLua.Exceptions.LuaException e)
-                {
-                    Debug.LogError("Custom script error: " + e.ToString());
-                }
-            }
-        }
-    }
 
 	protected override void Awake() 
 	{
@@ -57,12 +27,6 @@ public class Unit : WorldObject {
 	protected override void Update () 
 	{
 		base.Update();
-
-        if (scriptCallingFunc != null)
-        {
-            ScriptManager.SetGlobal("unit", this);
-            scriptCallingFunc.Call();
-        }
 
 		if(rotating)
 		{
@@ -207,5 +171,10 @@ public class Unit : WorldObject {
 	{
 		//specific initialization for a unit can be specified here
 	}
+
+    public Vector3 GetDestination()
+    {
+        return destination;
+    }
 
 }

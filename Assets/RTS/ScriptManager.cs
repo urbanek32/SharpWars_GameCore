@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using NLua;
+using STL;
 
 namespace RTS
 {
@@ -16,6 +17,7 @@ namespace RTS
 
         private static Dictionary<string, LuaFunction> globals = new Dictionary<string, LuaFunction>();
         private static Dictionary<string, LuaFunction> customScripts = new Dictionary<string, LuaFunction>();
+        private static List<Pair<string, LuaFunction>> blockingFunctions = new List<Pair<string, LuaFunction>>();
 
         public static void Init()
         {
@@ -61,9 +63,12 @@ namespace RTS
         }
 
         //for example if we want to define "PanzerVor(xxx)"
-        public static void RegisterCustomFunction(string custom_function_name, string func_definition)
+        //1) Function name
+        //2) Function definition
+        //3) Function name that checks if action has ended [Function must be registered before calling this method!]
+        public static void RegisterCustomFunction(string custom_function_name, string func_definition, string state_checker_name)
         {
-            if(!customScripts.ContainsKey(custom_function_name))
+            if(!customScripts.ContainsKey(custom_function_name) && customScripts.ContainsKey(state_checker_name))
             {
                 try
                 {
@@ -71,6 +76,34 @@ namespace RTS
                     environment.DoString(func_definition);
                     lf = environment.GetFunction(custom_function_name);
                     customScripts[custom_function_name] = lf;
+
+                    blockingFunctions.Add(new Pair<string, LuaFunction>(custom_function_name, customScripts[state_checker_name]));
+                }
+                catch (NLua.Exceptions.LuaException e)
+                {
+                    throw e;
+                }
+            }
+            else
+            {
+                if (customScripts.ContainsKey(custom_function_name))
+                    throw new System.InvalidOperationException("[LUA-EX] Function already defined!");
+                else
+                    throw new System.InvalidOperationException("[LUA-EX] Checker \"" + state_checker_name +"\" function not exist!");
+            }
+        }
+
+        //Registering non-blocking custom functions
+        public static void RegisterNBCustomFuntion(string function_name, string function_definition)
+        {
+            if (!customScripts.ContainsKey(function_name))
+            {
+                try
+                {
+                    LuaFunction lf = null;
+                    environment.DoString(function_definition);
+                    lf = environment.GetFunction(function_name);
+                    customScripts[function_name] = lf;
                 }
                 catch (NLua.Exceptions.LuaException e)
                 {
@@ -89,25 +122,85 @@ namespace RTS
             return environment.GetFunction(function_name);
         }
 
-        // Use it only for user-typed scripts
-        public static LuaFunction RegisterUserIngameScript(string user_defined_script)
+        private static LuaFunction GenerateUserFunction(string source)
         {
-            LuaFunction lf = null;
+            string user_func_name = "UDS_" + createdUserScripts.ToString();
+            string src = "function " + user_func_name + "()\n" + source + "\nend";
+
             try
             {
-                string func_name = "UDS_" + createdUserScripts.ToString();
-                string src = "function " + func_name  + "()\n" + user_defined_script + "\nend";
                 environment.DoString(src);
-                lf = environment.GetFunction(func_name);
+                createdUserScripts++;
             }
             catch (NLua.Exceptions.LuaException e)
             {
                 throw e;
             }
+            
+            return environment.GetFunction(user_func_name);
+        }
 
-            createdUserScripts++;
+        // Use it only for user-typed scripts
+        public static List<Pair<LuaFunction, LuaFunction>> RegisterUserIngameScript(string user_defined_script)
+        {
+            List<Pair<LuaFunction, LuaFunction>> ret_val = new List<Pair<LuaFunction,LuaFunction>>();
 
-            return lf;
+            Pair<string, LuaFunction> blocking_func_pair = null;
+            string func_buffer = "";
+            string[] loc = user_defined_script.Split(new string[] { "\r\n", "\n" }, System.StringSplitOptions.None);
+
+            foreach (string line in loc)
+            {
+                bool found_blocking_func = false;
+                foreach (Pair<string, LuaFunction> f in blockingFunctions)
+                {
+                    //regexp byłyby wydajniejszy?
+                    string[] variants = {f.First + " ", f.First + "\t", f.First + "("};
+                    foreach(string v in variants)
+                    {
+                        if (line.Contains(v))
+                        {
+                            found_blocking_func = true;
+                            blocking_func_pair = f;
+                            break;
+                        }
+                    }
+
+                    if (found_blocking_func)
+                        break;
+                    
+                }
+
+                func_buffer += line + "\n";
+
+                if (found_blocking_func)
+                {
+                    try
+                    {
+                        ret_val.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), blocking_func_pair.Second));
+                        
+                        func_buffer = "";
+                    }
+                    catch (NLua.Exceptions.LuaException e)
+                    {
+                        throw e;
+                    }
+                }
+            }
+
+            if (func_buffer.Length > 2)
+            {
+                try
+                {
+                    ret_val.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), null));
+                }
+                catch (NLua.Exceptions.LuaException e)
+                {
+                    throw e;
+                }
+            }
+
+            return ret_val;
         }
     }
 }
