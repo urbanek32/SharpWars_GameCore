@@ -207,6 +207,24 @@ PanzerVor(vec)
 			mouseScroll = true;
 		}
 
+        //Poruszanie kamery za pomocą strzałek
+        if(Input.GetKey(KeyCode.UpArrow))
+        {
+            movement.y += ResourceManager.ScrollSpeed;
+        }
+        if(Input.GetKey(KeyCode.DownArrow))
+        {
+            movement.y -= ResourceManager.ScrollSpeed;
+        }
+        if(Input.GetKey(KeyCode.LeftArrow))
+        {
+            movement.x -= ResourceManager.ScrollSpeed;
+        }
+        if(Input.GetKey(KeyCode.RightArrow))
+        {
+            movement.x += ResourceManager.ScrollSpeed;
+        }
+
 		if(!mouseScroll)
 		{
 			player.hud.SetCursorState(CursorState.Select);
