@@ -2,23 +2,10 @@
 using System.Collections;
 
 using RTS;
-using NLua;
 
 public class UserInput : MonoBehaviour {
-
-    string user_input_lua_source_code = @"
-import 'System'
-import 'UnityEngine'
-import 'Assembly-CSharp'
-
--- Use below function to move your lazy ass!
-function PanzerVor(pos)
-    unit:StartMove(pos)
-end
-";
-
-	private Player player;
-    static public Lua env;    //the environment of lua
+	
+    private Player player;
 
 	// Use this for initialization
 	void Start () 
@@ -46,22 +33,17 @@ PanzerVor(vec)
 ";
                 }
             }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Unit u = (Unit)player.SelectedObject;
+                u.userControlScript = "";
+            }
 		}
 	}
 
 
     void Awake()
     {
-        env = new Lua();
-        env.LoadCLRPackage();
-
-        try
-        {
-            env.DoString(user_input_lua_source_code);
-        } catch(NLua.Exceptions.LuaException e)
-        {
-            Debug.Log("[LUA-EXCEPTION] " + e.ToString());
-        }
     }
 
 	private void MouseHover()
@@ -266,36 +248,5 @@ PanzerVor(vec)
 	{
 
 	}
-
-    public System.Object[] Call(string function, params System.Object[] args)
-    {
-        System.Object[] result = new System.Object[0];
-        if (env == null) return result;
-        LuaFunction lf = env.GetFunction(function);
-        if (lf == null) return result;
-        try
-        {
-            // Note: calling a function that does not
-            // exist does not throw an exception.
-            if (args != null)
-            {
-                result = lf.Call(args);
-            }
-            else
-            {
-                result = lf.Call();
-            }
-        }
-        catch (NLua.Exceptions.LuaException e)
-        {
-            Debug.Log("[LUA-EX]" + e.ToString());
-        }
-        return result;
-    }
-
-    public System.Object[] Call(string function)
-    {
-        return Call(function, null);
-    }
 
 }

@@ -21,6 +21,9 @@ public class Player : MonoBehaviour {
 		resourceLimits = InitResourceList();
 		AddStartResourceLimits();
 		AddStartResources();
+        ScriptManager.Init();
+        //Register PanzerVor
+        ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n unit:StartMove(pos)\n end");
 	}
 
 	// Use this for initialization

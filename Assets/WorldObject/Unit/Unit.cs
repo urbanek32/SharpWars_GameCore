@@ -14,7 +14,7 @@ public class Unit : WorldObject {
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
 
-    private string callingName;
+    private LuaFunction scriptCallingFunc;
     private string _userControlScript;
 
 
@@ -26,15 +26,20 @@ public class Unit : WorldObject {
         {
             if (value.Length == 0)
             {
-                callingName = "";
+                scriptCallingFunc = null;
                 _userControlScript = "";
             }
             else
             {
-                callingName = "UnitFunc" + System.DateTime.Now.Ticks.ToString();
                 string _userControlScript = value;
-                string userFunc = "function " + callingName + "(u)\n unit = u\n" + _userControlScript + "\nend";
-                UserInput.env.DoString(userFunc);
+                try
+                {
+                    scriptCallingFunc = ScriptManager.RegisterUserIngameScript(_userControlScript);
+                }
+                catch (NLua.Exceptions.LuaException e)
+                {
+                    Debug.LogError("Custom script error: " + e.ToString());
+                }
             }
         }
     }
@@ -53,10 +58,10 @@ public class Unit : WorldObject {
 	{
 		base.Update();
 
-        if (callingName != null && callingName.Length > 0)
+        if (scriptCallingFunc != null)
         {
-            object[] arg = {this};
-            Call(callingName, arg);
+            ScriptManager.SetGlobal("unit", this);
+            scriptCallingFunc.Call();
         }
 
 		if(rotating)
@@ -202,31 +207,5 @@ public class Unit : WorldObject {
 	{
 		//specific initialization for a unit can be specified here
 	}
-
-    public System.Object[] Call(string function, params System.Object[] args)
-    {
-        System.Object[] result = new System.Object[0];
-        if (UserInput.env == null) return result;
-        LuaFunction lf = UserInput.env.GetFunction(function);
-        if (lf == null) return result;
-        try
-        {
-            // Note: calling a function that does not
-            // exist does not throw an exception.
-            if (args != null)
-            {
-                result = lf.Call(args);
-            }
-            else
-            {
-                result = lf.Call();
-            }
-        }
-        catch (NLua.Exceptions.LuaException e)
-        {
-            Debug.Log("[LUA-EX]" + e.ToString());
-        }
-        return result;
-    }
 
 }
