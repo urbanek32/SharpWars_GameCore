@@ -20,6 +20,24 @@ public class Worker : Unit {
 	protected override void Update()
 	{
 		base.Update();
+
+		if(!moving && !rotating)
+		{
+			if(building && currentProject && currentProject.UnderConstruction())
+			{
+				amountBuilt += buildSpeed * Time.deltaTime;
+				int amount = Mathf.FloorToInt(amountBuilt);
+				if(amount > 0)
+				{
+					amountBuilt -= amount;
+					currentProject.Construct(amount);
+					if(!currentProject.UnderConstruction())
+					{
+						building = false;
+					}
+				}
+			}
+		}
 	}
 
 

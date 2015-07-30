@@ -158,6 +158,21 @@ public class Player : MonoBehaviour {
 		return canPlace;
 		
 	}
+
+	public void StartConstruction()
+	{
+		findingPlacement = false;
+		Buildings buildings = GetComponentInChildren< Buildings >();
+		if(buildings)
+		{
+			tempBuilding.transform.parent = buildings.transform;
+		}
+		tempBuilding.SetPlayer();
+		tempBuilding.SetColliders(true);
+		tempCreator.SetBuilding(tempBuilding);
+		tempBuilding.StartConstruction();
+	}
+
 	
 	
 	

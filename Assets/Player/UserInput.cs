@@ -100,26 +100,36 @@ PanzerVor(vec)
 		// tylko gdy klikamy w obszarze gry, nie HUD
 		if(player.hud.MouseInBounds())
 		{
-			GameObject hitObj = WorkManager.FindHitObject(Input.mousePosition);
-			Vector3 hitPoint = WorkManager.FindHitPoint(Input.mousePosition);
-
-			if(hitObj && hitPoint != ResourceManager.InvalidPosition)
+			if(player.IsFindingBuildingLocation())
 			{
-				// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
-				// jednostka wykona akcje zwiazana z tym kliknieciem
-				if(player.SelectedObject)
+				if(player.CanPlaceBuilding())
 				{
-					player.SelectedObject.MouseClick(hitObj, hitPoint, player);
+					player.StartConstruction();
 				}
-				else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
-				{
-					WorldObject worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
+			}
+			else
+			{
+				GameObject hitObj = WorkManager.FindHitObject(Input.mousePosition);
+				Vector3 hitPoint = WorkManager.FindHitPoint(Input.mousePosition);
 
-					if(worldObject)
+				if(hitObj && hitPoint != ResourceManager.InvalidPosition)
+				{
+					// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
+					// jednostka wykona akcje zwiazana z tym kliknieciem
+					if(player.SelectedObject)
 					{
-						// wiemy ze gracz nie ma zaznaczonych obiektów
-						player.SelectedObject = worldObject;
-						worldObject.SetSelection(true, player.hud.GetPlayingArea());
+						player.SelectedObject.MouseClick(hitObj, hitPoint, player);
+					}
+					else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
+					{
+						WorldObject worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
+
+						if(worldObject)
+						{
+							// wiemy ze gracz nie ma zaznaczonych obiektów
+							player.SelectedObject = worldObject;
+							worldObject.SetSelection(true, player.hud.GetPlayingArea());
+						}
 					}
 				}
 			}
