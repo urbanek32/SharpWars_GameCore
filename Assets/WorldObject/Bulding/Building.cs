@@ -24,11 +24,7 @@ public class Building : WorldObject
 		base.Awake();
 
 		buildQueue = new Queue<string>();
-		float spawnX = selectionBounds.center.x + transform.forward.x * selectionBounds.extents.x + transform.forward.x * 10;
-		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
-		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
-
-		rallyPoint = spawnPoint;
+		SetSpawnPoint();
 	}
 
 	protected override void Start()
@@ -82,6 +78,15 @@ public class Building : WorldObject
 		CalculateCurrentHealth(0.5f, 0.99f);
 		DrawHealthBar(selectBox, "Building ...");
 		GUI.EndGroup();
+	}
+
+	private void SetSpawnPoint()
+	{
+		float spawnX = selectionBounds.center.x + transform.forward.x * selectionBounds.extents.x + transform.forward.x * 10;
+		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
+		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
+		
+		rallyPoint = spawnPoint;
 	}
 	
 	
@@ -201,6 +206,7 @@ public class Building : WorldObject
 		CalculateBounds();
 		needsBuilding = true;
 		hitPoints = 0;
+		SetSpawnPoint();
 	}
 
 	public bool UnderConstruction()

@@ -343,6 +343,7 @@ public class WorldObject : MonoBehaviour {
 		selectionBounds = new Bounds(transform.position, Vector3.zero);
 		foreach(Renderer r in GetComponentsInChildren< Renderer >())
 		{
+			if(r.gameObject.name.Equals("Particle System")) continue;
 			selectionBounds.Encapsulate(r.bounds);
 		}
 	}
@@ -468,6 +469,15 @@ public class WorldObject : MonoBehaviour {
 	{
 		//default behaviour needs to be overidden by children
 		return false;
+	}
+
+	public void TakeDamage(int damage)
+	{
+		hitPoints -= damage;
+		if(hitPoints <= 0)
+		{
+			Destroy(gameObject);
+		}
 	}
 
 

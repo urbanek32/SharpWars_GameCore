@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using RTS;
+
 public class Tank : Unit 
 {
 
@@ -38,6 +40,22 @@ public class Tank : Unit
 		base.AimAtTarget();
 		aimRotation = Quaternion.LookRotation(target.transform.position - transform.position);
 	}
+
+	protected override void UseWeapon()
+	{
+		base.UseWeapon();
+		Vector3 spawnPoint = transform.position;
+		spawnPoint.x += (2.1f * transform.forward.x);
+		spawnPoint.y += 2.4f;
+		spawnPoint.z += (2.1f * transform.forward.z);
+		GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TankProjectile"), spawnPoint, transform.rotation);
+		Projectile projectile = gameObject.GetComponentInChildren< Projectile >();
+		projectile.SetRange( weaponRange);
+		projectile.SetTarget(target);
+	}
+
+
+
 
 	public override bool CanAttack()
 	{
