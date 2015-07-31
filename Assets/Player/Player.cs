@@ -27,9 +27,9 @@ public class Player : MonoBehaviour {
 		AddStartResources();
         ScriptManager.Init();
         //Register IsDestinationReached
-        ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if dst.x == src.x and dst.y == src.y and dst.z == src.z then\n		return true\n	else\n		return false\n	end\n end");
+        //ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if dst.x == src.x and dst.y == src.y and dst.z == src.z then\n		return true\n	else\n		return false\n	end\n end");
         //Register PanzerVor
-        ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n this:StartMove(pos)\n end", "IsDestinationReached");
+        //ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n this:StartMove(pos)\n end", "IsDestinationReached");
 	}
 
 	// Use this for initialization

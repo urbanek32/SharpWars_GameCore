@@ -66,7 +66,7 @@ public class Harvester : Unit {
 							arm.GetComponent<Renderer>().enabled = false;
 						}
 
-						if(!resourceDeposit.isEmpty())
+						if(!resourceDeposit.isEmpty() && resourceDeposit)
 						{
 							harvesting = true;
 							StartMove(resourceDeposit.transform.position, resourceDeposit.gameObject);
