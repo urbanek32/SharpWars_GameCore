@@ -17,4 +17,10 @@ public class Tank : Unit
 		base.Update ();
 
 	}
+
+
+	public override bool CanAttack()
+	{
+		return true;
+	}
 }
