@@ -70,6 +70,7 @@ public class Unit : WorldObject {
 		if(transform.position == destination)
 		{
 			moving = false;
+			movingIntoPosition = false;
 		}
 		CalculateBounds();
 	}

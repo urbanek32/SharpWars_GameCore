@@ -12,6 +12,9 @@ public class WorldObject : MonoBehaviour {
 	public Texture2D buildImage;
 	public int cost, sellValue, hitPoints, maxHitPoints;
 	public string unitScript;
+	public float weaponRange = 10.0f;
+	public float weaponRechargeTime = 1.0f;
+	public float weaponAimSpeed = 5.0f;
 
 	protected Player player;
 	protected string[] actions = {};
@@ -20,8 +23,15 @@ public class WorldObject : MonoBehaviour {
 	protected Rect playingArea = new Rect(0.0f, 0.0f, 0.0f, 0.0f); // ekran bez HUD
 	protected GUIStyle healthStyle = new GUIStyle();
 	protected float healthPercentage = 1.0f;
+	protected WorldObject target = null;
+	protected bool attacking = false;
+	protected bool movingIntoPosition = false;
+	protected bool aiming = false;
 
 	private List< Material > oldMaterials = new List< Material >();
+	private float currentWeaponChargeTime;
+
+
 	//splited script <blocking func part, execution checker that return true or false>
 	protected List<Pair<LuaFunction, LuaFunction>> scriptExecutionQueue = new List<Pair<LuaFunction, LuaFunction>>();
 	protected string _userControlScript;
@@ -73,6 +83,12 @@ public class WorldObject : MonoBehaviour {
 	protected virtual void Update () 
 	{
         ProcecssScriptQueue();
+
+		currentWeaponChargeTime += Time.deltaTime;
+		if(attacking && !movingIntoPosition && !aiming)
+		{
+			PreformAttack();
+		}
 	}
 
 	protected virtual void OnGUI()
@@ -120,9 +136,41 @@ public class WorldObject : MonoBehaviour {
 		TeamColor[] teamColors = GetComponentsInChildren< TeamColor >();
 		foreach(TeamColor teamColor in teamColors) 
 		{
-			teamColor.GetComponent<Renderer>().material.color = player.teamColor;
+			Renderer renderer = teamColor.GetComponent<Renderer>();
+			if(renderer)
+			{
+				renderer.material.color = player.teamColor;
+			}
+			//teamColor.renderer.material.color = player.teamColor; // lel, but werks
 		}
 	}
+
+	protected virtual void BeginAttack(WorldObject target)
+	{
+		this.target = target;
+		if(TargetInRange())
+		{
+			attacking = true;
+			PreformAttack();
+		}
+		else
+		{
+			AdjustPosition();
+		}
+	}
+
+	protected virtual void AimAtTarget()
+	{
+		aiming = true;
+		// this behaviour needs to be specified by a specific object
+	}
+
+	protected virtual void UseWeapon()
+	{
+		currentWeaponChargeTime = 0.0f;
+		// this behaviour needs to be specified by a specific object
+	}
+
 
 
 
@@ -150,6 +198,94 @@ public class WorldObject : MonoBehaviour {
 		GUI.BeginGroup(playingArea);
 		DrawSelectionBox(selectBox);
 		GUI.EndGroup();
+	}
+
+	private bool TargetInRange()
+	{
+		// http://docs.unity3d.com/Documentation/Manual/DirectionDistanceFromOneObjectToAnother.html
+		Vector3 targetLocation = target.transform.position;
+		Vector3 direction = targetLocation - transform.position;
+
+		if(direction.sqrMagnitude < weaponRange * weaponRange)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	private void AdjustPosition()
+	{
+		Unit self = this as Unit;
+		if(self)
+		{
+			movingIntoPosition = true;
+			Vector3 attackPosition = FindNearestAttackPosition();
+			self.StartMove(attackPosition);
+			attacking = true;
+		}
+		else
+		{
+			attacking = false;
+		}
+	}
+
+	private Vector3 FindNearestAttackPosition()
+	{
+		Vector3 targetLocation = target.transform.position;
+		Vector3 direction = targetLocation - transform.position;
+		float targetDistance = direction.magnitude;
+		// podjedź na zasięg broni + 10% żeby nie musieć od razu znowu jechać
+		float distanceToTravel = targetDistance - (0.9f * weaponRange);
+
+		return Vector3.Lerp(transform.position, targetLocation, distanceToTravel / targetDistance);
+	}
+
+	private void PreformAttack()
+	{
+		if(!target)
+		{
+			attacking = false;
+			return;
+		}
+		if(!TargetInRange())
+		{
+			AdjustPosition();
+		}
+		else if(!TargetInFrontOfWeapon())
+		{
+			AimAtTarget();
+		}
+		else if(ReadyToFire())
+		{
+			UseWeapon();
+		}
+	}
+
+	private bool TargetInFrontOfWeapon()
+	{
+		Vector3 targetLocaton = target.transform.position;
+		Vector3 direction = targetLocaton - transform.position;
+		if(direction.normalized == transform.forward.normalized)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private bool ReadyToFire()
+	{
+		if(currentWeaponChargeTime >= weaponRechargeTime)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 
@@ -240,7 +376,33 @@ public class WorldObject : MonoBehaviour {
 			// kliknieto na inna zaznaczalna jednostke
 			if(worldObject)
 			{
-				ChangeSelection(worldObject, controller);
+				Resource resource = hitObject.transform.parent.GetComponent< Resource >();
+				if(resource && resource.isEmpty()) return;
+				Player owner = hitObject.transform.root.GetComponent< Player >();
+				if(owner)
+				{
+					// the object is controlled by a player
+					if(player && player.human)
+					{
+						// start attack if object is not owned by the same player and this object can attack, else select
+						if(player.username != owner.username && CanAttack())
+						{
+							BeginAttack(worldObject);
+						}
+						else
+						{
+							ChangeSelection(worldObject, controller);
+						}
+					}
+					else
+					{
+						ChangeSelection(worldObject, controller);
+					}
+				}
+				else
+				{
+					ChangeSelection(worldObject, controller);
+				}
 			}
 		}
 	}

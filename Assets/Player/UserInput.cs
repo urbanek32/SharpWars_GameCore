@@ -24,7 +24,7 @@ public class UserInput : MonoBehaviour {
 
             if (Input.GetKeyDown(KeyCode.W))
             {
-                if (player.SelectedObject && player.SelectedObject is Unit)
+                if (player.SelectedObject && player.SelectedObject is Unit && player.SelectedObject.IsOwnedBy(player))
                 {
                     Unit u = (Unit)player.SelectedObject;
                     u.userControlScript = @"
