@@ -63,6 +63,10 @@ public class WorldObject : MonoBehaviour {
 	protected virtual void Start () 
 	{
 		SetPlayer();
+		if(player)
+		{
+			SetTeamColor();
+		}
 	}
 	
 	// Update is called once per frame
@@ -109,6 +113,15 @@ public class WorldObject : MonoBehaviour {
 		healthStyle.padding.top = -20;
 		healthStyle.fontStyle = FontStyle.Bold;
 		GUI.Label(new Rect(selectBox.x, selectBox.y - 7, selectBox.width * healthPercentage, 5), label, healthStyle);
+	}
+
+	protected void SetTeamColor()
+	{
+		TeamColor[] teamColors = GetComponentsInChildren< TeamColor >();
+		foreach(TeamColor teamColor in teamColors) 
+		{
+			teamColor.GetComponent<Renderer>().material.color = player.teamColor;
+		}
 	}
 
 
