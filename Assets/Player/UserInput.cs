@@ -21,29 +21,6 @@ public class UserInput : MonoBehaviour {
 			MoveCamera();
 			RotateCamera(); // useless?
 			MouseActivity();
-
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                if (player.SelectedObject && player.SelectedObject is Unit && player.SelectedObject.IsOwnedBy(player))
-                {
-                    Unit u = (Unit)player.SelectedObject;
-                    u.userControlScript = @"
-vec = Vector3(25, 0, 0)
-PanzerVor(vec)
-vec.z = 25
-PanzerVor(vec)
-vec.x = 0
-PanzerVor(vec)
-vec.z = 0
-PanzerVor(vec)
-";
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                Unit u = (Unit)player.SelectedObject;
-                u.userControlScript = "";
-            }
 		}
 	}
 

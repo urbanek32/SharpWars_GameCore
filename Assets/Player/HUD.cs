@@ -276,6 +276,7 @@ public class HUD : MonoBehaviour {
 					sliderValue = 0.0f;
 				}
 				DrawScriptButton();
+                DrawRunScriptButton();
 				DrawActions(player.SelectedObject.GetActions());
 				// store the current selection
 				lastSelection = player.SelectedObject;
@@ -464,8 +465,20 @@ public class HUD : MonoBehaviour {
 
 	}
 
-
-
+    private void DrawRunScriptButton()
+    {
+        GUIStyle buttons = new GUIStyle();
+        buttons.hover.background = buttonHover;
+        buttons.active.background = buttonClick;
+        buttons.alignment = TextAnchor.MiddleCenter;
+        GUI.skin.button = buttons;
+        GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 64, ORDERS_BAR_WIDTH, 64));
+        if(GUI.Button(new Rect(22, 10, 128, 60), "Zaprogramuj\njednostkę"))
+        {
+            player.SelectedObject.runScript();
+        }
+        GUI.EndGroup();
+    }
 
 
 

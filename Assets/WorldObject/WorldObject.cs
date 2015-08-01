@@ -34,31 +34,16 @@ public class WorldObject : MonoBehaviour {
 
 	//splited script <blocking func part, execution checker that return true or false>
 	protected List<Pair<LuaFunction, LuaFunction>> scriptExecutionQueue = new List<Pair<LuaFunction, LuaFunction>>();
-	protected string _userControlScript;
 
-
-    public string userControlScript
+    public void runScript()
     {
-        get { return _userControlScript; }
-        set
+        try
         {
-            if (value.Length == 0)
-            {
-                scriptExecutionQueue.Clear();
-                _userControlScript = "";
-            }
-            else
-            {
-                string _userControlScript = value;
-                try
-                {
-                    scriptExecutionQueue = ScriptManager.RegisterUserIngameScript(_userControlScript);
-                }
-                catch (NLua.Exceptions.LuaException e)
-                {
-                    Debug.LogError("Custom script error: " + e.ToString());
-                }
-            }
+            scriptExecutionQueue = ScriptManager.RegisterUserIngameScript(unitScript);
+        }
+        catch (NLua.Exceptions.LuaException e)
+        {
+            Debug.LogError("Your code is piece of crap! Details: " + e.ToString());
         }
     }
 
