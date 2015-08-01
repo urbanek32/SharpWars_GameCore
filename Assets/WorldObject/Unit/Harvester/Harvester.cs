@@ -16,17 +16,33 @@ public class Harvester : Unit {
 	private float currentDeposit = 0.0f;
 
 
+
 	// Game Engine methods, all can be overridden by subclass
 
 	protected override void Start()
 	{
 		base.Start();
-		harvestType = ResourceType.Unknown;
+		harvestType = ResourceType.Unknown; 
 	}
 
 	protected override void Update()
 	{
 		base.Update();
+
+		if(agent.remainingDistance < 5.0f)
+		{
+			moving = false;
+			agent.Stop();
+			agent.ResetPath();
+			agent.avoidancePriority = 60;
+
+		}
+		else
+		{
+			moving = true;
+			agent.Resume();
+			agent.avoidancePriority = 50;
+		}
 
 		if(!rotating && !moving)
 		{

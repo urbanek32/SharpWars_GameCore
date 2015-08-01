@@ -31,7 +31,7 @@ public class HUD : MonoBehaviour {
 	private CursorState previousCursorState;
 
 	private bool scriptWindowOpen = false;
-	private string scriptString = "";
+	//private string scriptString = "";
 
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 15;

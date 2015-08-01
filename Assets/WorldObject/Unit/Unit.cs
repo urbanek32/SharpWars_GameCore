@@ -13,6 +13,8 @@ public class Unit : WorldObject {
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
 
+	protected NavMeshAgent agent;
+
 
 	protected override void Awake() 
 	{
@@ -22,6 +24,7 @@ public class Unit : WorldObject {
 	protected override void Start () 
 	{
 		base.Start();
+		agent = GetComponent<NavMeshAgent>();
 	}
 	
 	protected override void Update () 
@@ -30,12 +33,16 @@ public class Unit : WorldObject {
 
 		if(rotating)
 		{
-			TurnToTarget();
+			//TurnToTarget();
+
 		}
 		else if(moving)
 		{
-			MakeMove();
+			//MakeMove();
+
 		}
+
+		CalculateBounds(); // navmesh
 	}
 	
 	protected override void OnGUI() 
@@ -57,6 +64,7 @@ public class Unit : WorldObject {
 		{
 			rotating = false;
 			moving = true;
+
 			if(destinationTarget)
 			{
 				CalculateTargetDestination();
@@ -121,15 +129,19 @@ public class Unit : WorldObject {
 
 	public virtual void StartMove(Vector3 destination)
 	{
-        //if nothing to deal with
+        // if nothing to deal with
         if (this.destination == destination)
-            return;
+        	return; 
+
 
 		this.destination = destination;
 		destinationTarget = null;
 		targetRotation = Quaternion.LookRotation(destination - transform.position);
-		rotating = true;
-		moving = false;
+		//rotating = true;
+		//moving = false;
+		agent.SetDestination(destination);
+		//agent.updatePosition = false;
+		//Gagent.updateRotation = false;
 	}
 
 	public void StartMove(Vector3 destination, GameObject destinationTarget)
