@@ -76,6 +76,11 @@ public class WorldObject : MonoBehaviour {
 		}
 	}
 
+	protected virtual void FixedUpdate()
+	{
+
+	}
+
 	protected virtual void OnGUI()
 	{
 		if(currentlySelected)
@@ -414,6 +419,7 @@ public class WorldObject : MonoBehaviour {
 		{
 			collider.enabled = enabled;
 		}
+		GetComponent<NavMeshObstacle>().enabled = enabled;
 	}
 
 	public void SetTransparentMaterial(Material material, bool storeExistingMaterial)

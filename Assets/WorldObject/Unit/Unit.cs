@@ -12,6 +12,7 @@ public class Unit : WorldObject {
 	private Vector3 destination;
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
+	private Vector3 startPos;
 
 	protected NavMeshAgent agent;
 
@@ -33,12 +34,14 @@ public class Unit : WorldObject {
 
 		if(rotating)
 		{
-			//TurnToTarget();
+			//if(agent.velocity.sqrMagnitude <= 0)
+				//TurnToTarget();
 
 		}
 		else if(moving)
 		{
-			//MakeMove();
+			MakeMove();
+			//agent.SetDestination(destination);
 
 		}
 
@@ -55,6 +58,7 @@ public class Unit : WorldObject {
 
 	private void TurnToTarget()
 	{
+		//agent.updateRotation = false;
 		transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed);
 		CalculateBounds();
 
@@ -74,16 +78,22 @@ public class Unit : WorldObject {
 
 	private void MakeMove()
 	{
-		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
-		if(transform.position == destination)
-		{
-			moving = false;
-			movingIntoPosition = false;
-		}
+		//transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
+		//agent.SetDestination(destination);
+		//if(transform.position == destination)
+		//Debug.Log(transform.position.magnitude);
+		//Debug.Log(agent.remainingDistance);
+		if(startPos.magnitude != transform.position.magnitude)
+			if(agent.velocity.magnitude <= 0.0f)
+			{
+				moving = false;
+				movingIntoPosition = false;
+				//Debug.Log("Dojechalem");
+			}
 		CalculateBounds();
 	}
 
-	private void CalculateTargetDestination()
+	private void CalculateTargetDestination() 
 	{
 		// calculate number of unit vectors from unit centre to unit edge of bounds
 		Vector3 originalExtents = selectionBounds.extents;
@@ -124,8 +134,11 @@ public class Unit : WorldObject {
 
 
 
+	protected override void FixedUpdate()
+	{
+		base.FixedUpdate();
 
-
+	}
 
 	public virtual void StartMove(Vector3 destination)
 	{
@@ -137,11 +150,26 @@ public class Unit : WorldObject {
 		this.destination = destination;
 		destinationTarget = null;
 		targetRotation = Quaternion.LookRotation(destination - transform.position);
+		startPos = transform.position;
+
+		moving = true;
 		//rotating = true;
-		//moving = false;
-		agent.SetDestination(destination);
+		agent.ResetPath();
+		agent.destination = destination;
+
+		/*if(agent.velocity.sqrMagnitude <= 0)
+		{
+			rotating = true;
+			agent.ResetPath();
+		}
+		else
+		{
+			agent.SetDestination(destination);
+		}*/
+		//agent.velocity = new Vector3(0f,0f,0f);
+		//agent.SetDestination(destination);
 		//agent.updatePosition = false;
-		//Gagent.updateRotation = false;
+		//agent.updateRotation = false;
 	}
 
 	public void StartMove(Vector3 destination, GameObject destinationTarget)

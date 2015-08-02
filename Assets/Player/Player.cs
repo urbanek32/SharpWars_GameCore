@@ -88,6 +88,7 @@ public class Player : MonoBehaviour {
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
 	{
 		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(buildingName), buildPoint, new Quaternion());
+		if(tempBuilding) Destroy(tempBuilding.gameObject); // prevent spawning ghosty buildings
 		tempBuilding = newBuilding.GetComponent< Building >();
 		if (tempBuilding) 
 		{
