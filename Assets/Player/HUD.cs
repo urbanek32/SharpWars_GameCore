@@ -331,7 +331,7 @@ public class HUD : MonoBehaviour {
 		GUI.skin.button = buttons;
 		int numActions = actions.Length;
 		//define the area to draw the actions inside
-		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 64, ORDERS_BAR_WIDTH, buildAreaHeight)); // 0->64 bo scriptWindow
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 128, ORDERS_BAR_WIDTH, buildAreaHeight)); // 0->64 bo scriptWindow
 		// draw scroll bar for the list of actions if need be
 		if(numActions >= MaxNumRows(buildAreaHeight)) 
 		{
