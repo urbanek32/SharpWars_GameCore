@@ -21,10 +21,13 @@ public class GameObjectList : MonoBehaviour
 			created = true;
 
 			ScriptManager.Init();
+            // Non-blocking functions
 			// Register IsDestinationReached
-			ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if dst.x == src.x and dst.y == src.y and dst.z == src.z then\n		return true\n	else\n		return false\n	end\n end");
-			// Register PanzerVor
-			ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n this:StartMove(pos)\n end", "IsDestinationReached");
+			ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n if this:isUnit() then\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if dst.x == src.x and dst.z == src.z then\n		return true\n	else\n		return false\n	end\n else return true\n end \n end");
+			
+            // Blocking functions
+            // Register PanzerVor
+			ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n if this:isUnit() then this:StartMove(pos)\n end end", "IsDestinationReached");
 
 		} 
 		else 

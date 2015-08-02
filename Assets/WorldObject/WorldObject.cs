@@ -503,11 +503,49 @@ public class WorldObject : MonoBehaviour {
         }
     }
 
+    public bool isUnit()
+    {
+        return (this is Unit);
+    }
 
+    public bool isBuilding()
+    {
+        return (this is Building);
+    }
 
+    public bool isTank()
+    {
+        return (this is Tank);
+    }
 
+    public bool isWorker()
+    {
+        return (this is Worker);
+    }
 
+    public bool isHarvester()
+    {
+        return (this is Harvester);
+    }
 
+    public bool isRafinery()
+    {
+        return (this is Rafinery);
+    }
 
+    public bool isWarFactory()
+    {
+        return (this is WarFactory);
+    }
+
+    public bool isOreDeposit()
+    {
+        return (this is OreDeposit);
+    }
+
+    public bool isResource()
+    {
+        return (this is Resource);
+    }
 
 }
