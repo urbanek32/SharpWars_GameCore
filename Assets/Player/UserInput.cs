@@ -102,6 +102,11 @@ public class UserInput : MonoBehaviour {
 					// jednostka wykona akcje zwiazana z tym kliknieciem
 					if(player.SelectedObject)
 					{
+						if(hitObj.name == "Ground" && player.SelectedObject.isAttacking())
+						{
+							player.SelectedObject.StopAttacking();
+						}
+
 						player.SelectedObject.MouseClick(hitObj, hitPoint, player);
 					}
 					else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
@@ -116,6 +121,7 @@ public class UserInput : MonoBehaviour {
 						}
 					}
 				}
+
 			}
 		}
 	}

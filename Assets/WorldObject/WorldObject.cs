@@ -471,6 +471,17 @@ public class WorldObject : MonoBehaviour {
 		}
 	}
 
+	public void StopAttacking()
+	{
+		target = null;
+		attacking = false;
+	}
+
+	public bool isAttacking()
+	{
+		return attacking;
+	}
+
 
 
 
