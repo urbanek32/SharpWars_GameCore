@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 using RTS;
 
-public class Player : MonoBehaviour {
+public class Player : NetworkBehaviour {
 
 	public string username;
 	public bool human;
@@ -69,20 +70,29 @@ public class Player : MonoBehaviour {
 		resourceLimits[type] += amount;
 	}
 
-	public void AddUnit(string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation, Building creator)
+	[Command] 
+	public void Cmd_AddUnit(NetworkInstanceId identity, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
 	{
-		Units units = GetComponentInChildren< Units >();
+
+
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
+		Units units = GetComponentInChildren<Units>();
 		newUnit.transform.parent = units.transform;
+	NetworkServer.Spawn(newUnit);
 		Unit unitObject = newUnit.GetComponent< Unit >();
 		if(unitObject)
 		{
-			unitObject.SetBuilding(creator);
+			//unitObject.SetBuilding(creator);
 			if(spawnPoint != rallyPoint)
 			{
 				unitObject.StartMove(rallyPoint);
 			}
 		}
+	}
+
+	void OnNetworkInstantiate(NetworkMessageInfo info)
+	{
+		Debug.Log(info.networkView.viewID);
 	}
 
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using RTS;
 
 public class Building : WorldObject 
-{
+{ 
 	public float maxBuildProgress;
 	public Texture2D rallyPointImage;
 	public Texture2D sellImage;
@@ -62,7 +62,7 @@ public class Building : WorldObject
 			{
 				if(player)
 				{
-					player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, this);
+					player.Cmd_AddUnit(player.netId, buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation/*, this*/);
 				}
 				currentBuildProgress = 0.0f;
 			}

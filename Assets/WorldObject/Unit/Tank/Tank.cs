@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 
 using RTS;
 
@@ -8,11 +9,18 @@ public class Tank : Unit
 
 	private Quaternion aimRotation;
 
+	public void OnNetworkInstantiate(NetworkMessageInfo info)
+	{
+		Debug.Log(info.networkView.viewID);
+	}
 
 	// Use this for initialization
 	protected override void Start () 
 	{
 		base.Start ();
+
+
+
 
 	}
 	

@@ -150,7 +150,7 @@ public class UserInput : MonoBehaviour {
 		float ypos = Input.mousePosition.y;
 		Vector3 movement = new Vector3(0,0,0);
 		bool mouseScroll = false;
-
+		/*
 		// ruszanie kamery w poziomie
 		if(xpos >= 0 && xpos < ResourceManager.ScrollWidth)
 		{
@@ -178,7 +178,7 @@ public class UserInput : MonoBehaviour {
 			player.hud.SetCursorState(CursorState.PanUp);
 			mouseScroll = true;
 		}
-
+		*/
         //Poruszanie kamery za pomocą strzałek
         if(Input.GetKey(KeyCode.UpArrow))
         {

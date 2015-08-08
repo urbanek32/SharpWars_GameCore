@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 using RTS;
 using STL;
 using NLua;
 
-public class WorldObject : MonoBehaviour {
+public class WorldObject : NetworkBehaviour {
 
 	public string objectName;
 	public Texture2D buildImage;
@@ -282,11 +283,32 @@ public class WorldObject : MonoBehaviour {
 
 
 
-
-
 	public void SetPlayer()
 	{
 		player = transform.root.GetComponentInChildren< Player >();
+
+		if(this as Unit)
+		{
+			GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+			//Debug.Log(players.Length);
+			
+			Units units = null;
+			foreach(GameObject p in players)
+			{
+				Player pp = p.GetComponent<Player>();
+				//Debug.Log(players.Length +" : "+ pp.netId);
+				if(pp.isLocalPlayer)
+				{
+					Debug.Log(pp.username);
+					player = pp;
+					units = pp.GetComponentInChildren<Units>();
+					if(this as Unit)
+						transform.parent = units.transform;
+					break;
+				}
+			}
+		}
+		
 	}
 
 	public virtual void SetHoverState(GameObject hoverObject)
