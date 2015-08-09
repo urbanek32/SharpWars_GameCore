@@ -17,7 +17,7 @@ public class Player_SyncPos : NetworkBehaviour {
 	void FixedUpdate () 
 	{
 		TransmitPosition();
-		LerpPosition();
+		//LerpPosition();
 	}
 
 	void LerpPosition()

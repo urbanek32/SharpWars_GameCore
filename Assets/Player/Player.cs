@@ -78,6 +78,7 @@ public class Player : NetworkBehaviour {
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
 		Units units = GetComponentInChildren<Units>();
 		newUnit.transform.parent = units.transform;
+	newUnit.GetComponent<WorldObject>().ownerId = GetComponent<NetworkIdentity>().netId;
 	NetworkServer.Spawn(newUnit);
 		Unit unitObject = newUnit.GetComponent< Unit >();
 		if(unitObject)
@@ -88,11 +89,6 @@ public class Player : NetworkBehaviour {
 				unitObject.StartMove(rallyPoint);
 			}
 		}
-	}
-
-	void OnNetworkInstantiate(NetworkMessageInfo info)
-	{
-		Debug.Log(info.networkView.viewID);
 	}
 
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)

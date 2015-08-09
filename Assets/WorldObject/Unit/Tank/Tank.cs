@@ -9,10 +9,7 @@ public class Tank : Unit
 
 	private Quaternion aimRotation;
 
-	public void OnNetworkInstantiate(NetworkMessageInfo info)
-	{
-		Debug.Log(info.networkView.viewID);
-	}
+
 
 	// Use this for initialization
 	protected override void Start () 

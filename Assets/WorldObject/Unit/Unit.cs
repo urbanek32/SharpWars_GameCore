@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 
 using RTS;
 
@@ -9,12 +10,16 @@ public class Unit : WorldObject {
 
 	protected bool moving, rotating;
 
+
 	private Vector3 destination;
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
 	private Vector3 startPos;
 
 	protected NavMeshAgent agent;
+
+	[SyncVar]
+	private Vector3 syncPos;
 
 
 	protected override void Awake() 
@@ -40,6 +45,7 @@ public class Unit : WorldObject {
 		}
 		else if(moving)
 		{
+
 			MakeMove();
 			//agent.SetDestination(destination);
 
@@ -78,18 +84,18 @@ public class Unit : WorldObject {
 
 	private void MakeMove()
 	{
-		//transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
+		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
 		//agent.SetDestination(destination);
 		//if(transform.position == destination)
 		//Debug.Log(transform.position.magnitude);
 		//Debug.Log(agent.remainingDistance);
-		if(startPos.magnitude != transform.position.magnitude)
+		/*if(startPos.magnitude != transform.position.magnitude)
 			if(agent.velocity.magnitude <= 0.0f)
 			{
 				moving = false;
 				movingIntoPosition = false;
 				//Debug.Log("Dojechalem");
-			}
+			}*/
 		CalculateBounds();
 	}
 
@@ -132,6 +138,23 @@ public class Unit : WorldObject {
 	}
 
 
+	[Command]
+	void CmdProvidePositionToServer(Vector3 pos)
+	{
+		syncPos = pos;
+	}
+	
+	[ClientCallback]
+	void TransmitPosition()
+	{
+		if(player.isLocalPlayer)
+		{
+			Debug.Log(player.username+" : " +destination);
+			CmdProvidePositionToServer(destination);
+		}
+	}
+
+
 
 
 	protected override void FixedUpdate()
@@ -155,7 +178,7 @@ public class Unit : WorldObject {
 		moving = true;
 		//rotating = true;
 		agent.ResetPath();
-		agent.destination = destination;
+		//agent.destination = destination;
 
 		/*if(agent.velocity.sqrMagnitude <= 0)
 		{

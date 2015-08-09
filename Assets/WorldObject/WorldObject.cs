@@ -7,7 +7,10 @@ using RTS;
 using STL;
 using NLua;
 
+
 public class WorldObject : NetworkBehaviour {
+
+	[SyncVar] public NetworkInstanceId ownerId;
 
 	public string objectName;
 	public Texture2D buildImage;
@@ -285,6 +288,7 @@ public class WorldObject : NetworkBehaviour {
 
 	public void SetPlayer()
 	{
+		Debug.Log(ownerId);
 		player = transform.root.GetComponentInChildren< Player >();
 
 		if(this as Unit)
@@ -297,9 +301,9 @@ public class WorldObject : NetworkBehaviour {
 			{
 				Player pp = p.GetComponent<Player>();
 				//Debug.Log(players.Length +" : "+ pp.netId);
-				if(pp.isLocalPlayer)
+				if(pp.netId.Equals(ownerId))
 				{
-					Debug.Log(pp.username);
+					//Debug.Log(pp.username);
 					player = pp;
 					units = pp.GetComponentInChildren<Units>();
 					if(this as Unit)
