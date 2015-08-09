@@ -77,7 +77,7 @@ public class Player : NetworkBehaviour {
 
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
 		Units units = GetComponentInChildren<Units>();
-		newUnit.transform.parent = units.transform;
+		//newUnit.transform.parent = units.transform;
 	newUnit.GetComponent<WorldObject>().ownerId = GetComponent<NetworkIdentity>().netId;
 	NetworkServer.Spawn(newUnit);
 		Unit unitObject = newUnit.GetComponent< Unit >();
@@ -89,6 +89,43 @@ public class Player : NetworkBehaviour {
 				unitObject.StartMove(rallyPoint);
 			}
 		}
+	}
+
+	[Command]
+	public void Cmd_MoveUnit(NetworkInstanceId id, Vector3 newPos)
+	{
+		Rpc_MoveUnit(id, newPos);
+	}
+
+	[ClientRpc]
+	public void Rpc_MoveUnit(NetworkInstanceId id, Vector3 newPos)
+	{
+		if(isLocalPlayer)
+			return;
+
+
+
+		Units units = GetComponentInChildren<Units>();
+		Unit[] unitss = units.GetComponentsInChildren<Unit>();
+		//Debug.Log(unitss.Length);
+		
+		//Units units = null;
+		foreach(Unit u in unitss)
+		{
+			if(u as Tank)
+			{
+			//Debug.Log(id + " / "+u.netId);
+				WorldObject wo = u.GetComponent<WorldObject>();
+				//Debug.Log(players.Length +" : "+ pp.netId);
+				if(wo.netId.Equals(id))
+				{
+					//Debug.Log(pp.username);
+					wo.transform.position = newPos;
+					break;
+				}
+			}
+		}
+		
 	}
 
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)

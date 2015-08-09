@@ -10,14 +10,14 @@ public class Player_SyncPos : NetworkBehaviour {
 	[SerializeField]
 	Transform myTransform;
 
-	[SerializeField]
+	//[SerializeField]
 	float lerpRate = 15;
 	
 
 	void FixedUpdate () 
 	{
 		TransmitPosition();
-		//LerpPosition();
+		LerpPosition();
 	}
 
 	void LerpPosition()

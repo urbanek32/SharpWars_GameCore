@@ -11,6 +11,7 @@ using NLua;
 public class WorldObject : NetworkBehaviour {
 
 	[SyncVar] public NetworkInstanceId ownerId;
+	[SyncVar] public string lelos;
 
 	public string objectName;
 	public Texture2D buildImage;
@@ -288,7 +289,7 @@ public class WorldObject : NetworkBehaviour {
 
 	public void SetPlayer()
 	{
-		Debug.Log(ownerId);
+		//Debug.Log(ownerId);
 		player = transform.root.GetComponentInChildren< Player >();
 
 		if(this as Unit)

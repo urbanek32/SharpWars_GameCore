@@ -24,7 +24,8 @@ public class Tank : Unit
 	// Update is called once per frame
 	protected override void Update () 
 	{
-		base.Update ();
+		base.Update();
+	
 		if(aiming)
 		{
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, aimRotation, weaponAimSpeed);

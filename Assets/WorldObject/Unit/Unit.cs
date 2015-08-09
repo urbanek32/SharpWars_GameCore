@@ -10,7 +10,6 @@ public class Unit : WorldObject {
 
 	protected bool moving, rotating;
 
-
 	private Vector3 destination;
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
@@ -18,7 +17,7 @@ public class Unit : WorldObject {
 
 	protected NavMeshAgent agent;
 
-	[SyncVar]
+	//[SyncVar]
 	private Vector3 syncPos;
 
 
@@ -36,6 +35,11 @@ public class Unit : WorldObject {
 	protected override void Update () 
 	{
 		base.Update();
+		if(this as Tank && !player.isLocalPlayer)
+		{
+			//Debug.Log(player.netId + " / " + lelos);
+			lelos = transform.position.x + " " + transform.position.z;
+		}
 
 		if(rotating)
 		{
@@ -85,6 +89,8 @@ public class Unit : WorldObject {
 	private void MakeMove()
 	{
 		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
+		//syncPos = transform.position;
+		player.Cmd_MoveUnit(GetComponent<WorldObject>().netId, transform.position);
 		//agent.SetDestination(destination);
 		//if(transform.position == destination)
 		//Debug.Log(transform.position.magnitude);
@@ -206,7 +212,7 @@ public class Unit : WorldObject {
 		base.MouseClick(hitObject, hitPoint, controller);
 
 		//only handle input if owned by a human player and currently selected
-		if(player && player.human && currentlySelected) 
+		if(player && /*player.human &&*/ currentlySelected) 
 		{
 			if(hitObject.name == "Ground" && hitPoint != ResourceManager.InvalidPosition) {
 				float x = hitPoint.x;
