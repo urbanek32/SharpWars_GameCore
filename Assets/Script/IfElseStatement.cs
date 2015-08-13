@@ -92,22 +92,32 @@ namespace Script
             return stateChecked;
         }
 
-        //returns if value
-        private bool checkState()
-        {
-            if (conditionCheckFunction == null)
-            {
-                return true;
-            }
-
-            object[] result = conditionCheckFunction.Call();
-
-            return (bool)result[0];
-        }
-
         public void SetNextConditionalStatement(IfElseStatement cs)
         {
             nextStatement = cs;
+        }
+
+        //back to state before execution
+        public override void Reset()
+        {
+            base.Reset();
+            stateChecked = false;
+            executingStatement = null;
+
+            IfElseStatement ies = nextStatement;
+            while (ies != null)
+            {
+                ies.Reset();
+                ies = ies.nextStatement;
+            }
+
+            if (executionBlock == null)
+                return;
+
+            foreach (ConditionalStatement cs in executionBlock)
+            {
+                cs.Reset();
+            }
         }
     }
 }

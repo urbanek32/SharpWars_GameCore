@@ -14,5 +14,22 @@ namespace Script
 
         // should returen true when finish executing
         public virtual bool Execute() { return false; }
+        public virtual void Reset()
+        {
+            positionInExecList = 0;
+        }
+
+        //returns if value
+        protected bool checkState()
+        {
+            if (conditionCheckFunction == null)
+            {
+                return true;
+            }
+
+            object[] result = conditionCheckFunction.Call();
+
+            return (bool)result[0];
+        }
     }
 }

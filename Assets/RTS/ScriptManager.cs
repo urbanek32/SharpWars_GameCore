@@ -157,11 +157,12 @@ namespace RTS
             Regex re_elseif = new Regex("(\\s+elseif\\s|^elseif\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sthen($|\\s)");
             Regex re_else = new Regex("(\\s+|^)else($|\\s)");
             Regex re_end = new Regex("(\\s+|^)end($|\\s)");
+            Regex re_while = new Regex("(\\s+while\\s|^while\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sdo($|\\s)");
 
             foreach (string line in loc)
             {
-                //if match one of the following: [if elseif else end] then do:
-                if (re_if.IsMatch(line) | re_elseif.IsMatch(line) | re_else.IsMatch(line) | re_end.IsMatch(line))
+                //if match one of the following: [if elseif else end while] then do:
+                if (re_if.IsMatch(line) || re_elseif.IsMatch(line) || re_else.IsMatch(line) || re_end.IsMatch(line) || re_while.IsMatch(line))
                 {
                     LuaFunction lf = (func_buffer.Length > 3) ? GenerateUserFunction(func_buffer) : null;
                     if (lf != null)
@@ -171,11 +172,15 @@ namespace RTS
 
                     if (ncs_block.Count > 0)
                     {
-                        //FIXME for WHILE
                         if (block_depth.Count > 0 && block_depth.Peek() is IfElseStatement)
                         {
                             IfElseStatement ies = (IfElseStatement)block_depth.Peek();
                             ies.AddCSToExecutionBlock(new NonconditionalStatement(ncs_block));
+                        }
+                        else if (block_depth.Count > 0 && block_depth.Peek() is WhileStatement)
+                        {
+                            WhileStatement ws = (WhileStatement)block_depth.Peek();
+                            ws.AddCSToExecutionBlock(new NonconditionalStatement(ncs_block));
                         }
                         else if (block_depth.Count == 0)
                         {
@@ -210,7 +215,11 @@ namespace RTS
                             IfElseStatement ies = (IfElseStatement)block_depth.Peek();
                             ies.AddCSToExecutionBlock(new_statement);
                         }
-                        //put here "is WHILE" in future
+                        else if (block_depth.Peek() is WhileStatement)
+                        {
+                            WhileStatement ws = (WhileStatement)block_depth.Peek();
+                            ws.AddCSToExecutionBlock(new_statement);
+                        }
                     }
                     block_depth.Push(new_statement);
                 }
@@ -240,6 +249,32 @@ namespace RTS
                         ies.SetNextConditionalStatement(new_statement);
                         block_depth.Push(new_statement);
                     }
+                }
+                //check for while
+                else if (re_while.IsMatch(line))
+                {
+                    //WHILE found!
+                    LuaFunction cclf = GenerateUserFunction("if " + re_while.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    WhileStatement new_statement = new WhileStatement(cclf);
+
+                    if (block_depth.Count == 0)
+                    {
+                        ret_val.Add(new_statement);
+                    }
+                    else
+                    {
+                        if (block_depth.Peek() is IfElseStatement)
+                        {
+                            IfElseStatement ies = (IfElseStatement)block_depth.Peek();
+                            ies.AddCSToExecutionBlock(new_statement);
+                        }
+                        else if (block_depth.Peek() is WhileStatement)
+                        {
+                            WhileStatement ws = (WhileStatement)block_depth.Peek();
+                            ws.AddCSToExecutionBlock(new_statement);
+                        }
+                    }
+                    block_depth.Push(new_statement);
                 }
                 //check for END ✞
                 else if (re_end.IsMatch(line))
