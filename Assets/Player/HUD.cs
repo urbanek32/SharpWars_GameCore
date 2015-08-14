@@ -41,6 +41,8 @@ public class HUD : MonoBehaviour {
 	private const int SCROLL_BAR_WIDTH = 22;
 	private const int BUILD_IMAGE_PADDING = 8;
 
+    //HOOK
+    private int tabInsertPos = -1;
 
 	// Use this for initialization
 	void Start () 
@@ -378,9 +380,24 @@ public class HUD : MonoBehaviour {
 	{
 		if(scriptWindowOpen && player.SelectedObject)
 		{
+            if (tabInsertPos > -1)
+            {
+                player.SelectedObject.unitScript = player.SelectedObject.unitScript.Insert(tabInsertPos, "\t");
+                tabInsertPos = -1;
+            }
+
 			GUI.SetNextControlName("ScriptTextArea");
-			player.SelectedObject.unitScript = GUI.TextArea(new Rect(Screen.width/2, 50, 400, 200), player.SelectedObject.unitScript);
+            player.SelectedObject.unitScript = GUI.TextArea(new Rect(Screen.width / 2, 50, 400, 200), player.SelectedObject.unitScript);
 			GUI.FocusControl("ScriptTextArea");
+
+            //Hook for GUI.TextArea to force adding horizontal tab
+            if (Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Tab)
+            {
+                TextEditor editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+                tabInsertPos = editor.pos;
+                editor.pos++;
+                editor.selectPos++;
+            }
 		}
 	}
 
