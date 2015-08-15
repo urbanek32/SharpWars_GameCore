@@ -70,6 +70,7 @@ public class Harvester : Unit {
 							arm.GetComponent<Renderer>().enabled = false;
 						}
 						agent.avoidancePriority = 50;
+						FindClosestRafinery();
 						StartMove(resourceStore.transform.position, resourceStore.gameObject);
 					}
 				}
@@ -246,6 +247,19 @@ public class Harvester : Unit {
 				depositType = ResourceType.Money;
 			}
 			player.AddResource(depositType, deposit);
+		}
+	}
+
+	private void FindClosestRafinery()
+	{
+		Building[] builds = player.GetComponentsInChildren<Building>();
+		foreach(Building b in builds)
+		{
+			if(b is Rafinery)
+			{
+				resourceStore = b;
+				break;
+			}
 		}
 	}
 
