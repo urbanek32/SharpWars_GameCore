@@ -11,7 +11,6 @@ using NLua;
 public class WorldObject : NetworkBehaviour {
 
 	[SyncVar] public NetworkInstanceId ownerId;
-	[SyncVar] public string lelos;
 
 	public string objectName;
 	public Texture2D buildImage;
@@ -316,6 +315,11 @@ public class WorldObject : NetworkBehaviour {
 		
 	}
 
+	public Player GetPlayer()
+	{
+		return player;
+	}
+
 	public virtual void SetHoverState(GameObject hoverObject)
 	{
 		// only handle input if owned by a human player and currently selected
@@ -493,8 +497,9 @@ public class WorldObject : NetworkBehaviour {
 	{
 		hitPoints -= damage;
 		if(hitPoints <= 0)
-		{
-			Destroy(gameObject);
+		{ 
+			//Destroy(gameObject);
+			NetworkServer.Destroy(gameObject);
 		}
 	}
 

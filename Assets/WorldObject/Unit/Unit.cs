@@ -15,10 +15,7 @@ public class Unit : WorldObject {
 	private GameObject destinationTarget;
 	private Vector3 startPos;
 
-	protected NavMeshAgent agent;
-
-	//[SyncVar]
-	private Vector3 syncPos;
+	public NavMeshAgent agent;
 
 
 	protected override void Awake() 
@@ -35,11 +32,6 @@ public class Unit : WorldObject {
 	protected override void Update () 
 	{
 		base.Update();
-		if(this as Tank && !player.isLocalPlayer)
-		{
-			//Debug.Log(player.netId + " / " + lelos);
-			lelos = transform.position.x + " " + transform.position.z;
-		}
 
 		if(rotating)
 		{
@@ -88,20 +80,22 @@ public class Unit : WorldObject {
 
 	private void MakeMove()
 	{
-		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
+		//transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
 		//syncPos = transform.position;
-		player.Cmd_MoveUnit(GetComponent<WorldObject>().netId, transform.position);
+		player.Cmd_MoveUnit(GetComponent<WorldObject>().netId, transform.position, transform.rotation);
 		//agent.SetDestination(destination);
 		//if(transform.position == destination)
 		//Debug.Log(transform.position.magnitude);
 		//Debug.Log(agent.remainingDistance);
-		/*if(startPos.magnitude != transform.position.magnitude)
+		if(startPos.magnitude != transform.position.magnitude)
+		{
 			if(agent.velocity.magnitude <= 0.0f)
 			{
 				moving = false;
 				movingIntoPosition = false;
 				//Debug.Log("Dojechalem");
-			}*/
+			}
+		}
 		CalculateBounds();
 	}
 
@@ -144,21 +138,6 @@ public class Unit : WorldObject {
 	}
 
 
-	[Command]
-	void CmdProvidePositionToServer(Vector3 pos)
-	{
-		syncPos = pos;
-	}
-	
-	[ClientCallback]
-	void TransmitPosition()
-	{
-		if(player.isLocalPlayer)
-		{
-			Debug.Log(player.username+" : " +destination);
-			CmdProvidePositionToServer(destination);
-		}
-	}
 
 
 
@@ -171,34 +150,37 @@ public class Unit : WorldObject {
 
 	public virtual void StartMove(Vector3 destination)
 	{
-        // if nothing to deal with
-        if (this.destination == destination)
-        	return; 
-
-
-		this.destination = destination;
-		destinationTarget = null;
-		targetRotation = Quaternion.LookRotation(destination - transform.position);
-		startPos = transform.position;
-
-		moving = true;
-		//rotating = true;
-		agent.ResetPath();
-		//agent.destination = destination;
-
-		/*if(agent.velocity.sqrMagnitude <= 0)
+		if(player.isLocalPlayer)
 		{
-			rotating = true;
+	        // if nothing to deal with
+	        if (this.destination == destination)
+	        	return; 
+
+
+			this.destination = destination;
+			destinationTarget = null;
+			targetRotation = Quaternion.LookRotation(destination - transform.position);
+			startPos = transform.position;
+
+			moving = true;
+			//rotating = true;
 			agent.ResetPath();
-		}
-		else
-		{
 			agent.SetDestination(destination);
-		}*/
-		//agent.velocity = new Vector3(0f,0f,0f);
-		//agent.SetDestination(destination);
-		//agent.updatePosition = false;
-		//agent.updateRotation = false;
+
+			/*if(agent.velocity.sqrMagnitude <= 0)
+			{
+				rotating = true;
+				agent.ResetPath();
+			}
+			else
+			{
+				agent.SetDestination(destination);
+			}*/
+			//agent.velocity = new Vector3(0f,0f,0f);
+			//agent.SetDestination(destination);
+			//agent.updatePosition = false;
+			//agent.updateRotation = false;
+		}
 	}
 
 	public void StartMove(Vector3 destination, GameObject destinationTarget)
@@ -212,7 +194,7 @@ public class Unit : WorldObject {
 		base.MouseClick(hitObject, hitPoint, controller);
 
 		//only handle input if owned by a human player and currently selected
-		if(player && /*player.human &&*/ currentlySelected) 
+		if(player && player.human && currentlySelected) 
 		{
 			if(hitObject.name == "Ground" && hitPoint != ResourceManager.InvalidPosition) {
 				float x = hitPoint.x;

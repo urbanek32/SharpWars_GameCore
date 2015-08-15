@@ -9,6 +9,7 @@ public class Projectile : MonoBehaviour
 
 	private float range = 1;
 	private WorldObject target;
+	private WorldObject owner;
 	
 
 	// Update is called once per frame
@@ -44,6 +45,10 @@ public class Projectile : MonoBehaviour
 		this.target = target;
 	}
 
+	public void SetOwner(WorldObject owner)
+	{
+		this.owner = owner;
+	}
 
 
 
@@ -63,7 +68,8 @@ public class Projectile : MonoBehaviour
 	{
 		if(target)
 		{
-			target.TakeDamage(damage);
+			//target.TakeDamage(damage);
+			owner.GetPlayer().Cmd_TakeDamage(target.netId, damage);
 		}
 	}
 }

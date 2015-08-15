@@ -76,7 +76,7 @@ public class Player : NetworkBehaviour {
 
 
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-		Units units = GetComponentInChildren<Units>();
+		//Units units = GetComponentInChildren<Units>();
 		//newUnit.transform.parent = units.transform;
 	newUnit.GetComponent<WorldObject>().ownerId = GetComponent<NetworkIdentity>().netId;
 	NetworkServer.Spawn(newUnit);
@@ -92,38 +92,57 @@ public class Player : NetworkBehaviour {
 	}
 
 	[Command]
-	public void Cmd_MoveUnit(NetworkInstanceId id, Vector3 newPos)
+	public void Cmd_TakeDamage(NetworkInstanceId id, int damage)
 	{
-		Rpc_MoveUnit(id, newPos);
+		Rpc_TakeDamage(id, damage);
 	}
 
 	[ClientRpc]
-	public void Rpc_MoveUnit(NetworkInstanceId id, Vector3 newPos)
+	public void Rpc_TakeDamage(NetworkInstanceId id, int damage)
+	{
+
+		GameObject[] go = GameObject.FindGameObjectsWithTag("Tank");
+		foreach(GameObject g in go)
+		{
+			Unit u = g.GetComponent<Unit>();
+			Debug.Log(id +"  " +u.netId);
+			if(u.netId.Equals(id))
+			{
+				u.TakeDamage(damage);
+				Debug.Log("HIT");
+				break;
+			}
+		}
+	}
+
+	[Command]
+	public void Cmd_MoveUnit(NetworkInstanceId id, Vector3 newPos, Quaternion newRot)
+	{
+		Rpc_MoveUnit(id, newPos, newRot);
+	}
+
+	[ClientRpc]
+	public void Rpc_MoveUnit(NetworkInstanceId id, Vector3 newPos, Quaternion newRot)
 	{
 		if(isLocalPlayer)
 			return;
 
-
-
 		Units units = GetComponentInChildren<Units>();
 		Unit[] unitss = units.GetComponentsInChildren<Unit>();
-		//Debug.Log(unitss.Length);
-		
-		//Units units = null;
+
 		foreach(Unit u in unitss)
 		{
-			if(u as Tank)
+			WorldObject wo = u.GetComponent<WorldObject>();
+
+			if(wo.netId.Equals(id))
 			{
-			//Debug.Log(id + " / "+u.netId);
-				WorldObject wo = u.GetComponent<WorldObject>();
-				//Debug.Log(players.Length +" : "+ pp.netId);
-				if(wo.netId.Equals(id))
-				{
-					//Debug.Log(pp.username);
-					wo.transform.position = newPos;
-					break;
-				}
-			}
+
+				Unit unit = wo.GetComponent<Unit>();
+				unit.agent.Stop();
+				wo.transform.position = Vector3.MoveTowards(wo.transform.position, newPos, Time.deltaTime * unit.agent.speed);
+				wo.transform.rotation = Quaternion.Lerp(wo.transform.rotation, newRot, Time.deltaTime * unit.agent.angularSpeed);
+				break;
+			}		
 		}
 		
 	}

@@ -58,6 +58,7 @@ public class Tank : Unit
 		Projectile projectile = gameObject.GetComponentInChildren< Projectile >();
 		projectile.SetRange( weaponRange);
 		projectile.SetTarget(target);
+		projectile.SetOwner(this);
 	}
 
 

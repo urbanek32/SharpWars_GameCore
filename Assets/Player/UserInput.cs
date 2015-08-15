@@ -146,8 +146,8 @@ public class UserInput : MonoBehaviour {
 
 	private void MoveCamera()
 	{
-		float xpos = Input.mousePosition.x;
-		float ypos = Input.mousePosition.y;
+		//float xpos = Input.mousePosition.x;
+		//float ypos = Input.mousePosition.y;
 		Vector3 movement = new Vector3(0,0,0);
 		bool mouseScroll = false;
 		/*
