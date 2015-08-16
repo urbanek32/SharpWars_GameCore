@@ -14,7 +14,8 @@ public class WorldObject : NetworkBehaviour {
 
 	public string objectName;
 	public Texture2D buildImage;
-	public int cost, sellValue, hitPoints, maxHitPoints;
+	public int cost, sellValue;
+    [SyncVar]public int hitPoints, maxHitPoints;
 	public string unitScript;
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;

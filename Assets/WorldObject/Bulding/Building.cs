@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 using RTS;
 
@@ -15,7 +16,7 @@ public class Building : WorldObject
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
 	private Vector3 rallyPoint;
-	private bool needsBuilding = false;
+	[SyncVar]private bool needsBuilding = false;
 
 
 
@@ -30,11 +31,21 @@ public class Building : WorldObject
 	protected override void Start()
 	{
 		base.Start();
+        if(needsBuilding)
+        {
+            StartConstruction();
+            SetTransparentMaterial(player.allowedMaterial, true);
+        }
 	}
 
 	protected override void Update()
 	{
 		base.Update();
+
+        if(hitPoints >= maxHitPoints && UnderConstruction())
+        {
+            CompleteConstruction();
+        }
 
 		ProcessBuildQueue();
 	}
@@ -219,12 +230,18 @@ public class Building : WorldObject
 		hitPoints += amount;
 		if(hitPoints >= maxHitPoints)
 		{
-			hitPoints = maxHitPoints;
-			needsBuilding = false;
-			RestoreMaterials();
-			SetTeamColor();
+            CompleteConstruction();
+            player.Cmd_BuildingCompleted(player.netId, this.netId);
 		}
 	}
+
+    public void CompleteConstruction()
+    {
+        hitPoints = maxHitPoints;
+        needsBuilding = false;
+        RestoreMaterials();
+        SetTeamColor();
+    }
 
 
 

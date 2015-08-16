@@ -149,7 +149,7 @@ public class Player : NetworkBehaviour {
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
 	{
 		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(buildingName), buildPoint, new Quaternion());
-		if(tempBuilding) Destroy(tempBuilding.gameObject); // prevent spawning ghosty buildings
+		//if(tempBuilding) Destroy(tempBuilding.gameObject); // prevent spawning ghosty buildings
 		tempBuilding = newBuilding.GetComponent< Building >();
 		if (tempBuilding) 
 		{
@@ -223,7 +223,8 @@ public class Player : NetworkBehaviour {
 	public void StartConstruction()
 	{
 		findingPlacement = false;
-		Buildings buildings = GetComponentInChildren< Buildings >();
+
+		/*Buildings buildings = GetComponentInChildren< Buildings >();
 		if(buildings)
 		{
 			tempBuilding.transform.parent = buildings.transform;
@@ -231,27 +232,108 @@ public class Player : NetworkBehaviour {
 		tempBuilding.SetPlayer();
 		tempBuilding.SetColliders(true);
 		tempCreator.SetBuilding(tempBuilding);
-		tempBuilding.StartConstruction();
+		tempBuilding.StartConstruction();*/
 
-		tempBuilding.ownerId = this.netId;
-		Cmd_StartConstruction(tempBuilding.ownerId, tempBuilding.GetType().ToString(), tempBuilding.transform.position, tempBuilding.transform.rotation);
+   
+        string name = tempBuilding.GetType().ToString();
+        Transform tr = tempBuilding.transform;
+        CancelBuildingPlacement();
+
+        Cmd_StartConstruction(this.netId, name, tr.position, tr.rotation);
 	}
 
 	[Command]
     public void Cmd_StartConstruction(NetworkInstanceId ownerId, string name, Vector3 pos, Quaternion rot)
 	{
-		Rpc_StartConstruction(ownerId, name, pos, rot);
+		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
+        Building build = newBuilding.GetComponent<Building>();
+        build.ownerId = ownerId;
+        build.StartConstruction();
+        NetworkServer.Spawn(newBuilding);
+
+		//Rpc_StartConstruction(ownerId, build.netId, name, pos, rot);
 	}
 
 	[ClientRpc]
-    public void Rpc_StartConstruction(NetworkInstanceId ownerId, string name, Vector3 pos, Quaternion rot)
+    public void Rpc_StartConstruction(NetworkInstanceId ownerId, NetworkInstanceId buildingId, string name, Vector3 pos, Quaternion rot)
 	{
 		if(isLocalPlayer)
 			return;
 
-		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
-        newBuilding.GetComponent<Building>().ownerId = ownerId;
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject go in players)
+        {
+            Player p = go.GetComponent<Player>();
+            if (p.netId.Equals(ownerId))
+            {
+                Building[] builds = p.GetComponentsInChildren<Building>();
+                foreach (Building b in builds)
+                {
+                    Debug.Log(b.netId);
+                    if (b.netId.Equals(buildingId))
+                    {
+                        Debug.Log("Started Construct");
+                        b.StartConstruction();
+                        b.SetTransparentMaterial(allowedMaterial, true);
+                        break;
+                    }
+                }
+            }
+        }
+
+// 		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
+//      Building build = newBuilding.GetComponent<Building>();
+//      build.ownerId = ownerId;
+//      build.StartConstruction();
+//      build.SetTransparentMaterial(allowedMaterial, true);
 	}
+
+    [Command]
+    public void Cmd_ConstructingBuilding(NetworkInstanceId buildingId, int amount)
+    {
+        foreach(Building b in GetComponentsInChildren<Building>())
+        {
+            if(b.netId.Equals(buildingId))
+            {
+                b.Construct(amount);
+                break;
+            }
+        }
+    }
+
+    [Command]
+    public void Cmd_BuildingCompleted(NetworkInstanceId ownerId, NetworkInstanceId buildingId)
+    {
+        Rpc_BuildingCompleted(ownerId, buildingId);
+    }
+
+    [ClientRpc]
+    public void Rpc_BuildingCompleted(NetworkInstanceId ownerId, NetworkInstanceId buildingId)
+    {
+        if (isLocalPlayer)
+            return;
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject go in players)
+        {
+            Player p = go.GetComponent<Player>();
+            if(p.netId.Equals(ownerId))
+            {
+                Building[] builds = p.GetComponentsInChildren<Building>();
+                foreach(Building b in builds)
+                {
+                    //Debug.Log(b.netId);
+                    if(b.netId.Equals(buildingId))
+                    {
+                        Debug.Log("Build Completed");
+                        b.CompleteConstruction();
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
 	public void CancelBuildingPlacement()
 	{

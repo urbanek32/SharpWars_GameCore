@@ -30,7 +30,8 @@ public class Worker : Unit {
 				if(amount > 0)
 				{
 					amountBuilt -= amount;
-					currentProject.Construct(amount);
+					//currentProject.Construct(amount);
+                    player.Cmd_ConstructingBuilding(currentProject.netId, amount);
 					if(!currentProject.UnderConstruction())
 					{
 						building = false;
