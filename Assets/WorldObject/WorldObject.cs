@@ -290,28 +290,30 @@ public class WorldObject : NetworkBehaviour {
 	{
 		//Debug.Log(ownerId);
 		player = transform.root.GetComponentInChildren< Player >();
+		GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-		if(this as Unit)
+
+		foreach(GameObject p in players)
 		{
-			GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-			//Debug.Log(players.Length);
-			
-			Units units = null;
-			foreach(GameObject p in players)
+			Player pp = p.GetComponent<Player>();
+			//Debug.Log(players.Length +" : "+ pp.netId);
+			if(pp.netId.Equals(ownerId))
 			{
-				Player pp = p.GetComponent<Player>();
-				//Debug.Log(players.Length +" : "+ pp.netId);
-				if(pp.netId.Equals(ownerId))
+				player = pp;
+				if(this is Unit)
 				{
-					//Debug.Log(pp.username);
-					player = pp;
-					units = pp.GetComponentInChildren<Units>();
-					if(this as Unit)
-						transform.parent = units.transform;
-					break;
+					Units units = pp.GetComponentInChildren<Units>();
+					transform.parent = units.transform;
 				}
+				else if(this is Building)
+				{
+					Buildings builds = pp.GetComponentInChildren<Buildings>();
+					transform.parent = builds.transform;
+				}
+				break;
 			}
 		}
+		
 		
 	}
 

@@ -78,7 +78,7 @@ public class Player : NetworkBehaviour {
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
 		//Units units = GetComponentInChildren<Units>();
 		//newUnit.transform.parent = units.transform;
-	newUnit.GetComponent<WorldObject>().ownerId = GetComponent<NetworkIdentity>().netId;
+	newUnit.GetComponent<WorldObject>().ownerId = this.netId;
 	NetworkServer.Spawn(newUnit);
 		Unit unitObject = newUnit.GetComponent< Unit >();
 		if(unitObject)
@@ -136,13 +136,12 @@ public class Player : NetworkBehaviour {
 
 			if(wo.netId.Equals(id))
 			{
-
 				Unit unit = wo.GetComponent<Unit>();
 				unit.agent.Stop();
 				wo.transform.position = Vector3.MoveTowards(wo.transform.position, newPos, Time.deltaTime * unit.agent.speed);
 				wo.transform.rotation = Quaternion.Lerp(wo.transform.rotation, newRot, Time.deltaTime * unit.agent.angularSpeed);
 				break;
-			}		
+			}	
 		}
 		
 	}
@@ -162,7 +161,7 @@ public class Player : NetworkBehaviour {
 		} 
 		else 
 		{
-			Destroy(newBuilding);
+			Destroy(newBuilding); // ?useless?
 		}
 	}
 
@@ -220,6 +219,7 @@ public class Player : NetworkBehaviour {
 		
 	}
 
+
 	public void StartConstruction()
 	{
 		findingPlacement = false;
@@ -232,6 +232,25 @@ public class Player : NetworkBehaviour {
 		tempBuilding.SetColliders(true);
 		tempCreator.SetBuilding(tempBuilding);
 		tempBuilding.StartConstruction();
+
+		tempBuilding.ownerId = this.netId;
+		Cmd_StartConstruction(tempBuilding.ownerId, tempBuilding.GetType().ToString(), tempBuilding.transform.position, tempBuilding.transform.rotation);
+	}
+
+	[Command]
+    public void Cmd_StartConstruction(NetworkInstanceId ownerId, string name, Vector3 pos, Quaternion rot)
+	{
+		Rpc_StartConstruction(ownerId, name, pos, rot);
+	}
+
+	[ClientRpc]
+    public void Rpc_StartConstruction(NetworkInstanceId ownerId, string name, Vector3 pos, Quaternion rot)
+	{
+		if(isLocalPlayer)
+			return;
+
+		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
+        newBuilding.GetComponent<Building>().ownerId = ownerId;
 	}
 
 	public void CancelBuildingPlacement()
