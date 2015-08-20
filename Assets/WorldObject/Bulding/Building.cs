@@ -15,6 +15,7 @@ public class Building : WorldObject
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
 	private Vector3 rallyPoint;
+	private bool needsBuilding = false;
 
 
 
@@ -23,11 +24,7 @@ public class Building : WorldObject
 		base.Awake();
 
 		buildQueue = new Queue<string>();
-		float spawnX = selectionBounds.center.x + transform.forward.x * selectionBounds.extents.x + transform.forward.x * 10;
-		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
-		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
-
-		rallyPoint = spawnPoint;
+		SetSpawnPoint();
 	}
 
 	protected override void Start()
@@ -45,6 +42,10 @@ public class Building : WorldObject
 	protected override void OnGUI()
 	{
 		base.OnGUI();
+		if(needsBuilding)
+		{
+			DrawBuildProgress();
+		}
 	}
 
 	protected void CreateUnit(string unitName)
@@ -68,8 +69,27 @@ public class Building : WorldObject
 		}
 	}
 
+	private void DrawBuildProgress()
+	{
+		GUI.skin = ResourceManager.SelectBoxSkin;
+		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
+		//Draw the selection box around the currently selected object, within the bounds of the main draw area
+		GUI.BeginGroup(playingArea);
+		CalculateCurrentHealth(0.5f, 0.99f);
+		DrawHealthBar(selectBox, "Building ...");
+		GUI.EndGroup();
+	}
 
-
+	private void SetSpawnPoint()
+	{
+		float spawnX = selectionBounds.center.x + transform.forward.x * selectionBounds.extents.x + transform.forward.x * 10;
+		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
+		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
+		
+		rallyPoint = spawnPoint;
+	}
+	
+	
 
 	public string[] getBuildQueueValues()
 	{
@@ -178,6 +198,31 @@ public class Building : WorldObject
 				SetSelection(false, playingArea);
 			}
 			Destroy(this.gameObject);
+		}
+	}
+
+	public void StartConstruction()
+	{
+		CalculateBounds();
+		needsBuilding = true;
+		hitPoints = 0;
+		SetSpawnPoint();
+	}
+
+	public bool UnderConstruction()
+	{
+		return needsBuilding;
+	}
+
+	public void Construct(int amount)
+	{
+		hitPoints += amount;
+		if(hitPoints >= maxHitPoints)
+		{
+			hitPoints = maxHitPoints;
+			needsBuilding = false;
+			RestoreMaterials();
+			SetTeamColor();
 		}
 	}
 

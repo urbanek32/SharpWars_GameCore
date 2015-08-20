@@ -16,17 +16,33 @@ public class Harvester : Unit {
 	private float currentDeposit = 0.0f;
 
 
+
 	// Game Engine methods, all can be overridden by subclass
 
 	protected override void Start()
 	{
 		base.Start();
-		harvestType = ResourceType.Unknown;
+		harvestType = ResourceType.Unknown; 
 	}
 
 	protected override void Update()
 	{
 		base.Update();
+
+		/*if(agent.remainingDistance < 5.0f)
+		{
+			moving = false;
+			agent.Stop();
+			agent.ResetPath();
+			agent.avoidancePriority = 60;
+
+		}
+		else
+		{
+			moving = true;
+			agent.Resume();
+			agent.avoidancePriority = 50;
+		}*/
 
 		if(!rotating && !moving)
 		{
@@ -40,6 +56,7 @@ public class Harvester : Unit {
 
 				if(harvesting)
 				{
+					agent.avoidancePriority = 60;
 					Collect();
 					if(currentLoad >= capacity || resourceDeposit.isEmpty())
 					{
@@ -52,11 +69,13 @@ public class Harvester : Unit {
 						{
 							arm.GetComponent<Renderer>().enabled = false;
 						}
+						agent.avoidancePriority = 50;
 						StartMove(resourceStore.transform.position, resourceStore.gameObject);
 					}
 				}
 				else
 				{
+					agent.avoidancePriority = 60;
 					Deposit();
 					if(currentLoad <= 0)
 					{
@@ -66,9 +85,10 @@ public class Harvester : Unit {
 							arm.GetComponent<Renderer>().enabled = false;
 						}
 
-						if(!resourceDeposit.isEmpty())
+						if(!resourceDeposit.isEmpty() && resourceDeposit)
 						{
 							harvesting = true;
+							agent.avoidancePriority = 50;
 							StartMove(resourceDeposit.transform.position, resourceDeposit.gameObject);
 						}
 					}
@@ -147,9 +167,9 @@ public class Harvester : Unit {
 
 	}
 
-	public override void Init(Building creator)
+	public override void SetBuilding(Building creator)
 	{
-		base.Init(creator);
+		base.SetBuilding(creator);
 		resourceStore = creator;
 	}
 

@@ -2,7 +2,6 @@
 using System.Collections;
 
 using RTS;
-using NLua;
 
 public class Unit : WorldObject {
 
@@ -13,31 +12,10 @@ public class Unit : WorldObject {
 	private Vector3 destination;
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
+	private Vector3 startPos;
 
-    private string callingName;
-    private string _userControlScript;
+	protected NavMeshAgent agent;
 
-
-
-    public string userControlScript
-    {
-        get { return _userControlScript; }
-        set
-        {
-            if (value.Length == 0)
-            {
-                callingName = "";
-                _userControlScript = "";
-            }
-            else
-            {
-                callingName = "UnitFunc" + System.DateTime.Now.Ticks.ToString();
-                string _userControlScript = value;
-                string userFunc = "function " + callingName + "(u)\n unit = u\n" + _userControlScript + "\nend";
-                UserInput.env.DoString(userFunc);
-            }
-        }
-    }
 
 	protected override void Awake() 
 	{
@@ -47,26 +25,27 @@ public class Unit : WorldObject {
 	protected override void Start () 
 	{
 		base.Start();
+		agent = GetComponent<NavMeshAgent>();
 	}
 	
 	protected override void Update () 
 	{
 		base.Update();
 
-        if (callingName != null && callingName.Length > 0)
-        {
-            object[] arg = {this};
-            Call(callingName, arg);
-        }
-
 		if(rotating)
 		{
-			TurnToTarget();
+			//if(agent.velocity.sqrMagnitude <= 0)
+				//TurnToTarget();
+
 		}
 		else if(moving)
 		{
 			MakeMove();
+			//agent.SetDestination(destination);
+
 		}
+
+		CalculateBounds(); // navmesh
 	}
 	
 	protected override void OnGUI() 
@@ -79,6 +58,7 @@ public class Unit : WorldObject {
 
 	private void TurnToTarget()
 	{
+		//agent.updateRotation = false;
 		transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed);
 		CalculateBounds();
 
@@ -88,6 +68,7 @@ public class Unit : WorldObject {
 		{
 			rotating = false;
 			moving = true;
+
 			if(destinationTarget)
 			{
 				CalculateTargetDestination();
@@ -97,15 +78,22 @@ public class Unit : WorldObject {
 
 	private void MakeMove()
 	{
-		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
-		if(transform.position == destination)
-		{
-			moving = false;
-		}
+		//transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
+		//agent.SetDestination(destination);
+		//if(transform.position == destination)
+		//Debug.Log(transform.position.magnitude);
+		//Debug.Log(agent.remainingDistance);
+		if(startPos.magnitude != transform.position.magnitude)
+			if(agent.velocity.magnitude <= 0.0f)
+			{
+				moving = false;
+				movingIntoPosition = false;
+				//Debug.Log("Dojechalem");
+			}
 		CalculateBounds();
 	}
 
-	private void CalculateTargetDestination()
+	private void CalculateTargetDestination() 
 	{
 		// calculate number of unit vectors from unit centre to unit edge of bounds
 		Vector3 originalExtents = selectionBounds.extents;
@@ -146,20 +134,42 @@ public class Unit : WorldObject {
 
 
 
-
-
-
-	public void StartMove(Vector3 destination)
+	protected override void FixedUpdate()
 	{
-        //if nothing to deal with
+		base.FixedUpdate();
+
+	}
+
+	public virtual void StartMove(Vector3 destination)
+	{
+        // if nothing to deal with
         if (this.destination == destination)
-            return;
+        	return; 
+
 
 		this.destination = destination;
 		destinationTarget = null;
 		targetRotation = Quaternion.LookRotation(destination - transform.position);
-		rotating = true;
-		moving = false;
+		startPos = transform.position;
+
+		moving = true;
+		//rotating = true;
+		agent.ResetPath();
+		agent.destination = destination;
+
+		/*if(agent.velocity.sqrMagnitude <= 0)
+		{
+			rotating = true;
+			agent.ResetPath();
+		}
+		else
+		{
+			agent.SetDestination(destination);
+		}*/
+		//agent.velocity = new Vector3(0f,0f,0f);
+		//agent.SetDestination(destination);
+		//agent.updatePosition = false;
+		//agent.updateRotation = false;
 	}
 
 	public void StartMove(Vector3 destination, GameObject destinationTarget)
@@ -198,35 +208,14 @@ public class Unit : WorldObject {
 
 	}
 
-	public virtual void Init(Building creator)
+	public virtual void SetBuilding(Building creator)
 	{
 		//specific initialization for a unit can be specified here
 	}
 
-    public System.Object[] Call(string function, params System.Object[] args)
+    public Vector3 GetDestination()
     {
-        System.Object[] result = new System.Object[0];
-        if (UserInput.env == null) return result;
-        LuaFunction lf = UserInput.env.GetFunction(function);
-        if (lf == null) return result;
-        try
-        {
-            // Note: calling a function that does not
-            // exist does not throw an exception.
-            if (args != null)
-            {
-                result = lf.Call(args);
-            }
-            else
-            {
-                result = lf.Call();
-            }
-        }
-        catch (NLua.Exceptions.LuaException e)
-        {
-            Debug.Log("[LUA-EX]" + e.ToString());
-        }
-        return result;
+        return destination;
     }
 
 }

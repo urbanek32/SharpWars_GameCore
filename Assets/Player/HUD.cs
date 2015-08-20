@@ -30,6 +30,10 @@ public class HUD : MonoBehaviour {
 	private int buildAreaHeight = 0;
 	private CursorState previousCursorState;
 
+	private bool scriptWindowOpen = false;
+    private Rect scriptWindowRect = new Rect(100, 100, 400, 220);
+	//private string scriptString = "";
+
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 15;
 	private const int ICON_WIDTH = 32, ICON_HEIGHT = 32, TEXT_WIDTH = 128, TEXT_HEIGHT = 32;
@@ -38,6 +42,8 @@ public class HUD : MonoBehaviour {
 	private const int SCROLL_BAR_WIDTH = 22;
 	private const int BUILD_IMAGE_PADDING = 8;
 
+    //HOOK
+    private int tabInsertPos = -1;
 
 	// Use this for initialization
 	void Start () 
@@ -93,6 +99,7 @@ public class HUD : MonoBehaviour {
 			DrawOrdersBar();
 			DrawResourceBar();
 			DrawMouseCursor();
+			DrawScriptWindow();
 		}
 	}
 
@@ -109,6 +116,16 @@ public class HUD : MonoBehaviour {
 		Vector3 mousePos = Input.mousePosition;
 		bool insideWidth = mousePos.x >= 0 && mousePos.x <= Screen.width - ORDERS_BAR_WIDTH;
 		bool insideHeight = mousePos.y >= 0 && mousePos.y <= Screen.height - RESOURCE_BAR_HEIGHT;
+
+        //is in script window?
+        if (insideHeight && insideWidth && scriptWindowOpen && player.SelectedObject != null)
+        {
+            insideWidth = mousePos.x >= scriptWindowRect.x && mousePos.x <= scriptWindowRect.xMax;
+            insideHeight = mousePos.y <= Screen.height - scriptWindowRect.y && mousePos.y >= Screen.height - scriptWindowRect.yMax;
+
+            return !(insideWidth && insideHeight);
+        }
+
 		return insideWidth && insideHeight;
 	}
 
@@ -191,13 +208,16 @@ public class HUD : MonoBehaviour {
 		else
 		{
 			Cursor.visible = false;
-			GUI.skin = mouseCursorSkin;
-			GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
-			UpdateCursorAnimation();
-			Rect cursorPos = GetCursorDrawPosition();
-			//GUI.Label(cursorPos, activeCursor);
-			GUI.DrawTexture(cursorPos, activeCursor);
-			GUI.EndGroup();
+			if(!player.IsFindingBuildingLocation())
+			{
+				GUI.skin = mouseCursorSkin;
+				GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
+				UpdateCursorAnimation();
+				Rect cursorPos = GetCursorDrawPosition();
+				//GUI.Label(cursorPos, activeCursor);
+				GUI.DrawTexture(cursorPos, activeCursor);
+				GUI.EndGroup();
+			}
 		}
 	}
 
@@ -268,6 +288,8 @@ public class HUD : MonoBehaviour {
 				{
 					sliderValue = 0.0f;
 				}
+				DrawScriptButton();
+                DrawRunScriptButton();
 				DrawActions(player.SelectedObject.GetActions());
 				// store the current selection
 				lastSelection = player.SelectedObject;
@@ -322,7 +344,7 @@ public class HUD : MonoBehaviour {
 		GUI.skin.button = buttons;
 		int numActions = actions.Length;
 		//define the area to draw the actions inside
-		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, buildAreaHeight));
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 128, ORDERS_BAR_WIDTH, buildAreaHeight)); // 0->64 bo scriptWindow
 		// draw scroll bar for the list of actions if need be
 		if(numActions >= MaxNumRows(buildAreaHeight)) 
 		{
@@ -349,6 +371,53 @@ public class HUD : MonoBehaviour {
 		}
 		GUI.EndGroup();
 	}
+
+	private void DrawScriptButton()
+	{
+		GUIStyle buttons = new GUIStyle();
+		buttons.hover.background = buttonHover;
+		buttons.active.background = buttonClick;
+		buttons.alignment = TextAnchor.MiddleCenter;
+		GUI.skin.button = buttons;
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, 64)); // 0->64 bo scriptWindow
+		if(GUI.Button(new Rect(22, 10, 128, 60), "Skryptowe okno"))
+		{
+			scriptWindowOpen = !scriptWindowOpen;
+		}
+		GUI.EndGroup();
+	}
+
+	private void DrawScriptWindow()
+	{
+		if(scriptWindowOpen && player.SelectedObject)
+		{
+            if (tabInsertPos > -1)
+            {
+                player.SelectedObject.unitScript = player.SelectedObject.unitScript.Insert(tabInsertPos, "\t");
+                tabInsertPos = -1;
+            }
+
+            //Hook for GUI.TextArea to force adding horizontal tab
+            if (Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Tab)
+            {
+                TextEditor editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+                tabInsertPos = editor.pos;
+                editor.pos++;
+                editor.selectPos++;
+            }
+
+            scriptWindowRect = GUI.Window(0, scriptWindowRect, DrawDraggableScriptWindow, "Script window");
+		}
+	}
+
+    private void DrawDraggableScriptWindow(int wid)
+    {
+        GUI.SetNextControlName("ScriptTextArea");
+        player.SelectedObject.unitScript = GUI.TextArea(new Rect(0, 20, 400, 200), player.SelectedObject.unitScript);
+		GUI.FocusControl("ScriptTextArea");
+
+        GUI.DragWindow();
+    }
 
 	private int MaxNumRows(int areaHeight)
 	{
@@ -431,8 +500,20 @@ public class HUD : MonoBehaviour {
 
 	}
 
-
-
+    private void DrawRunScriptButton()
+    {
+        GUIStyle buttons = new GUIStyle();
+        buttons.hover.background = buttonHover;
+        buttons.active.background = buttonClick;
+        buttons.alignment = TextAnchor.MiddleCenter;
+        GUI.skin.button = buttons;
+        GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 64, ORDERS_BAR_WIDTH, 64));
+        if(GUI.Button(new Rect(22, 10, 128, 60), "Zaprogramuj\njednostkę"))
+        {
+            player.SelectedObject.runScript();
+        }
+        GUI.EndGroup();
+    }
 
 
 

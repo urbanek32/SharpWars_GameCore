@@ -2,23 +2,10 @@
 using System.Collections;
 
 using RTS;
-using NLua;
 
 public class UserInput : MonoBehaviour {
-
-    string user_input_lua_source_code = @"
-import 'System'
-import 'UnityEngine'
-import 'Assembly-CSharp'
-
--- Use below function to move your lazy ass!
-function PanzerVor(pos)
-    unit:StartMove(pos)
-end
-";
-
-	private Player player;
-    static public Lua env;    //the environment of lua
+	
+    private Player player;
 
 	// Use this for initialization
 	void Start () 
@@ -35,56 +22,42 @@ end
 			RotateCamera(); // useless?
 			MouseActivity();
 
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                if (player.SelectedObject && player.SelectedObject is Unit)
-                {
-                    Unit u = (Unit)player.SelectedObject;
-                    u.userControlScript = @"
-vec = Vector3(100, 0, 0)
-PanzerVor(vec)
-";
-                }
-            }
 		}
 	}
 
 
     void Awake()
     {
-        env = new Lua();
-        env.LoadCLRPackage();
-
-        try
-        {
-            env.DoString(user_input_lua_source_code);
-        } catch(NLua.Exceptions.LuaException e)
-        {
-            Debug.Log("[LUA-EXCEPTION] " + e.ToString());
-        }
     }
 
 	private void MouseHover()
 	{
 		if(player.hud.MouseInBounds())
 		{
-			GameObject hoverObject = FindHitObject();
-			if(hoverObject)
+			if(player.IsFindingBuildingLocation())
 			{
-				if(player.SelectedObject)
+				player.FindBuildingLocation();
+			}
+			else
+			{
+				GameObject hoverObject = WorkManager.FindHitObject(Input.mousePosition);
+				if(hoverObject)
 				{
-					player.SelectedObject.SetHoverState(hoverObject);
-				}
-				else if(hoverObject.name != "Ground")
-				{
-					Player owner = hoverObject.transform.root.GetComponent< Player >();
-					if(owner)
+					if(player.SelectedObject)
 					{
-						Unit unit = hoverObject.transform.parent.GetComponent< Unit >();
-						Building building = hoverObject.transform.parent.GetComponent< Building >();
-						if(owner.username == player.username && (unit || building))
+						player.SelectedObject.SetHoverState(hoverObject);
+					}
+					else if(hoverObject.name != "Ground")
+					{
+						Player owner = hoverObject.transform.root.GetComponent< Player >();
+						if(owner)
 						{
-							player.hud.SetCursorState(CursorState.Select);
+							Unit unit = hoverObject.transform.parent.GetComponent< Unit >();
+							Building building = hoverObject.transform.parent.GetComponent< Building >();
+							if(owner.username == player.username && (unit || building))
+							{
+								player.hud.SetCursorState(CursorState.Select);
+							}
 						}
 					}
 				}
@@ -111,28 +84,44 @@ PanzerVor(vec)
 		// tylko gdy klikamy w obszarze gry, nie HUD
 		if(player.hud.MouseInBounds())
 		{
-			GameObject hitObj = FindHitObject();
-			Vector3 hitPoint = FindHitPoint();
-
-			if(hitObj && hitPoint != ResourceManager.InvalidPosition)
+			if(player.IsFindingBuildingLocation())
 			{
-				// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
-				// jednostka wykona akcje zwiazana z tym kliknieciem
-				if(player.SelectedObject)
+				if(player.CanPlaceBuilding())
 				{
-					player.SelectedObject.MouseClick(hitObj, hitPoint, player);
+					player.StartConstruction();
 				}
-				else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
-				{
-					WorldObject worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
+			}
+			else
+			{
+				GameObject hitObj = WorkManager.FindHitObject(Input.mousePosition);
+				Vector3 hitPoint = WorkManager.FindHitPoint(Input.mousePosition);
 
-					if(worldObject)
+				if(hitObj && hitPoint != ResourceManager.InvalidPosition)
+				{
+					// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
+					// jednostka wykona akcje zwiazana z tym kliknieciem
+					if(player.SelectedObject)
 					{
-						// wiemy ze gracz nie ma zaznaczonych obiektów
-						player.SelectedObject = worldObject;
-						worldObject.SetSelection(true, player.hud.GetPlayingArea());
+						if(hitObj.name == "Ground" && player.SelectedObject.isAttacking())
+						{
+							player.SelectedObject.StopAttacking();
+						}
+
+						player.SelectedObject.MouseClick(hitObj, hitPoint, player);
+					}
+					else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
+					{
+						WorldObject worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
+
+						if(worldObject)
+						{
+							// wiemy ze gracz nie ma zaznaczonych obiektów
+							player.SelectedObject = worldObject;
+							worldObject.SetSelection(true, player.hud.GetPlayingArea());
+						}
 					}
 				}
+
 			}
 		}
 	}
@@ -141,36 +130,19 @@ PanzerVor(vec)
 	{
 		if(player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) && player.SelectedObject)
 		{
-			player.SelectedObject.SetSelection(false, player.hud.GetPlayingArea());
-			player.SelectedObject = null;
+			if(player.IsFindingBuildingLocation())
+			{
+				player.CancelBuildingPlacement();
+			}
+			else
+			{
+				player.SelectedObject.SetSelection(false, player.hud.GetPlayingArea());
+				player.SelectedObject = null;
+			}
 		}
 	}
 
-	private Vector3 FindHitPoint()
-	{
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		RaycastHit hit;
 
-		if(Physics.Raycast(ray, out hit))
-		{
-			return hit.point;
-		}
-
-		return ResourceManager.InvalidPosition;
-	}
-
-	private GameObject FindHitObject()
-	{
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		RaycastHit hit;
-
-		if(Physics.Raycast(ray, out hit))
-		{
-			return hit.collider.gameObject;
-		}
-
-		return null;
-	}
 
 	private void MoveCamera()
 	{
@@ -206,6 +178,24 @@ PanzerVor(vec)
 			player.hud.SetCursorState(CursorState.PanUp);
 			mouseScroll = true;
 		}
+
+        //Poruszanie kamery za pomocą strzałek
+        if(Input.GetKey(KeyCode.UpArrow))
+        {
+            movement.y += ResourceManager.ScrollSpeed;
+        }
+        if(Input.GetKey(KeyCode.DownArrow))
+        {
+            movement.y -= ResourceManager.ScrollSpeed;
+        }
+        if(Input.GetKey(KeyCode.LeftArrow))
+        {
+            movement.x -= ResourceManager.ScrollSpeed;
+        }
+        if(Input.GetKey(KeyCode.RightArrow))
+        {
+            movement.x += ResourceManager.ScrollSpeed;
+        }
 
 		if(!mouseScroll)
 		{
@@ -248,36 +238,5 @@ PanzerVor(vec)
 	{
 
 	}
-
-    public System.Object[] Call(string function, params System.Object[] args)
-    {
-        System.Object[] result = new System.Object[0];
-        if (env == null) return result;
-        LuaFunction lf = env.GetFunction(function);
-        if (lf == null) return result;
-        try
-        {
-            // Note: calling a function that does not
-            // exist does not throw an exception.
-            if (args != null)
-            {
-                result = lf.Call(args);
-            }
-            else
-            {
-                result = lf.Call();
-            }
-        }
-        catch (NLua.Exceptions.LuaException e)
-        {
-            Debug.Log("[LUA-EX]" + e.ToString());
-        }
-        return result;
-    }
-
-    public System.Object[] Call(string function)
-    {
-        return Call(function, null);
-    }
 
 }
