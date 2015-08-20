@@ -31,6 +31,7 @@ public class HUD : MonoBehaviour {
 	private CursorState previousCursorState;
 
 	private bool scriptWindowOpen = false;
+    private Rect scriptWindowRect = new Rect(100, 100, 400, 220);
 	//private string scriptString = "";
 
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
@@ -115,6 +116,16 @@ public class HUD : MonoBehaviour {
 		Vector3 mousePos = Input.mousePosition;
 		bool insideWidth = mousePos.x >= 0 && mousePos.x <= Screen.width - ORDERS_BAR_WIDTH;
 		bool insideHeight = mousePos.y >= 0 && mousePos.y <= Screen.height - RESOURCE_BAR_HEIGHT;
+
+        //is in script window?
+        if (insideHeight && insideWidth && scriptWindowOpen && player.SelectedObject != null)
+        {
+            insideWidth = mousePos.x >= scriptWindowRect.x && mousePos.x <= scriptWindowRect.xMax;
+            insideHeight = mousePos.y <= Screen.height - scriptWindowRect.y && mousePos.y >= Screen.height - scriptWindowRect.yMax;
+
+            return !(insideWidth && insideHeight);
+        }
+
 		return insideWidth && insideHeight;
 	}
 
@@ -386,10 +397,6 @@ public class HUD : MonoBehaviour {
                 tabInsertPos = -1;
             }
 
-			GUI.SetNextControlName("ScriptTextArea");
-            player.SelectedObject.unitScript = GUI.TextArea(new Rect(Screen.width / 2, 50, 400, 200), player.SelectedObject.unitScript);
-			GUI.FocusControl("ScriptTextArea");
-
             //Hook for GUI.TextArea to force adding horizontal tab
             if (Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Tab)
             {
@@ -398,8 +405,19 @@ public class HUD : MonoBehaviour {
                 editor.pos++;
                 editor.selectPos++;
             }
+
+            scriptWindowRect = GUI.Window(0, scriptWindowRect, DrawDraggableScriptWindow, "Script window");
 		}
 	}
+
+    private void DrawDraggableScriptWindow(int wid)
+    {
+        GUI.SetNextControlName("ScriptTextArea");
+        player.SelectedObject.unitScript = GUI.TextArea(new Rect(0, 20, 400, 200), player.SelectedObject.unitScript);
+		GUI.FocusControl("ScriptTextArea");
+
+        GUI.DragWindow();
+    }
 
 	private int MaxNumRows(int areaHeight)
 	{
