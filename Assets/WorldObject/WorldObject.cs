@@ -94,7 +94,7 @@ end";
 
 	protected virtual void OnGUI()
 	{
-		if(currentlySelected)
+		if(currentlySelected && !ResourceManager.MenuOpen)
 		{
 			DrawSelection();
 		}
