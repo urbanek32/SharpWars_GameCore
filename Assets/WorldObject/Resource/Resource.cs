@@ -28,6 +28,11 @@ public class Resource : WorldObject
 		healthStyle.normal.background = ResourceManager.GetResourceHealthBar(resourceType);
 	}
 
+    protected override bool ShouldMakeDecision()
+    {
+        return false;
+    }
+
 
 	// Public methods
 

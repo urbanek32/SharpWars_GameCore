@@ -14,7 +14,7 @@ public class Worker : Unit {
 	protected override void Start()
 	{
 		base.Start();
-		actions = new string[] { "Rafinery", "WarFactory", "Wonder" };
+		actions = new string[] { "Rafinery", "WarFactory", "Wonder", "Turret" };
 	}
 
 	protected override void Update()
@@ -39,6 +39,12 @@ public class Worker : Unit {
 			}
 		}
 	}
+
+    protected override bool ShouldMakeDecision()
+    {
+        if (building) return false;
+        return base.ShouldMakeDecision();
+    }
 
 
 	/*** Public Methods ***/
