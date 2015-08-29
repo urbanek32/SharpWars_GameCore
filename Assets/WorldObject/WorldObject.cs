@@ -84,7 +84,7 @@ public class WorldObject : MonoBehaviour {
 
 	protected virtual void OnGUI()
 	{
-		if(currentlySelected)
+		if(currentlySelected && !ResourceManager.MenuOpen)
 		{
 			DrawSelection();
 		}

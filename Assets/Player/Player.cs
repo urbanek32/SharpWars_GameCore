@@ -180,6 +180,20 @@ public class Player : MonoBehaviour {
 		tempCreator = null;
 	}
 
+    public bool IsDead()
+    {
+        Building[] buildings = GetComponentsInChildren<Building>();
+        Unit[] units = GetComponentsInChildren<Unit>();
+        if (buildings != null && buildings.Length > 0) return false;
+        if (units != null && units.Length > 0) return false;
+        return true;
+    }
+
+    public int GetResourceAmount(ResourceType type)
+    {
+        return resources[type];
+    }
+
 	
 	
 	
