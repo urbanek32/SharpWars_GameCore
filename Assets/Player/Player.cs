@@ -166,6 +166,7 @@ public class Player : NetworkBehaviour {
 			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
 			tempBuilding.SetColliders(false);
 			tempBuilding.SetPlayingArea(playingArea);
+            tempBuilding.hitPoints = 0;
 		} 
 		else 
 		{

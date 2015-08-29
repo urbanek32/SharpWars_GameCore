@@ -86,6 +86,13 @@ public class Building : WorldObject
 		}
 	}
 
+    protected override bool ShouldMakeDecision()
+    {
+        return false;
+    }
+
+
+
 	private void DrawBuildProgress()
 	{
 		GUI.skin = ResourceManager.SelectBoxSkin;

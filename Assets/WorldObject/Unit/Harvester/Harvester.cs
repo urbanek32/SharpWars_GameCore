@@ -104,6 +104,12 @@ public class Harvester : Unit {
 		}
 	}
 
+    protected override bool ShouldMakeDecision()
+    {
+        if (harvesting || emptying) return false;
+        return base.ShouldMakeDecision();
+    }
+
 
 	// Public methods
 
