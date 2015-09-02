@@ -311,8 +311,6 @@ public class Player : NetworkBehaviour {
     [ClientRpc]
     public void Rpc_BuildingCompleted(NetworkInstanceId ownerId, NetworkInstanceId buildingId)
     {
-        if (isLocalPlayer)
-            return;
 
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
         foreach (GameObject go in players)
@@ -323,10 +321,8 @@ public class Player : NetworkBehaviour {
                 Building[] builds = p.GetComponentsInChildren<Building>();
                 foreach(Building b in builds)
                 {
-                    //Debug.Log(b.netId);
                     if(b.netId.Equals(buildingId))
                     {
-                        Debug.Log("Build Completed");
                         b.CompleteConstruction();
                         break;
                     }
