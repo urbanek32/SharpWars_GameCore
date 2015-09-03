@@ -59,6 +59,7 @@ public class Tank : Unit
 		projectile.SetRange( weaponRange);
 		projectile.SetTarget(target);
 		projectile.SetOwner(this);
+    NetworkServer.Spawn(gameObject);
 	}
 
 

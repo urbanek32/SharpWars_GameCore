@@ -259,35 +259,18 @@ public class WorldObject : NetworkBehaviour {
 
 	private bool TargetInFrontOfWeapon()
 	{
-		Vector3 targetLocaton = target.transform.position;
-		Vector3 direction = targetLocaton - transform.position;
-		if(direction.normalized == transform.forward.normalized)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+	    // true jezeli obiekt jest w polu widzenia o kacie 5*
+	    var angle = Vector3.Angle(transform.forward, target.transform.position - transform.position);
+	    return Mathf.Abs(angle) < 5;
 	}
 
-	private bool ReadyToFire()
-	{
-		if(currentWeaponChargeTime >= weaponRechargeTime)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+    private bool ReadyToFire()
+    {
+        return currentWeaponChargeTime >= weaponRechargeTime;
+    }
 
 
-
-
-
-	public void SetPlayer()
+    public void SetPlayer()
 	{
 		//Debug.Log(ownerId);
 		player = transform.root.GetComponentInChildren< Player >();

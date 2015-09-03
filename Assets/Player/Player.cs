@@ -92,26 +92,44 @@ public class Player : NetworkBehaviour {
 	}
 
 	[Command]
-	public void Cmd_TakeDamage(NetworkInstanceId id, int damage)
+    public void Cmd_TakeDamage(NetworkInstanceId ownerId, NetworkInstanceId targetId, int damage)
 	{
-		Rpc_TakeDamage(id, damage);
+        Rpc_TakeDamage(ownerId, targetId, damage);
 	}
 
 	[ClientRpc]
-	public void Rpc_TakeDamage(NetworkInstanceId id, int damage)
+    public void Rpc_TakeDamage(NetworkInstanceId ownerId, NetworkInstanceId targetId, int damage)
 	{
-
-		GameObject[] go = GameObject.FindGameObjectsWithTag("Tank");
-		foreach(GameObject g in go)
+		var go = GameObject.FindGameObjectsWithTag("Player");
+		foreach(var g in go)
 		{
-			Unit u = g.GetComponent<Unit>();
-			Debug.Log(id +"  " +u.netId);
-			if(u.netId.Equals(id))
+		    var player = g.GetComponent<Player>();
+            Debug.Log("player id: " + player.netId + "owner id: " + ownerId);
+		    if (player.netId.Equals(ownerId))
+		    {
+		        var units = player.GetComponentsInChildren<WorldObject>();
+                Debug.Log("units: "+units.Length);
+		        foreach (var worldObject in units)
+		        {
+		            if(worldObject is Resource)
+                        continue;
+
+		            if (worldObject.netId.Equals(targetId))
+		            {
+                        worldObject.TakeDamage(damage);
+                        Debug.Log("HIT");
+                        break;
+		            }
+		        }
+		    }
+
+			/*Unit u = g.GetComponent<Unit>();
+            if (u.netId.Equals(targetId))
 			{
-				u.TakeDamage(damage);
-				Debug.Log("HIT");
-				break;
-			}
+                u.TakeDamage(damage);
+                Debug.Log("HIT");
+                break;
+			}*/
 		}
 	}
 
