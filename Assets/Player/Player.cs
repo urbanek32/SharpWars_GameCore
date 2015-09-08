@@ -33,6 +33,10 @@ public class Player : NetworkBehaviour {
 	void Start () 
 	{
 		hud = GetComponentInChildren< HUD >();
+
+        // gowno potrzebne, zeby dac graczowi budynek startowy
+        if(isLocalPlayer)
+            Cmd_SpawnStartBuilding();
 	}
 	
 	// Update is called once per frame
@@ -381,6 +385,18 @@ public class Player : NetworkBehaviour {
 		AddResource(ResourceType.Money, startMoney);
 		AddResource(ResourceType.Power, startPower);
 	}
+
+    [Command]
+    private void Cmd_SpawnStartBuilding()
+    {
+        GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding("WarFactory"), transform.position, transform.rotation);
+        Building build = newBuilding.GetComponent<Building>();
+        build.ownerId = netId;
+        build.StartConstruction();
+        build.instantbuild = true;
+        //build.CompleteConstruction();
+        NetworkServer.Spawn(newBuilding);
+    }
 
 
 

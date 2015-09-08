@@ -16,7 +16,8 @@ public class Building : WorldObject
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
 	private Vector3 rallyPoint;
-	[SyncVar]private bool needsBuilding = false;
+	[SyncVar] private bool needsBuilding = false;
+    [SyncVar] public bool instantbuild = false;
 
 
 
@@ -36,6 +37,11 @@ public class Building : WorldObject
             StartConstruction();
             SetTransparentMaterial(player.allowedMaterial, true);
         }
+
+	    if (instantbuild)
+	    {
+	        CompleteConstruction();
+	    }
 	}
 
 	protected override void Update()
