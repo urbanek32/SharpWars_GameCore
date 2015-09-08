@@ -108,11 +108,11 @@ public class Player : NetworkBehaviour {
 		foreach(var g in go)
 		{
 		    var player = g.GetComponent<Player>();
-            Debug.Log("player id: " + player.netId + "owner id: " + ownerId);
+            //Debug.Log("player id: " + player.netId + "owner id: " + ownerId);
 		    if (player.netId.Equals(ownerId))
 		    {
 		        var units = player.GetComponentsInChildren<WorldObject>();
-                Debug.Log("units: "+units.Length);
+                //Debug.Log("units: "+units.Length);
 		        foreach (var worldObject in units)
 		        {
 		            if(worldObject is Resource)
@@ -120,7 +120,7 @@ public class Player : NetworkBehaviour {
 
 		            if (worldObject.netId.Equals(targetId))
 		            {
-                        worldObject.TakeDamage(damage);
+                        //worldObject.TakeDamage(damage);
                         Debug.Log("HIT");
                         break;
 		            }
@@ -136,6 +136,24 @@ public class Player : NetworkBehaviour {
 			}*/
 		}
 	}
+
+    [Command]
+    public void Cmd_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId targetId)
+    {
+        Rpc_SpawnBullet(name, newPos, newRot, targetId);
+    }
+
+    [ClientRpc]
+    public void Rpc_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId targetId)
+    {
+        GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject(name), newPos, newRot);
+        Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
+        projectile.SetRange(20);
+        projectile.SetTarget(targetId);
+        //NetworkServer.Spawn(gameObject);
+        //projectile.SetTarget(target);
+        //projectile.SetOwner(this);
+    }
 
 	[Command]
 	public void Cmd_MoveUnit(NetworkInstanceId id, Vector3 newPos, Quaternion newRot)

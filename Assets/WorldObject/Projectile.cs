@@ -17,7 +17,12 @@ public class Projectile : NetworkBehaviour
 
     [SyncVar]
     private NetworkInstanceId ownerId;
-	
+
+    void Start()
+    {
+        Debug.Log(transform.position + " " + transform.rotation);
+        target = ClientScene.objects[targetId].gameObject.GetComponent<WorldObject>();
+    }
 
 	// Update is called once per frame
 	void Update () 
@@ -47,10 +52,10 @@ public class Projectile : NetworkBehaviour
 		this.range = range;
 	}
 
-	public void SetTarget(WorldObject target)
+	public void SetTarget(NetworkInstanceId targetId)
 	{
-		this.target = target;
-	    targetId = target.netId;
+		//this.target = target;
+	    this.targetId = targetId;
 	}
 
 	public void SetOwner(WorldObject owner)
@@ -77,8 +82,7 @@ public class Projectile : NetworkBehaviour
 	{
 		if(target)
 		{
-			//target.TakeDamage(damage);
-			owner.GetPlayer().Cmd_TakeDamage(target.ownerId, target.netId, damage);
+			//owner.GetPlayer().Cmd_TakeDamage(target.ownerId, target.netId, damage);
 		}
 	}
 }

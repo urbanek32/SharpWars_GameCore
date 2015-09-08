@@ -29,6 +29,7 @@ public class Tank : Unit
 		if(aiming)
 		{
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, aimRotation, weaponAimSpeed);
+            player.Cmd_MoveUnit(netId, transform.position, transform.rotation);
 			CalculateBounds();
 
 			//sometimes it gets stuck exactly 180 degrees out in the calculation and does nothing, this check fixes that
@@ -54,12 +55,16 @@ public class Tank : Unit
 		spawnPoint.x += (2.1f * transform.forward.x);
 		spawnPoint.y += 2.4f;
 		spawnPoint.z += (2.1f * transform.forward.z);
-		GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TankProjectile"), spawnPoint, transform.rotation);
+
+        player.Cmd_SpawnBullet("TankProjectile", spawnPoint, transform.rotation, target.netId);
+		/*GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TankProjectile"), spawnPoint, transform.rotation);
+        Debug.Log("spawn na: " + spawnPoint);
+        Debug.Log("rot na: " + transform.rotation);
 		Projectile projectile = gameObject.GetComponentInChildren< Projectile >();
-		projectile.SetRange( weaponRange);
+		projectile.SetRange( 20 );
 		projectile.SetTarget(target);
 		projectile.SetOwner(this);
-    NetworkServer.Spawn(gameObject);
+        NetworkServer.Spawn(gameObject);*/
 	}
 
 
