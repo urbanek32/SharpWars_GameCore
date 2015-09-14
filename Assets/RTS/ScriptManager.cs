@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using NLua;
 using STL;
+using Script;
 
 namespace RTS
 {
@@ -30,14 +32,15 @@ namespace RTS
                 {
                     environment.DoString(initialScriptCode);
                     isInited = true;
-                } catch(NLua.Exceptions.LuaException e)
+                }
+                catch (NLua.Exceptions.LuaException e)
                 {
                     Debug.Log("[ScriptManager-Init-Ex] " + e.ToString());
                 }
             }
         }
 
-        //this method avoid memleak caused by NLua method by using [] operator
+        //this method avoid memleak caused by NLua [] operator
         public static void SetGlobal(string global_variable, object val)
         {
             if (!globals.ContainsKey(global_variable))
@@ -68,7 +71,7 @@ namespace RTS
         //3) Function name that checks if action has ended [Function must be registered before calling this method!]
         public static void RegisterCustomFunction(string custom_function_name, string func_definition, string state_checker_name)
         {
-            if(!customScripts.ContainsKey(custom_function_name) && customScripts.ContainsKey(state_checker_name))
+            if (!customScripts.ContainsKey(custom_function_name) && customScripts.ContainsKey(state_checker_name))
             {
                 try
                 {
@@ -89,7 +92,7 @@ namespace RTS
                 if (customScripts.ContainsKey(custom_function_name))
                     throw new System.InvalidOperationException("[LUA-EX] Function already defined!");
                 else
-                    throw new System.InvalidOperationException("[LUA-EX] Checker \"" + state_checker_name +"\" function not exist!");
+                    throw new System.InvalidOperationException("[LUA-EX] Checker \"" + state_checker_name + "\" function not exist!");
             }
         }
 
@@ -136,54 +139,186 @@ namespace RTS
             {
                 throw e;
             }
-            
+
             return environment.GetFunction(user_func_name);
         }
 
         // Use it only for user-typed scripts
-        public static List<Pair<LuaFunction, LuaFunction>> RegisterUserIngameScript(string user_defined_script)
+        public static List<ConditionalStatement> RegisterUserIngameScript(string user_defined_script)
         {
-            List<Pair<LuaFunction, LuaFunction>> ret_val = new List<Pair<LuaFunction,LuaFunction>>();
+            List<ConditionalStatement> ret_val = new List<ConditionalStatement>();
+            List<Pair<LuaFunction, LuaFunction>> ncs_block = new List<Pair<LuaFunction, LuaFunction>>();
+            Stack<ConditionalStatement> block_depth = new Stack<ConditionalStatement>();
 
             Pair<string, LuaFunction> blocking_func_pair = null;
             string func_buffer = "";
             string[] loc = user_defined_script.Split(new string[] { "\r\n", "\n" }, System.StringSplitOptions.None);
 
+            Regex re_if = new Regex("(\\s+if\\s|^if\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sthen($|\\s)");
+            Regex re_elseif = new Regex("(\\s+elseif\\s|^elseif\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sthen($|\\s)");
+            Regex re_else = new Regex("(\\s+|^)else($|\\s)");
+            Regex re_end = new Regex("(\\s+|^)end($|\\s)");
+            Regex re_while = new Regex("(\\s+while\\s|^while\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sdo($|\\s)");
+
             foreach (string line in loc)
             {
-                bool found_blocking_func = false;
-                foreach (Pair<string, LuaFunction> f in blockingFunctions)
+                //if match one of the following: [if elseif else end while] then do:
+                if (re_if.IsMatch(line) || re_elseif.IsMatch(line) || re_else.IsMatch(line) || re_end.IsMatch(line) || re_while.IsMatch(line))
                 {
-                    //regexp byłyby wydajniejszy?
-                    string[] variants = {f.First + " ", f.First + "\t", f.First + "("};
-                    foreach(string v in variants)
+                    LuaFunction lf = (func_buffer.Length > 3) ? GenerateUserFunction(func_buffer) : null;
+                    if (lf != null)
                     {
-                        if (line.Contains(v))
-                        {
-                            found_blocking_func = true;
-                            blocking_func_pair = f;
-                            break;
-                        }
+                        ncs_block.Add(new Pair<LuaFunction, LuaFunction>(lf, null));
                     }
 
-                    if (found_blocking_func)
-                        break;
-                    
+                    if (ncs_block.Count > 0)
+                    {
+                        if (block_depth.Count > 0 && block_depth.Peek() is IfElseStatement)
+                        {
+                            IfElseStatement ies = (IfElseStatement)block_depth.Peek();
+                            ies.AddCSToExecutionBlock(new NonconditionalStatement(ncs_block));
+                        }
+                        else if (block_depth.Count > 0 && block_depth.Peek() is WhileStatement)
+                        {
+                            WhileStatement ws = (WhileStatement)block_depth.Peek();
+                            ws.AddCSToExecutionBlock(new NonconditionalStatement(ncs_block));
+                        }
+                        else if (block_depth.Count == 0)
+                        {
+                            ret_val.Add(new NonconditionalStatement(ncs_block));
+                        }
+                        else
+                        {
+                            Debug.LogError("[LUA:RUIS] Lel script.");
+                        }
+                        ncs_block = new List<Pair<LuaFunction, LuaFunction>>();
+                    }
+                    func_buffer = "";
                 }
 
-                func_buffer += line + "\n";
 
-                if (found_blocking_func)
+                //check for IF statement
+                if (re_if.IsMatch(line))
                 {
-                    try
+                    //IF found!
+
+                    //Start a statement
+                    LuaFunction cclf = GenerateUserFunction("if " + re_if.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    IfElseStatement new_statement = new IfElseStatement(cclf);
+                    if (block_depth.Count == 0)
                     {
-                        ret_val.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), blocking_func_pair.Second));
-                        
-                        func_buffer = "";
+                        ret_val.Add(new_statement);
                     }
-                    catch (NLua.Exceptions.LuaException e)
+                    else
                     {
-                        throw e;
+                        if (block_depth.Peek() is IfElseStatement)
+                        {
+                            IfElseStatement ies = (IfElseStatement)block_depth.Peek();
+                            ies.AddCSToExecutionBlock(new_statement);
+                        }
+                        else if (block_depth.Peek() is WhileStatement)
+                        {
+                            WhileStatement ws = (WhileStatement)block_depth.Peek();
+                            ws.AddCSToExecutionBlock(new_statement);
+                        }
+                    }
+                    block_depth.Push(new_statement);
+                }
+                //check for ELSEIF statement
+                else if (re_elseif.IsMatch(line))
+                {
+                    //ELSEIF found!
+                    LuaFunction cclf = GenerateUserFunction("if " + re_elseif.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    IfElseStatement new_statement = new IfElseStatement(cclf);
+
+                    if (block_depth.Peek() is IfElseStatement)
+                    {
+                        IfElseStatement ies = (IfElseStatement)block_depth.Pop();
+                        ies.SetNextConditionalStatement(new_statement);
+                        block_depth.Push(new_statement);
+                    }
+                }
+                //check for ELSE statement
+                else if (re_else.IsMatch(line))
+                {
+                    //ELSE found!
+                    IfElseStatement new_statement = new IfElseStatement(null);
+
+                    if (block_depth.Peek() is IfElseStatement)
+                    {
+                        IfElseStatement ies = (IfElseStatement)block_depth.Pop();
+                        ies.SetNextConditionalStatement(new_statement);
+                        block_depth.Push(new_statement);
+                    }
+                }
+                //check for while
+                else if (re_while.IsMatch(line))
+                {
+                    //WHILE found!
+                    LuaFunction cclf = GenerateUserFunction("if " + re_while.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    WhileStatement new_statement = new WhileStatement(cclf);
+
+                    if (block_depth.Count == 0)
+                    {
+                        ret_val.Add(new_statement);
+                    }
+                    else
+                    {
+                        if (block_depth.Peek() is IfElseStatement)
+                        {
+                            IfElseStatement ies = (IfElseStatement)block_depth.Peek();
+                            ies.AddCSToExecutionBlock(new_statement);
+                        }
+                        else if (block_depth.Peek() is WhileStatement)
+                        {
+                            WhileStatement ws = (WhileStatement)block_depth.Peek();
+                            ws.AddCSToExecutionBlock(new_statement);
+                        }
+                    }
+                    block_depth.Push(new_statement);
+                }
+                //check for END ✞
+                else if (re_end.IsMatch(line))
+                {
+                    //E.N.D.
+                    block_depth.Pop();
+                }
+                else
+                {
+                    bool found_blocking_func = false;
+                    foreach (Pair<string, LuaFunction> f in blockingFunctions)
+                    {
+                        //regexp byłyby wydajniejszy?
+                        string[] variants = { f.First + " ", f.First + "\t", f.First + "(" };
+                        foreach (string v in variants)
+                        {
+                            if (line.Contains(v))
+                            {
+                                found_blocking_func = true;
+                                blocking_func_pair = f;
+                                break;
+                            }
+                        }
+
+                        if (found_blocking_func)
+                            break;
+
+                    }
+
+                    func_buffer += line + "\n";
+
+                    if (found_blocking_func)
+                    {
+                        try
+                        {
+                            ncs_block.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), blocking_func_pair.Second));
+
+                            func_buffer = "";
+                        }
+                        catch (NLua.Exceptions.LuaException e)
+                        {
+                            throw e;
+                        }
                     }
                 }
             }
@@ -192,13 +327,16 @@ namespace RTS
             {
                 try
                 {
-                    ret_val.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), null));
+                    ncs_block.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), null));
                 }
                 catch (NLua.Exceptions.LuaException e)
                 {
                     throw e;
                 }
             }
+
+            if (ncs_block.Count > 0)
+                ret_val.Add(new NonconditionalStatement(ncs_block));
 
             return ret_val;
         }
