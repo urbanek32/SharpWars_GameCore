@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using RTS;
 using STL;
 using NLua;
+using Script;
 
 
 public class WorldObject : NetworkBehaviour {
@@ -16,7 +17,7 @@ public class WorldObject : NetworkBehaviour {
 	public Texture2D buildImage;
 	public int cost, sellValue;
     [SyncVar]public int hitPoints, maxHitPoints;
-	public string unitScript;
+    public string unitScript;
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 5.0f;
@@ -38,7 +39,7 @@ public class WorldObject : NetworkBehaviour {
 
 
 	//splited script <blocking func part, execution checker that return true or false>
-	protected List<Pair<LuaFunction, LuaFunction>> scriptExecutionQueue = new List<Pair<LuaFunction, LuaFunction>>();
+    protected List<ConditionalStatement> scriptExecutionQueue = new List<ConditionalStatement>();
 
     public void runScript()
     {
@@ -57,6 +58,11 @@ public class WorldObject : NetworkBehaviour {
 	{
 		selectionBounds = ResourceManager.InvalidBounds;
 		CalculateBounds();
+        unitScript = @"v = Vector3(0, 0, -10)
+while v.x > -100 do
+    PanzerVor(v)
+    v.x = v.x - 10
+end";
 	}
 
 	// Use this for initialization
@@ -72,7 +78,7 @@ public class WorldObject : NetworkBehaviour {
 	// Update is called once per frame
 	protected virtual void Update () 
 	{
-        ProcecssScriptQueue();
+        ProcessScriptQueue();
 
 		currentWeaponChargeTime += Time.deltaTime;
 		if(attacking && !movingIntoPosition && !aiming)
@@ -504,36 +510,23 @@ public class WorldObject : NetworkBehaviour {
 
 
 
-    protected void ProcecssScriptQueue()
+    protected void ProcessScriptQueue()
     {
-        bool stop_executing = false;
         if (scriptExecutionQueue.Count > 0)
         {
             ScriptManager.SetGlobal("this", this);
         }
 
-        while (scriptExecutionQueue.Count > 0 && !stop_executing)
+        while (scriptExecutionQueue.Count > 0)
         {
-            Pair<LuaFunction, LuaFunction> queue_item = scriptExecutionQueue[0];
-            queue_item.First.Call();
-
-            //if piece of code is non-blocking
-            if (queue_item.Second == null)
+            ConditionalStatement cs = scriptExecutionQueue[0];
+            if (cs.Execute())
             {
                 scriptExecutionQueue.RemoveAt(0);
             }
             else
             {
-                System.Object[] result = queue_item.Second.Call();
-                bool b_result = (bool)result[0];
-                if (b_result)
-                {
-                    scriptExecutionQueue.RemoveAt(0);
-                }
-                else
-                {
-                    stop_executing = true;
-                }
+                break;
             }
         }
     }
