@@ -17,7 +17,7 @@ public class WorldObject : NetworkBehaviour {
 	public Texture2D buildImage;
 	public int cost, sellValue;
     [SyncVar]public int hitPoints, maxHitPoints;
-	public string unitScript;
+    public string unitScript;
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 5.0f;
@@ -58,6 +58,11 @@ public class WorldObject : NetworkBehaviour {
 	{
 		selectionBounds = ResourceManager.InvalidBounds;
 		CalculateBounds();
+        unitScript = @"v = Vector3(0, 0, -10)
+while v.x > -100 do
+    PanzerVor(v)
+    v.x = v.x - 10
+end";
 	}
 
 	// Use this for initialization
