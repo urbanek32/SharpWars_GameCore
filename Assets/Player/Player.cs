@@ -17,7 +17,7 @@ public class Player : NetworkBehaviour {
 
 	private Dictionary< ResourceType, int > resources, resourceLimits;
 	private Building tempBuilding;
-	private Unit tempCreator;
+	//private Unit tempCreator;
 	private bool findingPlacement = false;
 
 	// works like constructor
@@ -104,7 +104,7 @@ public class Player : NetworkBehaviour {
 	[ClientRpc]
     public void Rpc_TakeDamage(NetworkInstanceId ownerId, NetworkInstanceId targetId, int damage)
 	{
-		var go = GameObject.FindGameObjectsWithTag("Player");
+		/*var go = GameObject.FindGameObjectsWithTag("Player");
 		foreach(var g in go)
 		{
 		    var player = g.GetComponent<Player>();
@@ -126,33 +126,34 @@ public class Player : NetworkBehaviour {
 		            }
 		        }
 		    }
+		}*/
 
-			/*Unit u = g.GetComponent<Unit>();
-            if (u.netId.Equals(targetId))
-			{
-                u.TakeDamage(damage);
-                Debug.Log("HIT");
-                break;
-			}*/
-		}
+        var target = ClientScene.objects[targetId].gameObject.GetComponent<WorldObject>();
+
+        if (target is Resource)
+            return;
+
+        target.TakeDamage(damage);
+        Debug.Log("HIT");
+
+
 	}
 
     [Command]
-    public void Cmd_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId targetId)
+    public void Cmd_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId ownerId, NetworkInstanceId targetId)
     {
-        Rpc_SpawnBullet(name, newPos, newRot, targetId);
+        Rpc_SpawnBullet(name, newPos, newRot, ownerId, targetId);
     }
 
-    [ClientRpc]
-    public void Rpc_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId targetId)
+    //[ClientRpc]
+    public void Rpc_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId ownerId, NetworkInstanceId targetId)
     {
         GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject(name), newPos, newRot);
         Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
         projectile.SetRange(20);
         projectile.SetTarget(targetId);
-        //NetworkServer.Spawn(gameObject);
-        //projectile.SetTarget(target);
-        //projectile.SetOwner(this);
+        projectile.SetOwner(ownerId);
+        NetworkServer.Spawn(gameObject);
     }
 
 	[Command]
@@ -193,7 +194,7 @@ public class Player : NetworkBehaviour {
 		tempBuilding = newBuilding.GetComponent< Building >();
 		if (tempBuilding) 
 		{
-			tempCreator = creator;
+			//tempCreator = creator;
 			findingPlacement = true;
 			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
 			tempBuilding.SetColliders(false);
@@ -376,7 +377,7 @@ public class Player : NetworkBehaviour {
 		findingPlacement = false;
 		Destroy(tempBuilding.gameObject);
 		tempBuilding = null;
-		tempCreator = null;
+		//tempCreator = null;
 	}
 
 	

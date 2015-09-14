@@ -18,10 +18,16 @@ public class Projectile : NetworkBehaviour
     [SyncVar]
     private NetworkInstanceId ownerId;
 
+    [SyncVar] private Vector3 syncPosition;
+    [SyncVar] private Quaternion syncRotation;
+
     void Start()
     {
-        Debug.Log(transform.position + " " + transform.rotation);
+        //Debug.Log(transform.position + " " + transform.rotation);
         target = ClientScene.objects[targetId].gameObject.GetComponent<WorldObject>();
+        owner = ClientScene.objects[ownerId].gameObject.GetComponent<WorldObject>();
+        syncPosition = transform.position;
+        syncRotation = owner.transform.rotation;
     }
 
 	// Update is called once per frame
@@ -35,9 +41,23 @@ public class Projectile : NetworkBehaviour
 
 		if(range > 0)
 		{
-			float positionChange = Time.deltaTime * velocity;
-			range -= positionChange;
-			transform.position += (positionChange * transform.forward);
+			
+
+		    if (isServer)
+		    {
+                float positionChange = Time.deltaTime * velocity;
+                range -= positionChange;
+                transform.position += (positionChange * transform.forward);
+
+		        syncPosition = transform.position;
+		        syncRotation = transform.rotation;
+		    }
+		    else
+		    {
+                transform.position = Vector3.MoveTowards(transform.position, syncPosition, Time.deltaTime * velocity);
+		        transform.rotation = syncRotation;
+		    }
+
 		}
 		else
 		{
@@ -49,40 +69,31 @@ public class Projectile : NetworkBehaviour
 
 	public void SetRange(float range)
 	{
-		this.range = range;
+		this.range = range + 3;
 	}
 
 	public void SetTarget(NetworkInstanceId targetId)
 	{
-		//this.target = target;
 	    this.targetId = targetId;
 	}
 
-	public void SetOwner(WorldObject owner)
+    public void SetOwner(NetworkInstanceId ownerId)
 	{
-		this.owner = owner;
-	    ownerId = owner.ownerId;
+	    this.ownerId = ownerId;
 	}
 
 
 
 	private bool HitSomething()
 	{
-		if(target && target.GetSelectionBounds().Contains(transform.position))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+	    return target && target.GetSelectionBounds().Contains(transform.position);
 	}
 
-	private void InflictDamage()
+    private void InflictDamage()
 	{
-		if(target)
+		if(target && isServer)
 		{
-			//owner.GetPlayer().Cmd_TakeDamage(target.ownerId, target.netId, damage);
+			owner.GetPlayer().Cmd_TakeDamage(target.ownerId, target.netId, damage);
 		}
 	}
 }
