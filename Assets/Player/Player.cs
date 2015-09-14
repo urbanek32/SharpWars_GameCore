@@ -178,7 +178,7 @@ public class Player : NetworkBehaviour {
 			if(wo.netId.Equals(id))
 			{
 				Unit unit = wo.GetComponent<Unit>();
-				unit.agent.Stop();
+				if(unit.agent.isActiveAndEnabled) unit.agent.Stop();
 				wo.transform.position = Vector3.MoveTowards(wo.transform.position, newPos, Time.deltaTime * unit.agent.speed);
 				wo.transform.rotation = Quaternion.Lerp(wo.transform.rotation, newRot, Time.deltaTime * unit.agent.angularSpeed);
 				break;
