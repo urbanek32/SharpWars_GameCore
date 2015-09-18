@@ -17,6 +17,9 @@ public class Unit : WorldObject {
 
 	public NavMeshAgent agent;
 
+    [SyncVar] public Vector3 BirthMoveTarget = Vector3.zero;
+    private bool _performBirthMove = true;
+
 
 	protected override void Awake() 
 	{
@@ -27,11 +30,22 @@ public class Unit : WorldObject {
 	{
 		base.Start();
 		agent = GetComponent<NavMeshAgent>();
+
+        if (BirthMoveTarget != Vector3.zero)
+        {
+            _performBirthMove = true;
+        }
 	}
 	
 	protected override void Update () 
 	{
 		base.Update();
+
+        if (_performBirthMove)
+	    {
+            _performBirthMove = false;
+            StartMove(BirthMoveTarget);
+	    }
 
 		if(rotating)
 		{
@@ -41,9 +55,7 @@ public class Unit : WorldObject {
 		}
 		else if(moving)
 		{
-
-			MakeMove();
-			//agent.SetDestination(destination);
+		    MakeMove();
 
 		}
 
@@ -80,13 +92,8 @@ public class Unit : WorldObject {
 
 	private void MakeMove()
 	{
-		//transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
-		//syncPos = transform.position;
 		player.Cmd_MoveUnit(GetComponent<WorldObject>().netId, transform.position, transform.rotation);
-		//agent.SetDestination(destination);
-		//if(transform.position == destination)
-		//Debug.Log(transform.position.magnitude);
-		//Debug.Log(agent.remainingDistance);
+
 		if(startPos.magnitude != transform.position.magnitude)
 		{
 			if(agent.velocity.magnitude <= 0.0f)
@@ -96,7 +103,7 @@ public class Unit : WorldObject {
 				//Debug.Log("Dojechalem");
 			}
 		}
-		CalculateBounds();
+		//CalculateBounds();
 	}
 
 	private void CalculateTargetDestination() 

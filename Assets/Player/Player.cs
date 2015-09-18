@@ -77,20 +77,16 @@ public class Player : NetworkBehaviour {
 	[Command] 
 	public void Cmd_AddUnit(NetworkInstanceId identity, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
 	{
-
-
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-		//Units units = GetComponentInChildren<Units>();
-		//newUnit.transform.parent = units.transform;
-	newUnit.GetComponent<WorldObject>().ownerId = this.netId;
-	NetworkServer.Spawn(newUnit);
+	    newUnit.GetComponent<WorldObject>().ownerId = this.netId;
+	    NetworkServer.Spawn(newUnit);
 		Unit unitObject = newUnit.GetComponent< Unit >();
+
 		if(unitObject)
 		{
-			//unitObject.SetBuilding(creator);
 			if(spawnPoint != rallyPoint)
 			{
-				unitObject.StartMove(rallyPoint);
+			    unitObject.BirthMoveTarget = rallyPoint;
 			}
 		}
 	}
@@ -104,30 +100,6 @@ public class Player : NetworkBehaviour {
 	[ClientRpc]
     public void Rpc_TakeDamage(NetworkInstanceId ownerId, NetworkInstanceId targetId, int damage)
 	{
-		/*var go = GameObject.FindGameObjectsWithTag("Player");
-		foreach(var g in go)
-		{
-		    var player = g.GetComponent<Player>();
-            //Debug.Log("player id: " + player.netId + "owner id: " + ownerId);
-		    if (player.netId.Equals(ownerId))
-		    {
-		        var units = player.GetComponentsInChildren<WorldObject>();
-                //Debug.Log("units: "+units.Length);
-		        foreach (var worldObject in units)
-		        {
-		            if(worldObject is Resource)
-                        continue;
-
-		            if (worldObject.netId.Equals(targetId))
-		            {
-                        //worldObject.TakeDamage(damage);
-                        Debug.Log("HIT");
-                        break;
-		            }
-		        }
-		    }
-		}*/
-
         var target = ClientScene.objects[targetId].gameObject.GetComponent<WorldObject>();
 
         if (target is Resource)
@@ -141,12 +113,6 @@ public class Player : NetworkBehaviour {
 
     [Command]
     public void Cmd_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId ownerId, NetworkInstanceId targetId)
-    {
-        Rpc_SpawnBullet(name, newPos, newRot, ownerId, targetId);
-    }
-
-    //[ClientRpc]
-    public void Rpc_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId ownerId, NetworkInstanceId targetId)
     {
         GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject(name), newPos, newRot);
         Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
