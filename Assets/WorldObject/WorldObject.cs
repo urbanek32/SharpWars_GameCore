@@ -13,6 +13,7 @@ public class WorldObject : MonoBehaviour {
 	public Texture2D buildImage;
 	public int cost, sellValue, hitPoints, maxHitPoints;
 	public string unitScript;
+    public int selectedScript; //which shall be performed
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 5.0f;
@@ -66,6 +67,7 @@ public class WorldObject : MonoBehaviour {
 		{
 			SetTeamColor();
 		}
+        selectedScript = -1;
 	}
 	
 	// Update is called once per frame
