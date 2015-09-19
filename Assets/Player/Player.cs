@@ -363,6 +363,19 @@ public class Player : NetworkBehaviour {
         }
     }
 
+    [Command]
+    public void Cmd_DecreaseResourceAmount(NetworkInstanceId resourceId, float amount)
+    {
+        NetworkIdentity resourceObject;
+        if (ClientScene.objects.TryGetValue(resourceId, out resourceObject))
+        {
+            var resource = resourceObject.gameObject.GetComponent<Resource>();
+            if (resource)
+            {
+                resource.Remove(amount);
+            }
+        }
+    }
 	
 	
 	

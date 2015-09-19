@@ -212,7 +212,7 @@ public class Harvester : Unit {
 		{
 			collect = capacity - currentLoad;
 		}
-		resourceDeposit.Remove(collect);
+        player.Cmd_DecreaseResourceAmount(resourceDeposit.netId, collect);
 		currentLoad += collect;
 	}
 

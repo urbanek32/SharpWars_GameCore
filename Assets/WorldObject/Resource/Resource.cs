@@ -2,6 +2,7 @@
 using System.Collections;
 
 using RTS;
+using UnityEngine.Networking;
 
 public class Resource : WorldObject 
 {
@@ -9,7 +10,7 @@ public class Resource : WorldObject
 	public float capacity;
 
 	// Variables accessible by subclass
-	protected float amountLeft;
+	[SyncVar]protected float amountLeft;
 	protected ResourceType resourceType;
 
 
