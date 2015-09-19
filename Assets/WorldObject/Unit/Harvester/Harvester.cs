@@ -48,11 +48,7 @@ public class Harvester : Unit {
 		{
 			if(harvesting || emptying)
 			{
-				Arms[] arms = GetComponentsInChildren< Arms >();
-				foreach(Arms arm in arms)
-				{
-					arm.GetComponentInChildren<Renderer>().enabled = true;
-				}
+                player.Cmd_SetHarvesterArms(netId, true);
 
 				if(harvesting)
 				{
@@ -65,10 +61,8 @@ public class Harvester : Unit {
 						currentLoad = Mathf.Floor(currentLoad);
 						harvesting = false;
 						emptying = true;
-						foreach(Arms arm in arms) 
-						{
-							arm.GetComponent<Renderer>().enabled = false;
-						}
+	
+                        player.Cmd_SetHarvesterArms(netId, false);
 						agent.avoidancePriority = 50;
 						FindClosestRafinery();
 						StartMove(resourceStore.transform.position, resourceStore.gameObject);
@@ -81,10 +75,7 @@ public class Harvester : Unit {
 					if(currentLoad <= 0)
 					{
 						emptying = false;
-						foreach(Arms arm in arms) 
-						{
-							arm.GetComponent<Renderer>().enabled = false;
-						}
+                        player.Cmd_SetHarvesterArms(netId, false);
 
 						if(!resourceDeposit.isEmpty() && resourceDeposit)
 						{
@@ -209,11 +200,7 @@ public class Harvester : Unit {
 		harvesting = false;
 		emptying = false;
 
-		Arms[] arms = GetComponentsInChildren< Arms >();
-		foreach(Arms arm in arms)
-		{
-			arm.GetComponent<Renderer>().enabled = false;
-		}
+        player.Cmd_SetHarvesterArms(netId, false);
 	}
 
 	private void Collect()

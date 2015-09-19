@@ -346,6 +346,23 @@ public class Player : NetworkBehaviour {
 		//tempCreator = null;
 	}
 
+    [Command]
+    public void Cmd_SetHarvesterArms(NetworkInstanceId objId, bool state)
+    {
+        Rpc_SetHarvesterArms(objId, state);
+    }
+
+    [ClientRpc]
+    public void Rpc_SetHarvesterArms(NetworkInstanceId objId, bool state)
+    {
+        var harvester = ClientScene.objects[objId].gameObject.GetComponent<Harvester>();
+        var arms = harvester.GetComponentsInChildren<Arms>();
+        foreach (var arm in arms)
+        {
+            arm.GetComponent<Renderer>().enabled = state;
+        }
+    }
+
 	
 	
 	
