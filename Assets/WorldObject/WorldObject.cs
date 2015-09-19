@@ -18,6 +18,7 @@ public class WorldObject : NetworkBehaviour {
 	public int cost, sellValue;
     [SyncVar]public int hitPoints, maxHitPoints;
     public string unitScript;
+    public int selectedScript; //which shall be performed
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 5.0f;
@@ -76,6 +77,7 @@ end";
 		{
 			SetTeamColor();
 		}
+        selectedScript = -1;
 	}
 	
 	// Update is called once per frame
