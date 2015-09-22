@@ -15,8 +15,6 @@ public class Harvester : Unit {
 	private Resource resourceDeposit;
 	private float currentDeposit = 0.0f;
 
-
-
 	// Game Engine methods, all can be overridden by subclass
 
 	protected override void Start()

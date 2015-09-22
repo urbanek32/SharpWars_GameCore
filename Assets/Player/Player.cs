@@ -376,6 +376,19 @@ public class Player : NetworkBehaviour {
             }
         }
     }
+
+    public bool IsDead()
+    {
+        var buildings = GetComponentsInChildren<Building>();
+        var units = GetComponentsInChildren<Unit>();
+        if (buildings != null && buildings.Length > 0) return false;
+        return units == null || units.Length <= 0;
+    }
+
+    public int GetResourceAmount(ResourceType type)
+    {
+        return resources[type];
+    }
 	
 	
 	

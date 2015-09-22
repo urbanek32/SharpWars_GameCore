@@ -6,11 +6,14 @@ namespace RTS {
 	public static class ResourceManager 
 	{
 		private static GUISkin selectBoxSkin;
-		private static Vector3 invalidPosition = new Vector3(-99999, -99999, -99999);
-		private static Bounds invalidBounds = new Bounds(new Vector3(-99999, -99999, -99999), new Vector3(0,0,0));
+		private static readonly Vector3 invalidPosition = new Vector3(-99999, -99999, -99999);
+		private static readonly Bounds invalidBounds = new Bounds(new Vector3(-99999, -99999, -99999), new Vector3(0,0,0));
 		private static GameObjectList gameObjectList;
 		private static Texture2D healthyTexture, damagedTexture, criticalTexture;
 		private static Dictionary< ResourceType, Texture2D > resourceHealthBarTextures;
+        private static float buttonHeight = 40;
+        private static float headerHeight = 32, headerWidth = 256;
+        private static float textHeight = 25, padding = 10;
 
 		public static int ScrollWidth { get { return 15; } }
 		public static float ScrollSpeed { get { return 100; } }
@@ -79,5 +82,18 @@ namespace RTS {
 		{
 			resourceHealthBarTextures = images;
 		}
+        
+        public static float PauseMenuHeight { get { return headerHeight + 2 * buttonHeight + 4 * padding; } }
+        public static float MenuWidth { get { return headerWidth + 2 * padding; } }
+        public static float ButtonHeight { get { return buttonHeight; } }
+        public static float ButtonWidth { get { return (MenuWidth - 3 * padding) / 2; } }
+        public static float HeaderHeight { get { return headerHeight; } }
+        public static float HeaderWidth { get { return headerWidth; } }
+        public static float TextHeight { get { return textHeight; } }
+        public static float Padding { get { return padding; } }
+
+        public static bool MenuOpen { get; set; }
+        public static string LevelName { get; set; }
+
 	}
 }
