@@ -12,31 +12,37 @@ public class GameManager : MonoBehaviour
     private HUD hud;
 
 
-	void Awake () 
-    {
-	    if (!created)
-	    {
-	        DontDestroyOnLoad(transform.gameObject);
-	        created = true;
-	        initialised = true;
-	    }
-	    else
-	    {
-	        Destroy(this.gameObject);
-	    }
-
-	    if (initialised)
-	    {
-	        LoadDetails();
-	    }
+	void Awake ()
+	{
+	    /*Initialise();*/
 	}
 
-    void OnLevelWasLoaded()
+    public void Initialise()
     {
+        Debug.Log("Init game managera");
+        if (!created)
+        {
+            DontDestroyOnLoad(transform.gameObject);
+            created = true;
+            initialised = true;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
+
         if (initialised)
         {
             LoadDetails();
         }
+    }
+
+    void OnLevelWasLoaded()
+    {
+        /*if (initialised)
+        {
+            LoadDetails();
+        }*/
     }
 
     private void LoadDetails()
@@ -63,7 +69,6 @@ public class GameManager : MonoBehaviour
 	    if (victoryConditions == null) return;
 	    foreach (var victoryCondition in victoryConditions.Where(victoryCondition => victoryCondition.GameFinished()))
 	    {
-            Debug.Log("Ktos wygral");
 	        ResultsScreen resultsScreen = hud.GetComponent<ResultsScreen>();
 	        resultsScreen.SetMetVictoryCondition(victoryCondition);
 	        resultsScreen.enabled = true;
