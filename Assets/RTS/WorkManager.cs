@@ -71,6 +71,45 @@ namespace RTS
 			return null;
 		}
 
+        public static List<WorldObject> FindNearbyObjects(Vector3 position, float range)
+        {
+            Collider[] hitColliders = Physics.OverlapSphere(position, range);
+            HashSet<int> nearbyObjectIds = new HashSet<int>();
+            List<WorldObject> nearbyObjects = new List<WorldObject>();
+            for (int i = 0; i < hitColliders.Length; i++)
+            {
+                Transform parent = hitColliders[i].transform.parent;
+                if (parent)
+                {
+                    WorldObject parentObject = parent.GetComponent<WorldObject>();
+                    // TODO: trzeba bedzie zastąpić to NetworkID w multi
+                    /*if (parentObject && !nearbyObjectIds.Contains(parentObject.ObjectId))
+                    {
+                        nearbyObjectIds.Add(parentObject.ObjectId);
+                        nearbyObjects.Add(parentObject);
+                    }*/
+                }
+            }
+            return nearbyObjects;
+        }
+
+        public static WorldObject FindNearestWorldObjectInListToPosition(List<WorldObject> objects, Vector3 position)
+        {
+            if (objects == null || objects.Count == 0) return null;
+            WorldObject nearestObject = objects[0];
+            float distanceToNearestObject = Vector3.SqrMagnitude(position - nearestObject.transform.position);
+            for (int i = 1; i < objects.Count; i++)
+            {
+                float distanceToObject = Vector3.SqrMagnitude(position - objects[i].transform.position);
+                if (distanceToObject < distanceToNearestObject)
+                {
+                    distanceToNearestObject = distanceToObject;
+                    nearestObject = objects[i];
+                }
+            }
+            return nearestObject;
+        }
+
 
 
 

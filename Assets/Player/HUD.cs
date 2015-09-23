@@ -30,7 +30,10 @@ public class HUD : MonoBehaviour {
 	private int buildAreaHeight = 0;
 	private CursorState previousCursorState;
 
+    private static GUIStyle comboboxStyle = new GUIStyle();
+    private ComboBox scriptSelectionBox = new ComboBox(new Rect(5, 20, 150, 20), new GUIContent("Wybierz skrypt"), null, comboboxStyle);
 	private bool scriptWindowOpen = false;
+    private Rect scriptWindowRect = new Rect(100, 100, 400, 240);
 	//private string scriptString = "";
 
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
@@ -41,6 +44,8 @@ public class HUD : MonoBehaviour {
 	private const int SCROLL_BAR_WIDTH = 22;
 	private const int BUILD_IMAGE_PADDING = 8;
 
+    //HOOK
+    private int tabInsertPos = -1;
 
 	// Use this for initialization
 	void Start () 
@@ -86,6 +91,30 @@ public class HUD : MonoBehaviour {
 			}
 		}
 		ResourceManager.SetResourceHealthBarTextures(resourceHealthBarTextures);
+
+        Texture2D wh = new Texture2D(1, 1);
+        wh.SetPixel(0, 0, Color.white);
+        wh.Apply();
+        Texture2D bl = new Texture2D(1, 1);
+        bl.SetPixel(0, 0, Color.black);
+        bl.Apply();
+
+
+        //Set ComboBox style
+        comboboxStyle.active.textColor =
+        comboboxStyle.onNormal.textColor =
+        comboboxStyle.normal.textColor = Color.white;
+        comboboxStyle.onActive.background =
+        comboboxStyle.onNormal.background =
+        comboboxStyle.normal.background = bl;
+        comboboxStyle.onHover.background =
+        comboboxStyle.hover.background = wh;
+        comboboxStyle.onHover.textColor =
+        comboboxStyle.hover.textColor = Color.black;
+        comboboxStyle.padding.left =
+        comboboxStyle.padding.right =
+        comboboxStyle.padding.top =
+        comboboxStyle.padding.bottom = 4;
 	}
 	
 	// called each frame to handle any drawing our script is responsible for
@@ -113,6 +142,16 @@ public class HUD : MonoBehaviour {
 		Vector3 mousePos = Input.mousePosition;
 		bool insideWidth = mousePos.x >= 0 && mousePos.x <= Screen.width - ORDERS_BAR_WIDTH;
 		bool insideHeight = mousePos.y >= 0 && mousePos.y <= Screen.height - RESOURCE_BAR_HEIGHT;
+
+        //is in script window?
+        if (insideHeight && insideWidth && scriptWindowOpen && player.SelectedObject != null)
+        {
+            insideWidth = mousePos.x >= scriptWindowRect.x && mousePos.x <= scriptWindowRect.xMax;
+            insideHeight = mousePos.y <= Screen.height - scriptWindowRect.y && mousePos.y >= Screen.height - scriptWindowRect.yMax;
+
+            return !(insideWidth && insideHeight);
+        }
+
 		return insideWidth && insideHeight;
 	}
 
@@ -378,11 +417,39 @@ public class HUD : MonoBehaviour {
 	{
 		if(scriptWindowOpen && player.SelectedObject)
 		{
-			GUI.SetNextControlName("ScriptTextArea");
-			player.SelectedObject.unitScript = GUI.TextArea(new Rect(Screen.width/2, 50, 400, 200), player.SelectedObject.unitScript);
-			GUI.FocusControl("ScriptTextArea");
+            if (tabInsertPos > -1)
+            {
+                player.SelectedObject.unitScript = player.SelectedObject.unitScript.Insert(tabInsertPos, "\t");
+                tabInsertPos = -1;
+            }
+
+            //Hook for GUI.TextArea to force adding horizontal tab
+            if (Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Tab)
+            {
+                TextEditor editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+                tabInsertPos = editor.pos;
+                editor.pos++;
+                editor.selectPos++;
+            }
+
+            scriptWindowRect = GUI.Window(0, scriptWindowRect, DrawDraggableScriptWindow, "Script window");
 		}
 	}
+
+    private void DrawDraggableScriptWindow(int wid)
+    {
+        if (!scriptSelectionBox.IsClicked())
+        {
+            GUI.SetNextControlName("ScriptTextArea");
+            player.SelectedObject.unitScript = GUI.TextArea(new Rect(0, 40, 400, 200), player.SelectedObject.unitScript);
+            GUI.FocusControl("ScriptTextArea");
+        }
+
+        if (player.SelectedObject != null && player.SelectedObject.GetPlayer() == player)
+            scriptSelectionBox.Show(player.scriptList.ToArray(), player);
+
+        GUI.DragWindow();
+    }
 
 	private int MaxNumRows(int areaHeight)
 	{
@@ -479,7 +546,6 @@ public class HUD : MonoBehaviour {
         }
         GUI.EndGroup();
     }
-
 
 
 

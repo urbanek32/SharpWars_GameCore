@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 
 using RTS;
+using STL;
 
 public class Player : NetworkBehaviour {
 
@@ -19,6 +20,8 @@ public class Player : NetworkBehaviour {
 	private Building tempBuilding;
 	//private Unit tempCreator;
 	private bool findingPlacement = false;
+
+    public List<Pair<string, string>> scriptList = new List<Pair<string,string>>();
 
 	// works like constructor
 	void Awake() 
@@ -37,6 +40,17 @@ public class Player : NetworkBehaviour {
         // gowno potrzebne, zeby dac graczowi budynek startowy
         if(isLocalPlayer)
             Cmd_SpawnStartBuilding();
+
+        /* TO DEAL WITH
+         * HARDCODED EXAMPLE LIST
+         */
+        scriptList.Add(new Pair<string, string>("PanzerVor", @"v = Vector3(0, 0, -10)
+while v.x > -100 do
+    PanzerVor(v)
+    v.x = v.x - 10
+end"));
+        scriptList.Add(new Pair<string, string>("Janusz Testowy", "Debug.Log(\"Czesc Jestem Janusz\")"));
+        scriptList.Add(new Pair<string, string>("Pusta #3", ""));
 	}
 	
 	// Update is called once per frame
@@ -77,6 +91,7 @@ public class Player : NetworkBehaviour {
 	[Command] 
 	public void Cmd_AddUnit(NetworkInstanceId identity, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
 	{
+		Units units = GetComponentInChildren< Units >();
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
 	    newUnit.GetComponent<WorldObject>().ownerId = this.netId;
 	    NetworkServer.Spawn(newUnit);
@@ -165,6 +180,7 @@ public class Player : NetworkBehaviour {
 			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
 			tempBuilding.SetColliders(false);
 			tempBuilding.SetPlayingArea(playingArea);
+            tempBuilding.hitPoints = 0;
 		} 
 		else 
 		{
@@ -225,7 +241,6 @@ public class Player : NetworkBehaviour {
 		return canPlace;
 		
 	}
-
 
 	public void StartConstruction()
 	{
