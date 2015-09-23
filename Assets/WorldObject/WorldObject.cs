@@ -550,11 +550,6 @@ end";
 		return attacking;
 	}
 
-    public Player GetPlayer()
-    {
-        return player;
-    }
-
 
 
 

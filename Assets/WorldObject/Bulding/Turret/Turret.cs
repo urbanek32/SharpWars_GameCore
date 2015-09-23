@@ -49,7 +49,7 @@ public class Turret : Building
         GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TurretProjectile"), spawnPoint, transform.rotation);
         Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
         projectile.SetRange(0.9f * weaponRange);
-        projectile.SetTarget(target);
+        projectile.SetTarget(target.netId);
     }
 
     protected override void AimAtTarget()

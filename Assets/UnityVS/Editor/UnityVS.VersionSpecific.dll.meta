@@ -1,12 +1,5 @@
 fileFormatVersion: 2
-<<<<<<< HEAD
 guid: b7f430519b43b62488d6128b1fd2ae78
-timeCreated: 1442257986
-=======
-guid: ef41fbce628df7146bf51bf25d903e83
-timeCreated: 1440864787
->>>>>>> PG-213: Podstawowa architektura do obsługi końca gry i warunków zwycięstwa
-licenseType: Free
 PluginImporter:
   serializedVersion: 1
   iconMap: {}
