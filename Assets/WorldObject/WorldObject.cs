@@ -18,9 +18,11 @@ public class WorldObject : NetworkBehaviour {
 	public int cost, sellValue;
     [SyncVar]public int hitPoints, maxHitPoints;
     public string unitScript;
+    public int selectedScript; //which shall be performed
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 5.0f;
+    public float detectionRange = 20.0f;
 
 	protected Player player;
 	protected string[] actions = {};
@@ -33,9 +35,11 @@ public class WorldObject : NetworkBehaviour {
 	protected bool attacking = false;
 	protected bool movingIntoPosition = false;
 	protected bool aiming = false;
+    protected List<WorldObject> nearbyObjects;
 
 	private List< Material > oldMaterials = new List< Material >();
 	private float currentWeaponChargeTime;
+    private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
 
 
 	//splited script <blocking func part, execution checker that return true or false>
@@ -73,12 +77,18 @@ end";
 		{
 			SetTeamColor();
 		}
+        selectedScript = -1;
 	}
 	
 	// Update is called once per frame
 	protected virtual void Update () 
 	{
         ProcessScriptQueue();
+
+        if (ShouldMakeDecision())
+        {
+            DecideWhatToDo();
+        }
 
 		currentWeaponChargeTime += Time.deltaTime;
 		if(attacking && !movingIntoPosition && !aiming)
@@ -94,7 +104,7 @@ end";
 
 	protected virtual void OnGUI()
 	{
-		if(currentlySelected)
+		if(currentlySelected && !ResourceManager.MenuOpen)
 		{
 			DrawSelection();
 		}
@@ -171,6 +181,40 @@ end";
 		currentWeaponChargeTime = 0.0f;
 		// this behaviour needs to be specified by a specific object
 	}
+
+    protected virtual bool ShouldMakeDecision()
+    {
+        if(!attacking && !movingIntoPosition && !aiming)
+        {
+            // we are not doing anything at the moment
+            if(timeSinceLastDecision > timeBetweenDecisions)
+            {
+                timeSinceLastDecision = 0.0f;
+                return true;
+            }
+            timeSinceLastDecision += Time.deltaTime;
+        }
+        return false;
+    }
+
+    protected virtual void DecideWhatToDo()
+    {
+        //determine what should be done by the world object at the current point in time
+        Vector3 currentPosition = transform.position;
+        nearbyObjects = WorkManager.FindNearbyObjects(currentPosition, detectionRange);
+        if (CanAttack())
+        {
+            List<WorldObject> enemyObjects = new List<WorldObject>();
+            foreach (WorldObject nearbyObject in nearbyObjects)
+            {
+                Resource resource = nearbyObject.GetComponent<Resource>();
+                if (resource) continue;
+                if (nearbyObject.GetPlayer() != player) enemyObjects.Add(nearbyObject);
+            }
+            WorldObject closestObject = WorkManager.FindNearestWorldObjectInListToPosition(enemyObjects, currentPosition);
+            if (closestObject) BeginAttack(closestObject);
+        }
+    }
 
 
 
