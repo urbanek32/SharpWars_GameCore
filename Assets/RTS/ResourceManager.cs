@@ -28,6 +28,15 @@ namespace RTS {
 		public static Vector3 InvalidPosition { get { return invalidPosition; } }
 		public static GUISkin SelectBoxSkin { get { return selectBoxSkin; } }
 
+        public static float PauseMenuHeight { get { return headerHeight + 2 * buttonHeight + 4 * padding; } }
+        public static float MenuWidth { get { return headerWidth + 2 * padding; } }
+        public static float ButtonHeight { get { return buttonHeight; } }
+        public static float ButtonWidth { get { return (MenuWidth - 3 * padding) / 2; } }
+        public static float HeaderHeight { get { return headerHeight; } }
+        public static float HeaderWidth { get { return headerWidth; } }
+        public static float TextHeight { get { return textHeight; } }
+        public static float Padding { get { return padding; } }
+
 		public static void StoreSelectBoxItems(GUISkin skin, Texture2D healthy, Texture2D damaged, Texture2D critical)
 		{
 			selectBoxSkin = skin;
@@ -82,15 +91,6 @@ namespace RTS {
 		{
 			resourceHealthBarTextures = images;
 		}
-        
-        public static float PauseMenuHeight { get { return headerHeight + 2 * buttonHeight + 4 * padding; } }
-        public static float MenuWidth { get { return headerWidth + 2 * padding; } }
-        public static float ButtonHeight { get { return buttonHeight; } }
-        public static float ButtonWidth { get { return (MenuWidth - 3 * padding) / 2; } }
-        public static float HeaderHeight { get { return headerHeight; } }
-        public static float HeaderWidth { get { return headerWidth; } }
-        public static float TextHeight { get { return textHeight; } }
-        public static float Padding { get { return padding; } }
 
         public static bool MenuOpen { get; set; }
         public static string LevelName { get; set; }

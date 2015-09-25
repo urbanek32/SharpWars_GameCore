@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
         /*if (initialised)
         {
             LoadDetails();
+            Time.timeScale = 1.0f;
+            ResourceManager.MenuOpen = false;
         }*/
     }
 

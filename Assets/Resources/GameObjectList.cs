@@ -22,13 +22,15 @@ public class GameObjectList : MonoBehaviour
 
 			ScriptManager.Init();
             // Non-blocking functions
+            // Register CompareF(val1f, val2f)
+            // Compares 2 numbers up to 1 digit after dot
+            ScriptManager.RegisterNBCustomFuntion("CompareF", "function CompareF(val1, val2)\n return string.format(\"%.1f\", val1) == string.format(\"%.1f\", val2)\n end");
 			// Register IsDestinationReached
-			ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n if this:isUnit() then\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if dst.x == src.x and dst.z == src.z then\n		return true\n	else\n		return false\n	end\n else return true\n end \n end");
+            ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n if this:isUnit() then\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if CompareF(dst.x, src.x) and CompareF(dst.z, src.z) then\n		return true\n	else\n		return false\n	end\n else return true\n end \n end");
 			
             // Blocking functions
             // Register PanzerVor
-			ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n if this:isUnit() then this:StartMove(pos)\n end end", "IsDestinationReached");
-
+            ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n if this:isUnit() then this:StartMove(pos)\n end end", "IsDestinationReached");
 		} 
 		else 
 		{

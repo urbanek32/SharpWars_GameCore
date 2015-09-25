@@ -67,6 +67,12 @@ public class Unit : WorldObject {
 		base.OnGUI();
 	}
 
+    protected override bool ShouldMakeDecision()
+    {
+        if (moving || rotating) return false;
+        return base.ShouldMakeDecision();
+    }
+
 
 	 
 
