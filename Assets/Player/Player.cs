@@ -91,7 +91,6 @@ end"));
 	[Command] 
 	public void Cmd_AddUnit(NetworkInstanceId identity, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
 	{
-		Units units = GetComponentInChildren< Units >();
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
 	    newUnit.GetComponent<WorldObject>().ownerId = this.netId;
 	    NetworkServer.Spawn(newUnit);
@@ -122,8 +121,6 @@ end"));
 
         target.TakeDamage(damage);
         Debug.Log("HIT");
-
-
 	}
 
     [Command]
