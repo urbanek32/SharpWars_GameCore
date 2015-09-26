@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
+using UnityEngine.Networking;
 
 using RTS;
 
@@ -9,17 +10,22 @@ public class GameManager : MonoBehaviour
     private static bool created = false;
     private bool initialised = false;
     private VictoryCondition[] victoryConditions;
-    private HUD hud;
+    private Player _localPlayer;
 
 
 	void Awake ()
 	{
-	    /*Initialise();*/
+	    
 	}
+
+    void Start()
+    {
+        Initialise();
+    }
 
     public void Initialise()
     {
-        Debug.Log("Init game managera");
+        Debug.Log("Game Manager Init");
         if (!created)
         {
             DontDestroyOnLoad(transform.gameObject);
@@ -28,6 +34,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            Debug.Log("Game Manager Destroyed");
             Destroy(this.gameObject);
         }
 
@@ -37,24 +44,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void OnLevelWasLoaded()
+    public void LoadDetails()
     {
-        /*if (initialised)
-        {
-            LoadDetails();
-            Time.timeScale = 1.0f;
-            ResourceManager.MenuOpen = false;
-        }*/
-    }
+        Debug.Log("Game Manager LoadDetails");
 
-    private void LoadDetails()
-    {
         var players = GameObject.FindObjectsOfType(typeof(Player)) as Player[];
         if (players == null) return;
 
-        foreach (var player in players.Where(player => player.human))
+        Debug.LogFormat("Game Manager Players: {0}", players.Length);
+        foreach (var player in players.Where(player => player.isLocalPlayer))
         {
-            hud = player.GetComponentInChildren<HUD>();
+            _localPlayer = player;
+            break;
         }
 
         victoryConditions = GameObject.FindObjectsOfType(typeof(VictoryCondition)) as VictoryCondition[];
@@ -68,16 +69,15 @@ public class GameManager : MonoBehaviour
 	
 	void Update ()
 	{
+	    if (!initialised || !_localPlayer)
+	    {
+	        return;
+	    }
+
 	    if (victoryConditions == null) return;
 	    foreach (var victoryCondition in victoryConditions.Where(victoryCondition => victoryCondition.GameFinished()))
 	    {
-	        ResultsScreen resultsScreen = hud.GetComponent<ResultsScreen>();
-	        resultsScreen.SetMetVictoryCondition(victoryCondition);
-	        resultsScreen.enabled = true;
-	        Time.timeScale = 0.0f;
-	        Cursor.visible = true;
-	        ResourceManager.MenuOpen = true;
-	        hud.enabled = false;
+            _localPlayer.Cmd_PlayerWin(_localPlayer.netId, victoryCondition.GetDescription());
 	    }
 	}
 }

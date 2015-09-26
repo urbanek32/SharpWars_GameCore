@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 
 using RTS;
+using UnityEngine.Networking;
 
 
 public class HUD : MonoBehaviour {
@@ -125,10 +126,15 @@ public class HUD : MonoBehaviour {
 	{
 		if(player && player.human)
 		{
-			DrawOrdersBar();
-			DrawResourceBar();
-			DrawMouseCursor();
-			DrawScriptWindow();
+            DrawMouseCursor();
+
+		    if (ResourceManager.MenuOpen)
+		    {
+		        return;
+		    }
+		    DrawOrdersBar();
+		    DrawResourceBar();
+		    DrawScriptWindow();
 		}
 	}
 
@@ -220,6 +226,18 @@ public class HUD : MonoBehaviour {
 		return activeCursorState;
 	}
 
+    public void DisplayResultScreen(NetworkInstanceId playerId, string descriptionWon)
+    {
+        var resultsScreen = GetComponent<ResultsScreen>();
+        //resultsScreen.SetMetVictoryCondition(victoryCondition);
+        resultsScreen.DescriptionWin = descriptionWon;
+        resultsScreen.PlayerWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>().username;
+        resultsScreen.enabled = true;
+        Time.timeScale = 0.0f;
+        Cursor.visible = true;
+        ResourceManager.MenuOpen = true;
+        this.enabled = false;
+    }
 
 
 

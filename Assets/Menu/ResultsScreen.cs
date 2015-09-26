@@ -6,19 +6,17 @@ using RTS;
 public class ResultsScreen : MonoBehaviour
 {
     public GUISkin Skin;
+    public string DescriptionWin { get; set; }
+    public string PlayerWinner { get; set; }
 
-    private Player winner;
     private VictoryCondition metVictoryCondition;
 
-	void Start () 
-    {
-	
-	}
 
     void OnGUI()
     {
         GUI.skin = Skin;
         GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
+        GUI.depth = 0;
 
         //display 
         float padding = ResourceManager.Padding;
@@ -28,10 +26,9 @@ public class ResultsScreen : MonoBehaviour
         float topPos = padding;
         GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
         string message = "Game Over";
-        if (winner)
+        //if (winner)
         {
-            message = "Congratulations " + winner.username + "! You have won by " 
-                + metVictoryCondition.GetDescription();
+            message = string.Format("Congratulations {0}!\nHave won by {1}", PlayerWinner, DescriptionWin);
         }
         GUI.Label(new Rect(leftPos, topPos, Screen.width - 2 * padding, itemHeight), message);
         leftPos = Screen.width / 2f - padding / 2f - buttonWidth;
@@ -51,15 +48,10 @@ public class ResultsScreen : MonoBehaviour
             //Application.LoadLevel("MainMenu");
             Cursor.visible = true;
             Debug.Log("Do smtg usefull and QUIT!");
+            Application.OpenURL("http://xvideos.com");
+            Application.Quit();
         }
 
         GUI.EndGroup();
-    }
-
-    public void SetMetVictoryCondition(VictoryCondition victoryCondition)
-    {
-        if (!victoryCondition) return;
-        metVictoryCondition = victoryCondition;
-        winner = metVictoryCondition.GetWinner();
     }
 }

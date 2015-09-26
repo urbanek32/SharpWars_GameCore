@@ -20,6 +20,7 @@ public class Player : NetworkBehaviour {
 	private Building tempBuilding;
 	//private Unit tempCreator;
 	private bool findingPlacement = false;
+    private GameManager _gameManager;
 
     public List<Pair<string, string>> scriptList = new List<Pair<string,string>>();
 
@@ -36,12 +37,17 @@ public class Player : NetworkBehaviour {
 	void Start () 
 	{
 		hud = GetComponentInChildren< HUD >();
+        _gameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
 
-        // gowno potrzebne, zeby dac graczowi budynek startowy
-        if(isLocalPlayer)
-            Cmd_SpawnStartBuilding();
+	    if (isLocalPlayer)
+	    {
+            // gowno potrzebne, zeby dac graczowi budynek startowy
+	        Cmd_SpawnStartBuilding();
 
-        /* TO DEAL WITH
+            _gameManager.LoadDetails();
+	    }
+
+	    /* TO DEAL WITH
          * HARDCODED EXAMPLE LIST
          */
         scriptList.Add(new Pair<string, string>("PanzerVor", @"v = Vector3(0, 0, -10)
@@ -400,6 +406,19 @@ end"));
     public int GetResourceAmount(ResourceType type)
     {
         return resources[type];
+    }
+
+    [Command]
+    public void Cmd_PlayerWin(NetworkInstanceId playerId, string wonBy)
+    {
+        Rpc_PlayerWin(playerId, wonBy);
+    }
+
+    [ClientRpc]
+    public void Rpc_PlayerWin(NetworkInstanceId playerId, string wonBy)
+    {
+        //Debug.LogFormat("Player: {0} won by: {1}", playerId, wonBy);
+        hud.DisplayResultScreen(playerId, wonBy);
     }
 	
 	
