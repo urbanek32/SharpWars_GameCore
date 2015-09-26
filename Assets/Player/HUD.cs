@@ -464,6 +464,31 @@ public class HUD : MonoBehaviour {
             GUI.SetNextControlName("ScriptTextArea");
             player.SelectedObject.unitScript = GUI.TextArea(new Rect(0, 40, 400, 200), player.SelectedObject.unitScript);
             GUI.FocusControl("ScriptTextArea");
+
+            //create new script
+            if (GUI.Button(new Rect(165, 20, 75, 20), "Nowy"))
+            {
+                //TO DO
+            }
+
+            //save script to current selection
+            if (GUI.Button(new Rect(240, 20, 75, 20), "Zapisz"))
+            {
+                if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
+                {
+                    player.scriptList[scriptSelectionBox.SelectedItemIndex].Second = player.SelectedObject.unitScript;
+                }
+            }
+
+            //delete selected script
+            if (GUI.Button(new Rect(315, 20, 75, 20), "Usuń"))
+            {
+                if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
+                {
+                    player.scriptList.RemoveAt(scriptSelectionBox.SelectedItemIndex);
+                    scriptSelectionBox.Deselect(player);
+                }
+            }
         }
 
         if (player.SelectedObject != null && player.SelectedObject.GetPlayer() == player)
