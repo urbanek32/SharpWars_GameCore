@@ -57,6 +57,15 @@ public class WorldObject : NetworkBehaviour {
         }
     }
 
+    public void stopScript()
+    {
+        scriptExecutionQueue.Clear();
+    }
+
+    public bool isExecutingScript()
+    {
+        return scriptExecutionQueue.Count > 0;
+    }
 
 	protected virtual void Awake()
 	{

@@ -44,6 +44,9 @@ public class HUD : MonoBehaviour {
 	private const int SCROLL_BAR_WIDTH = 22;
 	private const int BUILD_IMAGE_PADDING = 8;
 
+    public const string STR_PROGRAM_OBJECT = "Zaprogramuj\nobiekt";
+    public const string STR_STOP_SCRIPT_EXECUTION = "Zatrzymaj\nprogram";
+
     //HOOK
     private int tabInsertPos = -1;
 
@@ -540,9 +543,16 @@ public class HUD : MonoBehaviour {
         buttons.alignment = TextAnchor.MiddleCenter;
         GUI.skin.button = buttons;
         GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 64, ORDERS_BAR_WIDTH, 64));
-        if(GUI.Button(new Rect(22, 10, 128, 60), "Zaprogramuj\njednostkę"))
+        if(GUI.Button(new Rect(22, 10, 128, 60), player.SelectedObject.isExecutingScript() ? STR_STOP_SCRIPT_EXECUTION : STR_PROGRAM_OBJECT))
         {
-            player.SelectedObject.runScript();
+            if (player.SelectedObject.isExecutingScript())
+            {
+                player.SelectedObject.stopScript();
+            }
+            else
+            {
+                player.SelectedObject.runScript();
+            }
         }
         GUI.EndGroup();
     }
