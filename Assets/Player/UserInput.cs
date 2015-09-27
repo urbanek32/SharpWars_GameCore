@@ -100,7 +100,7 @@ public class UserInput : MonoBehaviour {
 				{
 					// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
 					// jednostka wykona akcje zwiazana z tym kliknieciem
-					if(player.SelectedObject)
+					if(player.SelectedObject && !player.SelectedObject.isExecutingScript())
 					{
 						if(hitObj.name == "Ground" && player.SelectedObject.isAttacking())
 						{
