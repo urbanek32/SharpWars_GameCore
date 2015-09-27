@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Newtonsoft.Json;
 
 using RTS;
 
@@ -37,9 +38,12 @@ public class ResultsScreen : MonoBehaviour
         {
             //makes sure that the loaded level runs at normal speed
             Time.timeScale = 1.0f;
-            ResourceManager.MenuOpen = false;
+            //ResourceManager.MenuOpen = false;
             //Application.LoadLevel("Map");
-            Debug.Log("Do smtg usefull");
+
+            MakeGetRequest();
+            MakePostRequest();
+
         }
         leftPos += padding + buttonWidth;
         if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "Quit"))
@@ -53,5 +57,36 @@ public class ResultsScreen : MonoBehaviour
         }
 
         GUI.EndGroup();
+    }
+
+    private void MakeGetRequest()
+    {
+        var client = new WWW("http://eti.endrius.tk/test/api/test_empty_body");
+        StartCoroutine(WaitForRequest(client));
+    }
+
+    private void MakePostRequest()
+    {
+        var form = new WWWForm();
+        form.AddField("word", "dupa blada nie jest zla");
+        var client = new WWW("http://eti.endrius.tk/test/api/test_string_body", form);
+        StartCoroutine(WaitForRequest(client));
+    }
+
+    private static IEnumerator WaitForRequest(WWW www)
+    {
+        yield return www;
+
+        // check for errors
+        if (www.error == null)
+        {
+            Debug.Log("WWW Ok!: " + www.text);
+            var obj = JsonConvert.DeserializeObject<CustomJsonResponse>(www.text);
+            Debug.Log(obj.Message);
+        }
+        else
+        {
+            Debug.Log("WWW Error: " + www.error);
+        }  
     }
 }

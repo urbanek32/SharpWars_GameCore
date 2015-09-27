@@ -135,6 +135,9 @@ public class HUD : MonoBehaviour {
 		    DrawOrdersBar();
 		    DrawResourceBar();
 		    DrawScriptWindow();
+
+            // ekran wynikow dla potrzeb testowych
+		    //DisplayResultScreen(new NetworkInstanceId(3), "test");
 		}
 	}
 
