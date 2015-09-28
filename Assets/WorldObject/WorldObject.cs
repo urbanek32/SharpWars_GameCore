@@ -559,7 +559,13 @@ end";
 		return attacking;
 	}
 
+    public virtual void StopAllActions()
+    {
+        //Stop Attacking
+        StopAttacking();
 
+        //later add more...
+    }
 
 
 

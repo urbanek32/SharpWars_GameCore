@@ -607,6 +607,7 @@ public class HUD : MonoBehaviour {
             }
             else
             {
+                player.SelectedObject.StopAllActions();
                 player.SelectedObject.runScript();
             }
         }

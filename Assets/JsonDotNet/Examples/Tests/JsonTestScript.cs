@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using SampleClassLibrary;
+//using SampleClassLibrary;
 using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
 using Assets.DustinHorne.JsonDotNetUnity.TestCases;
 using Assets.DustinHorne.JsonDotNetUnity.TestCases.TestModels;
 
-public class JsonTestScript
+/*public class JsonTestScript
 {
     private TextMesh _text;
     private const string BAD_RESULT_MESSAGE = "Incorrect Deserialized Result";
@@ -341,4 +341,4 @@ public class JsonTestScript
         Log("--------------------");
     }
     #endregion
-}
+}*/

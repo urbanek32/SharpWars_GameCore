@@ -10,7 +10,7 @@ public class TextTest : MonoBehaviour
     private TextMesh _statusText;
     private DateTime _refTime;
     private int _testNum = 5;
-    private JsonTestScript _tester;
+//    private JsonTestScript _tester;
     private bool _complete;
 
 	// Use this for initialization
@@ -20,7 +20,7 @@ public class TextTest : MonoBehaviour
         _testNum = 0;
 	    _statusText = TextObject.GetComponent<TextMesh>();
         _statusText.text = "-- SERIALIZATION TESTS -- \r\n Tests are run with \r\n a three second delay \r\n Starting in 10 seconds.";
-        _tester = new JsonTestScript(_statusText);
+//        _tester = new JsonTestScript(_statusText);
         _refTime = DateTime.Now.AddSeconds(7);
         
 	}
@@ -40,7 +40,7 @@ public class TextTest : MonoBehaviour
     {
         switch (_testNum)
         {
-            case 1:
+            /*case 1:
                 _tester.SerializeVector3();
                 break;
             case 2:
@@ -54,7 +54,7 @@ public class TextTest : MonoBehaviour
                 break;
             case 5:
                 _tester.DictionaryObjectValueSerialization();
-                break;
+                break;*/
             default:
                 _complete = true;
                 _statusText.text = "Tests Complete\r\nSee Console for Log";
