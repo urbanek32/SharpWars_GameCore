@@ -98,10 +98,10 @@ end"));
 	[Command] 
 	public void Cmd_AddUnit(NetworkInstanceId identity, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
 	{
-		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-	    newUnit.GetComponent<WorldObject>().ownerId = this.netId;
+		var newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
+        newUnit.GetComponent<WorldObject>().ownerId = identity;
 	    NetworkServer.Spawn(newUnit);
-		Unit unitObject = newUnit.GetComponent< Unit >();
+		var unitObject = newUnit.GetComponent< Unit >();
 
 		if(unitObject)
 		{
@@ -123,8 +123,10 @@ end"));
 	{
         var target = ClientScene.objects[targetId].gameObject.GetComponent<WorldObject>();
 
-        if (target is Resource)
-            return;
+	    if (target is Resource)
+	    {
+	        return;
+	    }
 
         target.TakeDamage(damage);
         Debug.Log("HIT");
@@ -133,8 +135,8 @@ end"));
     [Command]
     public void Cmd_SpawnBullet(string name, Vector3 newPos, Quaternion newRot, NetworkInstanceId ownerId, NetworkInstanceId targetId)
     {
-        GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject(name), newPos, newRot);
-        Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
+        var gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject(name), newPos, newRot);
+        var projectile = gameObject.GetComponentInChildren<Projectile>();
         projectile.SetRange(20);
         projectile.SetTarget(targetId);
         projectile.SetOwner(ownerId);
@@ -153,23 +155,21 @@ end"));
 		if(isLocalPlayer)
 			return;
 
-		Units units = GetComponentInChildren<Units>();
-		Unit[] unitss = units.GetComponentsInChildren<Unit>();
+	    NetworkIdentity netObj = null;
+	    if (ClientScene.objects.TryGetValue(id, out netObj))
+	    {
+	        var unit = netObj.gameObject.GetComponent<Unit>();
+	        if (unit)
+	        {
+	            if (unit.agent.isActiveAndEnabled)
+	            {
+	                unit.agent.Stop();
+	            }
 
-		foreach(Unit u in unitss)
-		{
-			WorldObject wo = u.GetComponent<WorldObject>();
-
-			if(wo.netId.Equals(id))
-			{
-				Unit unit = wo.GetComponent<Unit>();
-				if(unit.agent.isActiveAndEnabled) unit.agent.Stop();
-				wo.transform.position = Vector3.MoveTowards(wo.transform.position, newPos, Time.deltaTime * unit.agent.speed);
-				wo.transform.rotation = Quaternion.Lerp(wo.transform.rotation, newRot, Time.deltaTime * unit.agent.angularSpeed);
-				break;
-			}	
-		}
-		
+	            unit.transform.position = Vector3.MoveTowards(unit.transform.position, newPos, Time.deltaTime * unit.agent.speed);
+                unit.transform.rotation = Quaternion.Lerp(unit.transform.rotation, newRot, Time.deltaTime * unit.agent.angularSpeed); 
+	        }
+	    }
 	}
 
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
@@ -250,80 +250,30 @@ end"));
 	{
 		findingPlacement = false;
 
-		/*Buildings buildings = GetComponentInChildren< Buildings >();
-		if(buildings)
-		{
-			tempBuilding.transform.parent = buildings.transform;
-		}
-		tempBuilding.SetPlayer();
-		tempBuilding.SetColliders(true);
-		tempCreator.SetBuilding(tempBuilding);
-		tempBuilding.StartConstruction();*/
-
-   
-        string name = tempBuilding.GetType().ToString();
-        Transform tr = tempBuilding.transform;
         CancelBuildingPlacement();
-
-        Cmd_StartConstruction(this.netId, name, tr.position, tr.rotation);
+        Cmd_StartConstruction(this.netId, tempBuilding.GetType().ToString(), tempBuilding.transform.position, tempBuilding.transform.rotation);
 	}
 
 	[Command]
     public void Cmd_StartConstruction(NetworkInstanceId ownerId, string name, Vector3 pos, Quaternion rot)
 	{
-		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
-        Building build = newBuilding.GetComponent<Building>();
+		var newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
+        var build = newBuilding.GetComponent<Building>();
         build.ownerId = ownerId;
         build.StartConstruction();
         NetworkServer.Spawn(newBuilding);
-
-		//Rpc_StartConstruction(ownerId, build.netId, name, pos, rot);
-	}
-
-	[ClientRpc]
-    public void Rpc_StartConstruction(NetworkInstanceId ownerId, NetworkInstanceId buildingId, string name, Vector3 pos, Quaternion rot)
-	{
-		if(isLocalPlayer)
-			return;
-
-
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        foreach (GameObject go in players)
-        {
-            Player p = go.GetComponent<Player>();
-            if (p.netId.Equals(ownerId))
-            {
-                Building[] builds = p.GetComponentsInChildren<Building>();
-                foreach (Building b in builds)
-                {
-                    Debug.Log(b.netId);
-                    if (b.netId.Equals(buildingId))
-                    {
-                        Debug.Log("Started Construct");
-                        b.StartConstruction();
-                        b.SetTransparentMaterial(allowedMaterial, true);
-                        break;
-                    }
-                }
-            }
-        }
-
-// 		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(name), pos, rot);
-//      Building build = newBuilding.GetComponent<Building>();
-//      build.ownerId = ownerId;
-//      build.StartConstruction();
-//      build.SetTransparentMaterial(allowedMaterial, true);
 	}
 
     [Command]
     public void Cmd_ConstructingBuilding(NetworkInstanceId buildingId, int amount)
     {
-        foreach(Building b in GetComponentsInChildren<Building>())
+        NetworkIdentity netObj = null;
+        if (ClientScene.objects.TryGetValue(buildingId, out netObj))
         {
-            if(b.netId.Equals(buildingId))
+            var building = netObj.gameObject.GetComponent<Building>();
+            if (building)
             {
-                b.Construct(amount);
-                break;
+                building.Construct(amount);
             }
         }
     }
@@ -337,22 +287,13 @@ end"));
     [ClientRpc]
     public void Rpc_BuildingCompleted(NetworkInstanceId ownerId, NetworkInstanceId buildingId)
     {
-
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        foreach (GameObject go in players)
+        NetworkIdentity netObj = null;
+        if (ClientScene.objects.TryGetValue(buildingId, out netObj))
         {
-            Player p = go.GetComponent<Player>();
-            if(p.netId.Equals(ownerId))
+            var building = netObj.gameObject.GetComponent<Building>();
+            if (building)
             {
-                Building[] builds = p.GetComponentsInChildren<Building>();
-                foreach(Building b in builds)
-                {
-                    if(b.netId.Equals(buildingId))
-                    {
-                        b.CompleteConstruction();
-                        break;
-                    }
-                }
+                building.CompleteConstruction();
             }
         }
     }
@@ -361,7 +302,7 @@ end"));
 	{
 		findingPlacement = false;
 		Destroy(tempBuilding.gameObject);
-		tempBuilding = null;
+		//tempBuilding = null;
 		//tempCreator = null;
 	}
 
@@ -449,8 +390,8 @@ end"));
     [Command]
     private void Cmd_SpawnStartBuilding()
     {
-        GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding("WarFactory"), transform.position, transform.rotation);
-        Building build = newBuilding.GetComponent<Building>();
+        var newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding("WarFactory"), transform.position, transform.rotation);
+        var build = newBuilding.GetComponent<Building>();
         build.ownerId = netId;
         build.StartConstruction();
         build.instantbuild = true;
