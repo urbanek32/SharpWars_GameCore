@@ -43,6 +43,7 @@ public class Player : NetworkBehaviour {
 	    {
             // gowno potrzebne, zeby dac graczowi budynek startowy
 	        Cmd_SpawnStartBuilding();
+	        Cmd_SpawnStartUnit();
 
             _gameManager.LoadDetails();
 	    }
@@ -457,6 +458,12 @@ end"));
         NetworkServer.Spawn(newBuilding);
     }
 
+    [Command]
+    private void Cmd_SpawnStartUnit()
+    {
+        var pos = transform.position + new Vector3(10, 0, 0);
+        Cmd_AddUnit(this.netId, "Worker", pos, pos, transform.rotation);
+    }
 
 
 }
