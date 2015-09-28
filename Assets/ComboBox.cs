@@ -128,6 +128,11 @@ public class ComboBox
 
         listContent = lc.ToArray();
 
+        if (items == null || items.Length == 0)
+        {
+            Deselect(humanPlayer);
+        }
+
         return Show();
     }
  
@@ -172,7 +177,7 @@ public class ComboBox
  
         if( isClickedComboButton )
         {
-            GUIContent[] guiContent = (listContent == null) ? emptyContent : listContent;
+            GUIContent[] guiContent = (listContent == null || listContent.Length == 0) ? emptyContent : listContent;
 
             Rect listRect = new Rect( rect.x, rect.y + listStyle.CalcHeight(guiContent[0], 1.0f),
                       rect.width, listStyle.CalcHeight(guiContent[0], 1.0f) * guiContent.Length );
@@ -206,5 +211,16 @@ public class ComboBox
 		set{
 			selectedItemIndex = value;
 		}
+    }
+
+    //Set item selection index to -1
+    public void Deselect(Player player)
+    {
+        SelectedItemIndex = -1;
+        buttonContent = emptyContent[0];
+        if (player != null && player.SelectedObject != null)
+        {
+            player.SelectedObject.selectedScript = -1;
+        }
     }
 }

@@ -35,7 +35,8 @@ public class HUD : MonoBehaviour {
     private ComboBox scriptSelectionBox = new ComboBox(new Rect(5, 20, 150, 20), new GUIContent("Wybierz skrypt"), null, comboboxStyle);
 	private bool scriptWindowOpen = false;
     private Rect scriptWindowRect = new Rect(100, 100, 400, 240);
-	//private string scriptString = "";
+    private bool showCreateNewScriptWindow = false;
+    private string newScriptName = "";
 
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 15;
@@ -47,6 +48,8 @@ public class HUD : MonoBehaviour {
 
     public const string STR_PROGRAM_OBJECT = "Zaprogramuj\nobiekt";
     public const string STR_STOP_SCRIPT_EXECUTION = "Zatrzymaj\nprogram";
+
+    private const float createScriptWindowHeight = 64f;
 
     //HOOK
     private int tabInsertPos = -1;
@@ -136,8 +139,15 @@ public class HUD : MonoBehaviour {
 		    DrawResourceBar();
 		    DrawScriptWindow();
 
-            // ekran wynikow dla potrzeb testowych
-		    //DisplayResultScreen(new NetworkInstanceId(3), "test");
+            if (showCreateNewScriptWindow)
+            {
+                Rect createWndPos = new Rect(scriptWindowRect.position.x,
+                    scriptWindowRect.position.y + (scriptWindowRect.height - createScriptWindowHeight) / 2,
+                    scriptWindowRect.width,
+                    createScriptWindowHeight);
+
+                GUI.Window(0, createWndPos, DrawCreateNewScriptWindow, "Enter script name:");
+            }
 		}
 	}
 
@@ -467,6 +477,31 @@ public class HUD : MonoBehaviour {
             GUI.SetNextControlName("ScriptTextArea");
             player.SelectedObject.unitScript = GUI.TextArea(new Rect(0, 40, 400, 200), player.SelectedObject.unitScript);
             GUI.FocusControl("ScriptTextArea");
+
+            //create new script
+            if (GUI.Button(new Rect(165, 20, 75, 20), "Nowy"))
+            {
+                showCreateNewScriptWindow = true;
+            }
+
+            //save script to current selection
+            if (GUI.Button(new Rect(240, 20, 75, 20), "Zapisz"))
+            {
+                if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
+                {
+                    player.scriptList[scriptSelectionBox.SelectedItemIndex].Second = player.SelectedObject.unitScript;
+                }
+            }
+
+            //delete selected script
+            if (GUI.Button(new Rect(315, 20, 75, 20), "Usuń"))
+            {
+                if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
+                {
+                    player.scriptList.RemoveAt(scriptSelectionBox.SelectedItemIndex);
+                    scriptSelectionBox.Deselect(player);
+                }
+            }
         }
 
         if (player.SelectedObject != null && player.SelectedObject.GetPlayer() == player)
@@ -578,7 +613,23 @@ public class HUD : MonoBehaviour {
         GUI.EndGroup();
     }
 
+    private void DrawCreateNewScriptWindow(int wid)
+    {
+        GUI.SetNextControlName("ScriptNameArea");
+        newScriptName = GUI.TextArea(new Rect(0, 20, scriptWindowRect.width, 20), newScriptName);
+        GUI.FocusControl("ScriptNameArea");
 
-
+        if (GUI.Button(new Rect(10, 40, (scriptWindowRect.width - 20) / 2, 20), "Utwórz"))
+        {
+            player.scriptList.Add(new STL.Pair<string, string>(newScriptName, ""));
+            showCreateNewScriptWindow = false;
+            newScriptName = "";
+        }
+        if (GUI.Button(new Rect(scriptWindowRect.width/2, 40, (scriptWindowRect.width - 20) / 2, 20), "Anuluj"))
+        {
+            showCreateNewScriptWindow = false;
+            newScriptName = "";
+        }
+    }
 
 }
