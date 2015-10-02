@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     public void Initialise()
     {
-        Debug.Log("Game Manager Init");
+        //Debug.Log("Game Manager Init");
         if (!created)
         {
             DontDestroyOnLoad(transform.gameObject);
@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadDetails()
     {
-        Debug.Log("Game Manager LoadDetails");
+        //Debug.Log("Game Manager LoadDetails");
 
         var players = GameObject.FindObjectsOfType(typeof(Player)) as Player[];
         if (players == null) return;

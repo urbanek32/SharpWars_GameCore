@@ -81,52 +81,55 @@ public class UserInput : MonoBehaviour {
 
 	private void LeftMouseClick()
 	{
-		// tylko gdy klikamy w obszarze gry, nie HUD
-		if(player.hud.MouseInBounds())
-		{
-			if(player.IsFindingBuildingLocation())
-			{
-				if(player.CanPlaceBuilding())
-				{
-					player.StartConstruction();
-				}
-			}
-			else
-			{
-				GameObject hitObj = WorkManager.FindHitObject(Input.mousePosition);
-				Vector3 hitPoint = WorkManager.FindHitPoint(Input.mousePosition);
+	    // tylko gdy klikamy w obszarze gry, nie HUD
+	    if (!player.hud.MouseInBounds()) return;
 
-				if(hitObj && hitPoint != ResourceManager.InvalidPosition)
-				{
-					// mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
-					// jednostka wykona akcje zwiazana z tym kliknieciem
-					if(player.SelectedObject && !player.SelectedObject.isExecutingScript())
-					{
-						if(hitObj.name == "Ground" && player.SelectedObject.isAttacking())
-						{
-							player.SelectedObject.StopAttacking();
-						}
+	    if(player.IsFindingBuildingLocation())
+	    {
+	        if(player.CanPlaceBuilding())
+	        {
+	            player.StartConstruction();
+	        }
+	    }
+	    else
+	    {
+	        var hitObj = WorkManager.FindHitObject(Input.mousePosition);
+	        var hitPoint = WorkManager.FindHitPoint(Input.mousePosition);
 
-						player.SelectedObject.MouseClick(hitObj, hitPoint, player);
-					}
-					else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
-					{
-						WorldObject worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
+	        if (!hitObj || hitPoint == ResourceManager.InvalidPosition) return;
 
-						if(worldObject)
-						{
-							// wiemy ze gracz nie ma zaznaczonych obiektów
-							player.SelectedObject = worldObject;
-							worldObject.SetSelection(true, player.hud.GetPlayingArea());
-						}
-					}
-				}
+	        // mielismy juz zaznaczony obiekt i kliknelismy gdzies na mapie
+	        // jednostka wykona akcje zwiazana z tym kliknieciem
+	        if(player.SelectedObject && !player.SelectedObject.isExecutingScript())
+	        {
+	            if(hitObj.name == "Ground" && player.SelectedObject.isAttacking())
+	            {
+	                player.SelectedObject.StopAttacking();
+	            }
 
-			}
-		}
+	            player.SelectedObject.MouseClick(hitObj, hitPoint, player);
+	        }
+	        else if(hitObj.name != "Ground") // nie kliknelismy w ziemie
+	        {
+	            var worldObject = hitObj.transform.parent.GetComponent<WorldObject>();
+
+	            if(worldObject)
+	            {
+	                // unselect przed selectem nowej (script bug)
+	                if (player.SelectedObject)
+	                {
+	                    player.SelectedObject.SetSelection(false, player.hud.GetPlayingArea());
+	                }
+
+	                // wiemy ze gracz nie ma zaznaczonych obiektów
+	                player.SelectedObject = worldObject;
+	                worldObject.SetSelection(true, player.hud.GetPlayingArea());
+	            }
+	        }
+	    }
 	}
 
-	private void RightMouseClick()
+    private void RightMouseClick()
 	{
 		if(player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) && player.SelectedObject)
 		{

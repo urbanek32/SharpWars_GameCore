@@ -10,7 +10,7 @@ public class CustomNetworkManager : NetworkManager
 
     void Start()
     {
-        Debug.Log("CNM Start");
+        //Debug.Log("CNM Start");
         _gameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
     }
 
@@ -28,7 +28,7 @@ public class CustomNetworkManager : NetworkManager
     public override void OnStartServer()
     {
         base.OnStartServer();
-        Debug.Log("Server started");
+        //Debug.Log("Server started");
 
         _gameManager.enabled = true;
     }
@@ -36,7 +36,7 @@ public class CustomNetworkManager : NetworkManager
     public override void OnStopServer()
     {
         base.OnStopServer();
-        Debug.Log("Server stopped");
+        //Debug.Log("Server stopped");
 
         _gameManager.enabled = false;
     }
