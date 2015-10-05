@@ -7,8 +7,11 @@ using Newtonsoft.Json;
 using STL;
 
 //[03.10.2015] Aktualnie blokujące wykonanie
-public class WebsiteCommunication
+public class WebsiteCommunication : MonoBehaviour
 {
+    public delegate void HandleOnSuccess(string response_value, object caller);
+    public delegate void HandleOnError(object caller);
+
     //Kiedyś nastanie era HTTP/TLS...
     private const string SOCIAL_WEBSITE = "http://eti.endrius.tk";
     private const string SOCIAL_GETTOKEN = "/api/users/login";
@@ -24,9 +27,80 @@ public class WebsiteCommunication
         return str;
     }
 
+    private static IEnumerator WaitForRequest(WWW www_req, HandleOnError hoe ,HandleOnSuccess hos, object caller)
+    {
+        Debug.Log("Starting waiting 4 request...");
+        yield return www_req;
+
+        if (www_req.error == null)
+        {
+            Debug.Log("WWW Success: " + www_req.text);
+
+            if (hos != null)
+            {
+                hos(www_req.text, caller);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("WWW error: " + www_req.error);
+
+            if (hoe != null)
+            {
+                hoe(caller);
+            }
+        }
+    }
+
+    private static void HandleToken(string token, object caller)
+    {
+        var _token = JsonConvert.DeserializeObject<TokenResponse>(token);
+        
+        if (caller is Player)
+        {
+            Player p = (Player)caller;
+            p.token = _token.token;
+            Debug.Log("Token set to: " + p.token);
+        }
+    }
+
+    private static void HandleScriptList(string scripts, object caller)
+    {
+        if (scripts != "Unauthorized")
+        {
+            var lsr = JsonConvert.DeserializeObject<List<ListScriptResponse>>(scripts);
+
+            var converted_list = new List<Pair<string, string>>();
+
+            if (lsr.Count > 0)
+            {
+                foreach (var i in lsr)
+                {
+                    converted_list.Add(new Pair<string, string>(i.name, i.code));
+                }
+            }
+
+            if (caller is Player)
+            {
+                Player p = (Player)caller;
+                p.scriptList = converted_list;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Can not download script list! Unauthorized");
+        }
+    }
+
+    void Awake()
+    {
+        //EXAMPLUM
+        GetToken("janusz", "testowy", null, HandleToken, gameObject.GetComponent<Player>());
+    }
+
     //POST
     //Logowanie, zwracany token(string) lub null(null)
-    public string GetToken(string username, string password)
+    public void GetToken(string username, string password, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
         var url = SOCIAL_WEBSITE + SOCIAL_GETTOKEN;
 
@@ -39,16 +113,12 @@ public class WebsiteCommunication
 
         var www_req = new WWW(url, rawData, headers);
 
-        while (!www_req.isDone) { }
-
-        var token = JsonConvert.DeserializeObject<TokenResponse>(www_req.text);
-
-        return token.token;
+        StartCoroutine(WaitForRequest(www_req, null, HandleToken, caller));
     }
 
     //GET
     //null lub lista par<string, string> gdzie <nazwa, kod>
-    public List<Pair<string, string>> GetScriptsFromCloud(string username, string token)
+    public void GetScriptsFromCloud(string username, string token, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
         var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/list";
 
@@ -59,34 +129,13 @@ public class WebsiteCommunication
 
         var www_req = new WWW(url, null, headers);
 
-        while (!www_req.isDone) { }
-
-
-        if (www_req.text != "Unauthorized")
-        {
-            var lsr = JsonConvert.DeserializeObject<List<ListScriptResponse>>(www_req.text);
-
-            if (lsr.Count > 0)
-            {
-                var ret_val = new List<Pair<string, string>>();
-                foreach (var i in lsr)
-                {
-                    ret_val.Add(new Pair<string, string>(i.name, i.code));
-                }
-
-                return ret_val;
-            }
-        }
-
-        return null;
+        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
     }
 
     //POST
     //zwraca true jeśli się wepchnie do chmury, inaczej false
-    public bool AddScriptToCloud(string username, string token, string script_name, string script_description, string script_code)
+    public void AddScriptToCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var ret_val = false;
-
         var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/add";
 
         var headers = new Dictionary<string, string>();
@@ -104,24 +153,20 @@ public class WebsiteCommunication
 
         var www_req = new WWW(url, rawData, headers);
 
-        while (!www_req.isDone) { }
+        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
 
-        var ssr = JsonConvert.DeserializeObject<ScriptStatusResponse>(www_req.text);
+        /*var ssr = JsonConvert.DeserializeObject<ScriptStatusResponse>(www_req.text);
 
         if (ssr.status == 201)
         {
             ret_val = true;
-        }
-
-        return ret_val;
+        }*/
     }
 
     //POST
     //zwraca true jeśli chmura zatwierdzi, inaczej false
-    public bool EditScriptInCloud(string username, string token, string script_name, string script_description, string script_code)
+    public void EditScriptInCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var ret_val = false;
-
         //check name, description, code
         script_name = ValidateString(script_name);
         script_description = ValidateString(script_description);
@@ -139,21 +184,19 @@ public class WebsiteCommunication
 
         var www_req = new WWW(url, rawData, headers);
 
-        while (!www_req.isDone) { }
+        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
 
-        var ssr = JsonConvert.DeserializeObject<ScriptStatusResponse>(www_req.text);
+        /*var ssr = JsonConvert.DeserializeObject<ScriptStatusResponse>(www_req.text);
 
         if (ssr.status == 204)
         {
             ret_val = true;
-        }
-
-        return ret_val;
+        }*/
     }
 
     //GET
     //zwraca null jak coś pójdzie źle, inaczej skrypt <nazwa, kod>
-    public Pair<string, string> GetScriptFromCloud(string username, string token, string script_name)
+    public void GetScriptFromCloud(string username, string token, string script_name, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
         script_name = ValidateString(script_name);
 
@@ -166,15 +209,13 @@ public class WebsiteCommunication
 
         var www_req = new WWW(url, null, headers);
 
-        while (!www_req.isDone) { }
+        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
 
-        var lsr = JsonConvert.DeserializeObject<ListScriptResponse>(www_req.text);
+        /*var lsr = JsonConvert.DeserializeObject<ListScriptResponse>(www_req.text);
 
         if (lsr != null)
         {
             return new Pair<string, string>(lsr.name, lsr.code);
-        }
-
-        return null;
+        }*/
     }
 }
