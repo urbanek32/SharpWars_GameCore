@@ -67,24 +67,14 @@ end"));
 	// Update is called once per frame
 	void Update () 
 	{
-		if(human)
-		{
-			hud.SetResourceValues(resources, resourceLimits);
+	    if (!human) return;
+	    hud.SetResourceValues(resources, resourceLimits);
 
-			if(findingPlacement)
-			{
-				tempBuilding.CalculateBounds();
-				if(CanPlaceBuilding())
-				{
-					tempBuilding.SetTransparentMaterial(allowedMaterial, false);
-				}
-				else
-				{
-					tempBuilding.SetTransparentMaterial(notAllowedMaterial, false);
-				}
-			}
-		}
-
+	    if(findingPlacement)
+	    {
+	        tempBuilding.CalculateBounds();
+	        tempBuilding.SetTransparentMaterial(CanPlaceBuilding() ? allowedMaterial : notAllowedMaterial, false);
+	    }
 	}
 
 

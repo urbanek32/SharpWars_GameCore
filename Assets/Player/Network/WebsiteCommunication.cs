@@ -3,6 +3,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using STL;
 
@@ -19,31 +20,26 @@ public class WebsiteCommunication : MonoBehaviour
 
     private static string ValidateString(string str)
     {
-        if (str == null || str == "")
-        {
-            return "Default";
-        }
-
-        return str;
+        return string.IsNullOrEmpty(str) ? "Default" : str;
     }
 
-    private static IEnumerator WaitForRequest(WWW www_req, HandleOnError hoe ,HandleOnSuccess hos, object caller)
+    private static IEnumerator WaitForRequest(WWW wwwReq, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
         Debug.Log("Starting waiting 4 request...");
-        yield return www_req;
+        yield return wwwReq;
 
-        if (www_req.error == null)
+        if (wwwReq.error == null)
         {
-            Debug.Log("WWW Success: " + www_req.text);
+            Debug.Log("WWW Success: " + wwwReq.text);
 
             if (hos != null)
             {
-                hos(www_req.text, caller);
+                hos(wwwReq.text, caller);
             }
         }
         else
         {
-            Debug.LogWarning("WWW error: " + www_req.error);
+            Debug.LogWarning("WWW error: " + wwwReq.error);
 
             if (hoe != null)
             {
@@ -55,13 +51,13 @@ public class WebsiteCommunication : MonoBehaviour
     private static void HandleToken(string token, object caller)
     {
         var _token = JsonConvert.DeserializeObject<TokenResponse>(token);
-        
-        if (caller is Player)
-        {
-            Player p = (Player)caller;
-            p.token = _token.token;
-            Debug.Log("Token set to: " + p.token);
-        }
+
+        var player = caller as Player;
+        if (player == null) return;
+
+        Player p = player;
+        p.token = _token.token;
+        Debug.Log("Token set to: " + p.token);
     }
 
     private static void HandleScriptList(string scripts, object caller)
@@ -70,21 +66,18 @@ public class WebsiteCommunication : MonoBehaviour
         {
             var lsr = JsonConvert.DeserializeObject<List<ListScriptResponse>>(scripts);
 
-            var converted_list = new List<Pair<string, string>>();
+            var convertedList = new List<Pair<string, string>>();
 
             if (lsr.Count > 0)
             {
-                foreach (var i in lsr)
-                {
-                    converted_list.Add(new Pair<string, string>(i.name, i.code));
-                }
+                convertedList.AddRange(lsr.Select(i => new Pair<string, string>(i.name, i.code)));
             }
 
-            if (caller is Player)
-            {
-                Player p = (Player)caller;
-                p.scriptList = converted_list;
-            }
+            var player = caller as Player;
+            if (player == null) return;
+
+            Player p = player;
+            p.scriptList = convertedList;
         }
         else
         {
@@ -102,18 +95,24 @@ public class WebsiteCommunication : MonoBehaviour
     //Logowanie, zwracany token(string) lub null(null)
     public void GetToken(string username, string password, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var url = SOCIAL_WEBSITE + SOCIAL_GETTOKEN;
+        const string url = SOCIAL_WEBSITE + SOCIAL_GETTOKEN;
 
         var headers = new Dictionary<string, string>();
 
         headers["Content-Type"] = "application/json";
 
-        var ascii_data = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
-        var rawData = System.Text.Encoding.ASCII.GetBytes(ascii_data);
+        var playerCredentials = new LoginRequest
+        {
+            username = username,
+            password = password
+        };
 
-        var www_req = new WWW(url, rawData, headers);
+        var jsonData = JsonConvert.SerializeObject(playerCredentials);
+        var rawData = System.Text.Encoding.ASCII.GetBytes(jsonData);
 
-        StartCoroutine(WaitForRequest(www_req, null, HandleToken, caller));
+        var wwwReq = new WWW(url, rawData, headers);
+
+        StartCoroutine(WaitForRequest(wwwReq, null, HandleToken, caller));
     }
 
     //GET
@@ -127,16 +126,17 @@ public class WebsiteCommunication : MonoBehaviour
         headers["Content-Type"] = "application/json";
         headers["Authorization"] = "Bearer " + token;
 
-        var www_req = new WWW(url, null, headers);
+        var wwwReq = new WWW(url, null, headers);
 
-        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
+        StartCoroutine(WaitForRequest(wwwReq, hoe, hos, caller));
     }
 
     //POST
     //zwraca true jeśli się wepchnie do chmury, inaczej false
     public void AddScriptToCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/add";
+        //var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/add";
+        var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/add");
 
         var headers = new Dictionary<string, string>();
 
@@ -148,12 +148,19 @@ public class WebsiteCommunication : MonoBehaviour
         script_description = ValidateString(script_description);
         script_code = ValidateString(script_code);
 
-        var ascii_data = "{ \"name\": \"" + script_name + "\", \"description\": \"" + script_description + "\", \"code\": \"" + script_code + "\" }";
-        var rawData = System.Text.Encoding.ASCII.GetBytes(ascii_data);
+        var scriptBody = new ScriptBody
+        {
+            name = script_name,
+            code = script_code,
+            description = script_description
+        };
 
-        var www_req = new WWW(url, rawData, headers);
+        var scriptRequest = JsonConvert.SerializeObject(scriptBody);
+        var rawData = System.Text.Encoding.ASCII.GetBytes(scriptRequest);
 
-        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
+        var wwwReq = new WWW(url, rawData, headers);
+
+        StartCoroutine(WaitForRequest(wwwReq, hoe, hos, caller));
 
         /*var ssr = JsonConvert.DeserializeObject<ScriptStatusResponse>(www_req.text);
 
@@ -167,11 +174,6 @@ public class WebsiteCommunication : MonoBehaviour
     //zwraca true jeśli chmura zatwierdzi, inaczej false
     public void EditScriptInCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        //check name, description, code
-        script_name = ValidateString(script_name);
-        script_description = ValidateString(script_description);
-        script_code = ValidateString(script_code);
-
         var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/update/" + script_name;
 
         var headers = new Dictionary<string, string>();
@@ -179,12 +181,24 @@ public class WebsiteCommunication : MonoBehaviour
         headers["Content-Type"] = "application/json";
         headers["Authorization"] = "Bearer " + token;
 
-        var ascii_data = "{ \"name\": \"" + script_name + "\", \"description\": \"" + script_description + "\", \"code\": \"" + script_code + "\" }";
-        var rawData = System.Text.Encoding.ASCII.GetBytes(ascii_data);
+        //check name, description, code
+        script_name = ValidateString(script_name);
+        script_description = ValidateString(script_description);
+        script_code = ValidateString(script_code);
 
-        var www_req = new WWW(url, rawData, headers);
+        var scriptBody = new ScriptBody
+        {
+            name = script_name,
+            code = script_code,
+            description = script_description
+        };
 
-        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
+        var scriptRequest = JsonConvert.SerializeObject(scriptBody);
+        var rawData = System.Text.Encoding.ASCII.GetBytes(scriptRequest);
+
+        var wwwReq = new WWW(url, rawData, headers);
+
+        StartCoroutine(WaitForRequest(wwwReq, hoe, hos, caller));
 
         /*var ssr = JsonConvert.DeserializeObject<ScriptStatusResponse>(www_req.text);
 
@@ -207,9 +221,9 @@ public class WebsiteCommunication : MonoBehaviour
         headers["Content-Type"] = "application/json";
         headers["Authorization"] = "Bearer " + token;
 
-        var www_req = new WWW(url, null, headers);
+        var wwwReq = new WWW(url, null, headers);
 
-        StartCoroutine(WaitForRequest(www_req, hoe, hos, caller));
+        StartCoroutine(WaitForRequest(wwwReq, hoe, hos, caller));
 
         /*var lsr = JsonConvert.DeserializeObject<ListScriptResponse>(www_req.text);
 

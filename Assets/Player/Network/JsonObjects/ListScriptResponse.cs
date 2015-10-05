@@ -1,5 +1,5 @@
 ﻿//Script format in server resposnse
-class ListScriptResponse
+public class ListScriptResponse
 {
     public string name { get; set; }
     public string description { get; set; }

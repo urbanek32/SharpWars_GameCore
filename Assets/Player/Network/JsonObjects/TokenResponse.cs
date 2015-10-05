@@ -1,5 +1,5 @@
 ﻿//JSON token response format
-class TokenResponse
+public class TokenResponse
 {
     public string token { get; set; }
 }

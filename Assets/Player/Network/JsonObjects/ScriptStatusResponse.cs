@@ -1,5 +1,5 @@
 ﻿//odpowiedź z serwera www na dodanie/edycję skryptu
-class ScriptStatusResponse
+public class ScriptStatusResponse
 {
     public int status { get; set; }
     public string group { get; set; }
