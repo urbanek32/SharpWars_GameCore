@@ -9,6 +9,7 @@ using STL;
 public class Player : NetworkBehaviour {
 
 	public string username;
+    public string token;
 	public bool human;
 	public HUD hud;
 	public WorldObject SelectedObject { get; set; }
@@ -41,6 +42,9 @@ public class Player : NetworkBehaviour {
 
 	    if (isLocalPlayer)
 	    {
+            //dodanie komponentu do komunikacji ze stroną
+            gameObject.AddComponent<WebsiteCommunication>();
+            
             // gowno potrzebne, zeby dac graczowi budynek startowy
 	        Cmd_SpawnStartBuilding();
 	        Cmd_SpawnStartUnit();
@@ -63,24 +67,14 @@ end"));
 	// Update is called once per frame
 	void Update () 
 	{
-		if(human)
-		{
-			hud.SetResourceValues(resources, resourceLimits);
+	    if (!human) return;
+	    hud.SetResourceValues(resources, resourceLimits);
 
-			if(findingPlacement)
-			{
-				tempBuilding.CalculateBounds();
-				if(CanPlaceBuilding())
-				{
-					tempBuilding.SetTransparentMaterial(allowedMaterial, false);
-				}
-				else
-				{
-					tempBuilding.SetTransparentMaterial(notAllowedMaterial, false);
-				}
-			}
-		}
-
+	    if(findingPlacement)
+	    {
+	        tempBuilding.CalculateBounds();
+	        tempBuilding.SetTransparentMaterial(CanPlaceBuilding() ? allowedMaterial : notAllowedMaterial, false);
+	    }
 	}
 
 
