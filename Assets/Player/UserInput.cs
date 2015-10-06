@@ -239,7 +239,21 @@ public class UserInput : MonoBehaviour {
 
 	private void RotateCamera()
 	{
+        Vector3 origin = Camera.main.transform.eulerAngles;
+        Vector3 destination = origin;
 
+        //detect rotation amount if ALT is being held and the Right mouse button is down
+        if ((Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && Input.GetMouseButton(1))
+        {
+            destination.x -= Input.GetAxis("Mouse Y") * ResourceManager.RotateAmount;
+            destination.y += Input.GetAxis("Mouse X") * ResourceManager.RotateAmount;
+        }
+
+        //if a change in position is detected perform the necessary update
+        if (destination != origin)
+        {
+            Camera.main.transform.eulerAngles = Vector3.MoveTowards(origin, destination, Time.deltaTime * ResourceManager.RotateSpeed);
+        }
 	}
 
 }
