@@ -24,11 +24,7 @@ public class Player : NetworkBehaviour {
     private GameManager _gameManager;
 
     public List<Pair<string, string>> scriptList = new List<Pair<string,string>>();
-    //0 - nie pobierano
-    //1 - trwa pobieranie
-    //2 - pobrano
-    //chyba że wolisz enuma
-    public short hScriptsDownloadedFromCloud = 0;
+    public GetScriptStatus ScriptFromCloudStatus { get; set; }
 
 	// works like constructor
 	void Awake() 
@@ -81,13 +77,13 @@ end"));
 	        tempBuilding.SetTransparentMaterial(CanPlaceBuilding() ? allowedMaterial : notAllowedMaterial, false);
 	    }
 
-        if (hScriptsDownloadedFromCloud == 0 && !string.IsNullOrEmpty(token))
+        if (ScriptFromCloudStatus == GetScriptStatus.NotYet && !string.IsNullOrEmpty(token))
         {
             var wc = GetComponentInChildren<WebsiteCommunication>();
             //TO DO
             //prawdziwy username
             wc.GetScriptsFromCloud("janusz", token, null, WebsiteCommunication.HandleScriptList, this);
-            hScriptsDownloadedFromCloud = 1;
+            ScriptFromCloudStatus = GetScriptStatus.Downloading;
         }
 	}
 
