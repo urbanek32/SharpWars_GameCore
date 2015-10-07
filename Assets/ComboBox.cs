@@ -184,7 +184,9 @@ public class ComboBox
 
             GUI.Box(listRect, "", boxStyle);
             int newSelectedItemIndex = GUI.SelectionGrid( listRect, selectedItemIndex, guiContent, 1, listStyle);
-            if( newSelectedItemIndex != selectedItemIndex || (selectedItemIndex == 0 && humanPlayer.SelectedObject != null && humanPlayer.SelectedObject.selectedScript != selectedItemIndex) )
+            if( (newSelectedItemIndex != selectedItemIndex ||
+                (selectedItemIndex == 0 && humanPlayer.SelectedObject != null && humanPlayer.SelectedObject.selectedScript != selectedItemIndex) ) &&
+                (listContent != null && listContent.Length != 0) )
             {
                 selectedItemIndex = newSelectedItemIndex;
                 buttonContent = guiContent[selectedItemIndex];
