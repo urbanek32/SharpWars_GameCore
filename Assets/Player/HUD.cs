@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+using System;
 
 using RTS;
 using UnityEngine.Networking;
@@ -490,6 +490,17 @@ public class HUD : MonoBehaviour {
                 if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
                 {
                     player.scriptList[scriptSelectionBox.SelectedItemIndex].Second = player.SelectedObject.unitScript;
+
+                    var wc = GetComponentInParent<WebsiteCommunication>();
+
+                    //TODO TO DO FIX
+                    //janusz => username
+                    wc.EditScriptInCloud("janusz",
+                        player.token,
+                        player.scriptList[scriptSelectionBox.SelectedItemIndex].First,
+                        "Default",
+                        player.scriptList[scriptSelectionBox.SelectedItemIndex].Second,
+                        null, null, null);
                 }
             }
 
@@ -622,8 +633,17 @@ public class HUD : MonoBehaviour {
 
         if (GUI.Button(new Rect(10, 40, (scriptWindowRect.width - 20) / 2, 20), "Utwórz"))
         {
+            if (string.IsNullOrEmpty(newScriptName) || newScriptName.Trim().Length == 0) return;
+
             player.scriptList.Add(new STL.Pair<string, string>(newScriptName, ""));
             showCreateNewScriptWindow = false;
+
+            var wc = GetComponentInParent<WebsiteCommunication>();
+
+            //TODO TO DO FIX
+            //username => variable
+            wc.AddScriptToCloud("janusz", player.token, newScriptName, "Default", " ", null, null, this);
+
             newScriptName = "";
         }
         if (GUI.Button(new Rect(scriptWindowRect.width/2, 40, (scriptWindowRect.width - 20) / 2, 20), "Anuluj"))

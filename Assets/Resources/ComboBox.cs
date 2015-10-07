@@ -54,6 +54,7 @@ public class ComboBoxTest : MonoBehaviour
 */
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using STL;
 
@@ -62,23 +63,32 @@ public class ComboBox
     private static bool forceToUnShow = false; 
     private static int useControlID = -1;
     private bool isClickedComboButton = false;
-    private int selectedItemIndex = 0;
- 
-	private Rect rect;
+
+    private Rect rect;
 	private GUIContent buttonContent;
 	private GUIContent[] listContent;
 	private string buttonStyle;
 	//private string boxStyle;
 	private GUIStyle listStyle;
     private GUIStyle boxStyle;
-    Player humanPlayer;
+    private Player humanPlayer;
 
-    private static GUIContent[] emptyContent = { new GUIContent("-----") };
+    public int SelectedItemIndex { get; set; }
 
-    public bool IsClicked() { return isClickedComboButton; }
+    private static readonly GUIContent[] emptyContent =
+    {
+        new GUIContent("-----")
+    };
+
+    public bool IsClicked()
+    {
+        return isClickedComboButton;
+    }
  
-    public ComboBox( Rect rect, GUIContent buttonContent, GUIContent[] listContent, GUIStyle uniStyle ){
-		this.rect = rect;
+    public ComboBox( Rect rect, GUIContent buttonContent, GUIContent[] listContent, GUIStyle uniStyle )
+    {
+        SelectedItemIndex = 0;
+        this.rect = rect;
 		this.buttonContent = buttonContent;
 		this.listContent = listContent;
 		this.buttonStyle = "button";
@@ -86,8 +96,10 @@ public class ComboBox
 		this.listStyle = uniStyle;
     }
  
-	public ComboBox(Rect rect, GUIContent buttonContent, GUIContent[] listContent, string buttonStyle, GUIStyle boxStyle, GUIStyle listStyle){
-		this.rect = rect;
+	public ComboBox(Rect rect, GUIContent buttonContent, GUIContent[] listContent, string buttonStyle, GUIStyle boxStyle, GUIStyle listStyle)
+    {
+	    SelectedItemIndex = 0;
+	    this.rect = rect;
 		this.buttonContent = buttonContent;
 		this.listContent = listContent;
 		this.buttonStyle = buttonStyle;
@@ -98,7 +110,7 @@ public class ComboBox
     //Adds element at the end of list(array to be more precisely)
     void AddItem(GUIContent item)
     {
-        List<GUIContent> content = (listContent == null) ? new List<GUIContent>() : new List<GUIContent>(listContent);
+        var content = (listContent == null) ? new List<GUIContent>() : new List<GUIContent>(listContent);
         content.Add(item);
         listContent = content.ToArray();
     }
@@ -107,10 +119,13 @@ public class ComboBox
     void RemoveItem(int id)
     {
         if (listContent == null)
+        {
             return;
+        }
+
         if (listContent.Length > id)
         {
-            List<GUIContent> content = new List<GUIContent>(listContent);
+            var content = new List<GUIContent>(listContent);
             content.RemoveAt(id);
             listContent = content.ToArray();
         }
@@ -118,15 +133,9 @@ public class ComboBox
 
     public int Show(Pair<string, string>[] items, Player player)
     {
-        List<GUIContent> lc = new List<GUIContent>();
         humanPlayer = player;
 
-        foreach (Pair<string, string> i in items)
-        {
-            lc.Add(new GUIContent(i.First));
-        }
-
-        listContent = lc.ToArray();
+        listContent = items.Select(i => new GUIContent(i.First)).ToArray();
 
         if (items == null || items.Length == 0)
         {
@@ -183,17 +192,19 @@ public class ComboBox
                       rect.width, listStyle.CalcHeight(guiContent[0], 1.0f) * guiContent.Length );
 
             GUI.Box(listRect, "", boxStyle);
-            int newSelectedItemIndex = GUI.SelectionGrid( listRect, selectedItemIndex, guiContent, 1, listStyle);
-            if( newSelectedItemIndex != selectedItemIndex || (selectedItemIndex == 0 && humanPlayer.SelectedObject != null && humanPlayer.SelectedObject.selectedScript != selectedItemIndex) )
+            int newSelectedItemIndex = GUI.SelectionGrid( listRect, SelectedItemIndex, guiContent, 1, listStyle);
+            if( (newSelectedItemIndex != SelectedItemIndex ||
+                (SelectedItemIndex == 0 && humanPlayer.SelectedObject != null && humanPlayer.SelectedObject.selectedScript != SelectedItemIndex) ) &&
+                (listContent != null && listContent.Length != 0) )
             {
-                selectedItemIndex = newSelectedItemIndex;
-                buttonContent = guiContent[selectedItemIndex];
+                SelectedItemIndex = newSelectedItemIndex;
+                buttonContent = guiContent[SelectedItemIndex];
 
                 //overwrite world's object script
-                if (humanPlayer.SelectedObject != null && humanPlayer.SelectedObject.selectedScript != selectedItemIndex)
+                if (humanPlayer.SelectedObject != null && humanPlayer.SelectedObject.selectedScript != SelectedItemIndex)
                 {
-                    humanPlayer.SelectedObject.selectedScript = selectedItemIndex;
-                    humanPlayer.SelectedObject.unitScript = humanPlayer.scriptList[selectedItemIndex].Second;
+                    humanPlayer.SelectedObject.selectedScript = SelectedItemIndex;
+                    humanPlayer.SelectedObject.unitScript = humanPlayer.scriptList[SelectedItemIndex].Second;
                 }
             }
         }
@@ -201,18 +212,9 @@ public class ComboBox
         if( done )
             isClickedComboButton = false;
  
-        return selectedItemIndex;
+        return SelectedItemIndex;
     }
  
-    public int SelectedItemIndex{
-		get{
-        	return selectedItemIndex;
-		}
-		set{
-			selectedItemIndex = value;
-		}
-    }
-
     //Set item selection index to -1
     public void Deselect(Player player)
     {

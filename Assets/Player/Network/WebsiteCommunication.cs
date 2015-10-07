@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using RTS;
 using STL;
 
 //[03.10.2015] Aktualnie blokujące wykonanie
@@ -60,7 +61,7 @@ public class WebsiteCommunication : MonoBehaviour
         Debug.Log("Token set to: " + p.token);
     }
 
-    private static void HandleScriptList(string scripts, object caller)
+    public static void HandleScriptList(string scripts, object caller)
     {
         if (scripts != "Unauthorized")
         {
@@ -78,6 +79,7 @@ public class WebsiteCommunication : MonoBehaviour
 
             Player p = player;
             p.scriptList = convertedList;
+            p.ScriptFromCloudStatus = GetScriptStatus.Ready;
         }
         else
         {
@@ -119,7 +121,7 @@ public class WebsiteCommunication : MonoBehaviour
     //null lub lista par<string, string> gdzie <nazwa, kod>
     public void GetScriptsFromCloud(string username, string token, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/list";
+        var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/list");
 
         var headers = new Dictionary<string, string>();
 
@@ -135,7 +137,6 @@ public class WebsiteCommunication : MonoBehaviour
     //zwraca true jeśli się wepchnie do chmury, inaczej false
     public void AddScriptToCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        //var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/add";
         var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/add");
 
         var headers = new Dictionary<string, string>();
@@ -174,8 +175,8 @@ public class WebsiteCommunication : MonoBehaviour
     //zwraca true jeśli chmura zatwierdzi, inaczej false
     public void EditScriptInCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/update/" + script_name;
-
+        var url = string.Format("{0}{1}{2}{3}{4}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/update/", script_name.Replace(" ", "%20"));
+        
         var headers = new Dictionary<string, string>();
 
         headers["Content-Type"] = "application/json";
@@ -214,7 +215,7 @@ public class WebsiteCommunication : MonoBehaviour
     {
         script_name = ValidateString(script_name);
 
-        var url = SOCIAL_WEBSITE + SOCIAL_AUTH_BASE + username + "/scripts/" + script_name;
+        var url = string.Format("{0}{1}{2}{3}{4}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/", script_name.Replace(" ", "%20"));
 
         var headers = new Dictionary<string, string>();
 

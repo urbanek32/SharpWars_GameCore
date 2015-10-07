@@ -24,6 +24,7 @@ public class Player : NetworkBehaviour {
     private GameManager _gameManager;
 
     public List<Pair<string, string>> scriptList = new List<Pair<string,string>>();
+    public GetScriptStatus ScriptFromCloudStatus { get; set; }
 
 	// works like constructor
 	void Awake() 
@@ -75,6 +76,15 @@ end"));
 	        tempBuilding.CalculateBounds();
 	        tempBuilding.SetTransparentMaterial(CanPlaceBuilding() ? allowedMaterial : notAllowedMaterial, false);
 	    }
+
+        if (ScriptFromCloudStatus == GetScriptStatus.NotYet && !string.IsNullOrEmpty(token))
+        {
+            var wc = GetComponentInChildren<WebsiteCommunication>();
+            //TO DO
+            //prawdziwy username
+            wc.GetScriptsFromCloud("janusz", token, null, WebsiteCommunication.HandleScriptList, this);
+            ScriptFromCloudStatus = GetScriptStatus.Downloading;
+        }
 	}
 
 
