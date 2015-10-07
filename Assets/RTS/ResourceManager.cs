@@ -95,5 +95,6 @@ namespace RTS {
         public static bool MenuOpen { get; set; }
         public static string LevelName { get; set; }
 
+        public static string PlayerName { get; set; }
 	}
 }
