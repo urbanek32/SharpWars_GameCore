@@ -96,5 +96,6 @@ namespace RTS {
         public static string LevelName { get; set; }
 
         public static string PlayerName { get; set; }
+        public static string PlayerToken { get; set; }
 	}
 }

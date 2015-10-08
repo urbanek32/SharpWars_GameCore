@@ -17,6 +17,12 @@ public class Player_Setup : NetworkBehaviour {
 		    player.username = string.IsNullOrEmpty(ResourceManager.PlayerName)
 		        ? "player" + Random.Range(1, 100)
 		        : ResourceManager.PlayerName;
+
+            // center camera on player
+		    var camPosition = Camera.main.transform.position;
+		    camPosition.x = player.transform.position.x;
+		    camPosition.z = player.transform.position.z - 50f;
+		    Camera.main.transform.position = camPosition;
 		}
 	}
 	

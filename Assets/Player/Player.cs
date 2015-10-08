@@ -16,6 +16,7 @@ public class Player : NetworkBehaviour {
 	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
 	public Material notAllowedMaterial, allowedMaterial;
 	public Color teamColor;
+    public WebsiteCommunication WebsiteCommunication;
 
 	private Dictionary< ResourceType, int > resources, resourceLimits;
 	private Building tempBuilding;
@@ -45,6 +46,7 @@ public class Player : NetworkBehaviour {
 	    {
             //dodanie komponentu do komunikacji ze stroną
             gameObject.AddComponent<WebsiteCommunication>();
+	        WebsiteCommunication = GetComponent<WebsiteCommunication>();
             
             // gowno potrzebne, zeby dac graczowi budynek startowy
 	        Cmd_SpawnStartBuilding();
@@ -204,7 +206,7 @@ end"));
 	public void FindBuildingLocation()
 	{
 		Vector3 newLocation = WorkManager.FindHitPoint(Input.mousePosition);
-		newLocation.y = 0;
+		//newLocation.y = 0;
 		tempBuilding.transform.position = newLocation;
 	}
 

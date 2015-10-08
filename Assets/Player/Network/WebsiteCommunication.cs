@@ -58,6 +58,11 @@ public class WebsiteCommunication : MonoBehaviour
 
         Player p = player;
         p.token = _token.token;
+
+        // just 4 testing
+        ResourceManager.PlayerToken = _token.token;
+        ResourceManager.PlayerName = "janusz";
+
         Debug.Log("Token set to: " + p.token);
     }
 
@@ -232,5 +237,29 @@ public class WebsiteCommunication : MonoBehaviour
         {
             return new Pair<string, string>(lsr.name, lsr.code);
         }*/
+    }
+
+    public void SendScoreToCloud(int score, int gameTime)
+    {
+        Debug.Log("Sending score...");
+        var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, "janusz", "/game/scores");
+
+        var headers = new Dictionary<string, string>();
+
+        headers["Content-Type"] = "application/json";
+        headers["Authorization"] = "Bearer " + ResourceManager.PlayerToken;
+
+        var scoreBody = new ScoreRequest
+        {
+            score = score,
+            gameTime = gameTime
+        };
+
+        var scoreRequest = JsonConvert.SerializeObject(scoreBody);
+        var rawData = System.Text.Encoding.ASCII.GetBytes(scoreRequest);
+
+        var wwwReq = new WWW(url, rawData, headers);
+
+        StartCoroutine(WaitForRequest(wwwReq, null, null, null));
     }
 }

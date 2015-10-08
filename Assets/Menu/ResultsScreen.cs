@@ -40,9 +40,11 @@ public class ResultsScreen : MonoBehaviour
             Time.timeScale = 1.0f;
             //ResourceManager.MenuOpen = false;
             //Application.LoadLevel("Map");
+            var wc = GetComponentInParent<Player>().WebsiteCommunication;
+            wc.SendScoreToCloud(666, (int)Time.timeSinceLevelLoad);
 
-            MakeGetRequest();
-            MakePostRequest();
+            //MakeGetRequest();
+            //MakePostRequest();
 
         }
         leftPos += padding + buttonWidth;
