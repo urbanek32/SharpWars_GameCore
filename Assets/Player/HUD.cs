@@ -20,6 +20,7 @@ public class HUD : MonoBehaviour {
 	public Texture2D rallyPointCursor;
 	public Texture2D healthy, damaged, critical;
 	public Texture2D[] resourceHealthBars;
+    public string scriptErrorString;
 
 	private Player player;
 	private CursorState activeCursorState;
@@ -34,17 +35,19 @@ public class HUD : MonoBehaviour {
     private static GUIStyle comboboxStyle = new GUIStyle();
     private ComboBox scriptSelectionBox = new ComboBox(new Rect(5, 20, 150, 20), new GUIContent("Wybierz skrypt"), null, comboboxStyle);
 	private bool scriptWindowOpen = false;
-    private Rect scriptWindowRect = new Rect(100, 100, 400, 240);
+    private Rect scriptWindowRect = new Rect(50, 50, 600, 540);
     private bool showCreateNewScriptWindow = false;
     private string newScriptName = "";
 
-	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
+    private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 15;
 	private const int ICON_WIDTH = 32, ICON_HEIGHT = 32, TEXT_WIDTH = 128, TEXT_HEIGHT = 32;
 	private const int BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64;
 	private const int BUTTON_SPACING = 7;
 	private const int SCROLL_BAR_WIDTH = 22;
 	private const int BUILD_IMAGE_PADDING = 8;
+
+    private const int SCRIPT_DEBUG_MSG_AREA_HEIGHT = 150;
 
     public const string STR_PROGRAM_OBJECT = "Zaprogramuj\nobiekt";
     public const string STR_STOP_SCRIPT_EXECUTION = "Zatrzymaj\nprogram";
@@ -475,17 +478,19 @@ public class HUD : MonoBehaviour {
         if (!scriptSelectionBox.IsClicked())
         {
             GUI.SetNextControlName("ScriptTextArea");
-            player.SelectedObject.unitScript = GUI.TextArea(new Rect(0, 40, 400, 200), player.SelectedObject.unitScript);
+            player.SelectedObject.unitScript = GUI.TextArea(new Rect(5, 40, scriptWindowRect.width - 10, scriptWindowRect.height - SCRIPT_DEBUG_MSG_AREA_HEIGHT - 50), player.SelectedObject.unitScript);
             GUI.FocusControl("ScriptTextArea");
 
+            GUI.TextArea(new Rect(5, scriptWindowRect.height - SCRIPT_DEBUG_MSG_AREA_HEIGHT - 5, scriptWindowRect.width - 10, SCRIPT_DEBUG_MSG_AREA_HEIGHT), scriptErrorString);
+
             //create new script
-            if (GUI.Button(new Rect(165, 20, 75, 20), "Nowy"))
+            if (GUI.Button(new Rect(scriptWindowRect.width - 230, 20, 75, 20), "Nowy"))
             {
                 showCreateNewScriptWindow = true;
             }
 
             //save script to current selection
-            if (GUI.Button(new Rect(240, 20, 75, 20), "Zapisz"))
+            if (GUI.Button(new Rect(scriptWindowRect.width - 155, 20, 75, 20), "Zapisz"))
             {
                 if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
                 {
@@ -505,11 +510,12 @@ public class HUD : MonoBehaviour {
             }
 
             //delete selected script
-            if (GUI.Button(new Rect(315, 20, 75, 20), "Usuń"))
+            if (GUI.Button(new Rect(scriptWindowRect.width - 80, 20, 75, 20), "Usuń"))
             {
                 if (scriptSelectionBox.SelectedItemIndex >= 0 && player.scriptList.Count > 0)
                 {
                     player.scriptList.RemoveAt(scriptSelectionBox.SelectedItemIndex);
+                    player.SelectedObject.unitScript = "";
                     scriptSelectionBox.Deselect(player);
                 }
             }
