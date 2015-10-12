@@ -50,10 +50,23 @@ public class WorldObject : NetworkBehaviour {
         try
         {
             scriptExecutionQueue = ScriptManager.RegisterUserIngameScript(unitScript);
+            player.hud.scriptErrorString = string.Format("[{0}] {1}", System.DateTime.Now.ToString("HH:mm:ss"), "Skompilowane i działa!");
         }
         catch (NLua.Exceptions.LuaException e)
         {
-            Debug.LogError("Your code is piece of crap! Details: " + e.ToString());
+            var lineWithError = ScriptManager.FindErrorInBuffer(e.Message);
+
+            if (string.IsNullOrEmpty(lineWithError))
+            {
+                player.hud.scriptErrorString = string.Format("Błąd tkwi gdzieś w: \"{0}\"\n{1}", e.Message, player.hud.scriptErrorString);
+            }
+            else
+            {
+                var cut = unitScript.Remove(unitScript.IndexOf(lineWithError));
+                var lineCount = cut.Split('\n').Length;
+
+                player.hud.scriptErrorString = string.Format("Błąd w lini: {0}\n#> \"{1}\"\n\n{2}", lineCount, lineWithError, player.hud.scriptErrorString);
+            }
         }
     }
 
@@ -71,11 +84,7 @@ public class WorldObject : NetworkBehaviour {
 	{
 		selectionBounds = ResourceManager.InvalidBounds;
 		CalculateBounds();
-        unitScript = @"v = Vector3(0, 0, -10)
-while v.x > -100 do
-    PanzerVor(v)
-    v.x = v.x - 10
-end";
+        unitScript = "";
 	}
 
 	// Use this for initialization

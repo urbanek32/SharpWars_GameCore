@@ -137,7 +137,8 @@ namespace RTS
             }
             catch (NLua.Exceptions.LuaException e)
             {
-                throw e;
+                var ex = new NLua.Exceptions.LuaException(source);
+                throw ex;
             }
 
             return environment.GetFunction(user_func_name);
@@ -203,7 +204,7 @@ namespace RTS
                     //IF found!
 
                     //Start a statement
-                    LuaFunction cclf = GenerateUserFunction("if " + re_if.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    LuaFunction cclf = GenerateUserFunction(string.Format("{0} {1} {2}", "if ", re_if.Match(line).Groups["ConditionExp"].Value, "then return true\n else return false\n end"));
                     IfElseStatement new_statement = new IfElseStatement(cclf);
                     if (block_depth.Count == 0)
                     {
@@ -228,7 +229,7 @@ namespace RTS
                 else if (re_elseif.IsMatch(line))
                 {
                     //ELSEIF found!
-                    LuaFunction cclf = GenerateUserFunction("if " + re_elseif.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    LuaFunction cclf = GenerateUserFunction(string.Format("{0} {1} {2}", "if ", re_elseif.Match(line).Groups["ConditionExp"].Value, "then return true\n else return false\n end"));
                     IfElseStatement new_statement = new IfElseStatement(cclf);
 
                     if (block_depth.Peek() is IfElseStatement)
@@ -255,7 +256,7 @@ namespace RTS
                 else if (re_while.IsMatch(line))
                 {
                     //WHILE found!
-                    LuaFunction cclf = GenerateUserFunction("if " + re_while.Match(line).Groups["ConditionExp"].Value + "then return true\n else return false\n end");
+                    LuaFunction cclf = GenerateUserFunction(string.Format("{0} {1} {2}", "if ", re_while.Match(line).Groups["ConditionExp"].Value, "then return true\n else return false\n end"));
                     WhileStatement new_statement = new WhileStatement(cclf);
 
                     if (block_depth.Count == 0)
@@ -339,6 +340,26 @@ namespace RTS
                 ret_val.Add(new NonconditionalStatement(ncs_block));
 
             return ret_val;
+        }
+
+        public static string FindErrorInBuffer(string scriptWithError)
+        {
+            var lines = scriptWithError.Split('\n');
+
+            foreach (var line in scriptWithError.Split('\n'))
+            {
+                try
+                {
+                    environment.DoString(line);
+                }
+                catch(NLua.Exceptions.LuaException le)
+                {
+                    return line;
+                }
+            }
+
+            //jeśli z jakiegoś powodu podamy coś co działa
+            return null;
         }
     }
 }
