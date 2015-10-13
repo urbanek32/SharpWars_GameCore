@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using NLua;
@@ -15,11 +16,11 @@ namespace RTS
 
         private static Lua environment;
 
-        private static System.UInt64 createdUserScripts = 0;
+        private static ulong createdUserScripts = 0;
 
-        private static Dictionary<string, LuaFunction> globals = new Dictionary<string, LuaFunction>();
-        private static Dictionary<string, LuaFunction> customScripts = new Dictionary<string, LuaFunction>();
-        private static List<Pair<string, LuaFunction>> blockingFunctions = new List<Pair<string, LuaFunction>>();
+        private static readonly Dictionary<string, LuaFunction> globals = new Dictionary<string, LuaFunction>();
+        private static readonly Dictionary<string, LuaFunction> customScripts = new Dictionary<string, LuaFunction>();
+        private static readonly List<Pair<string, LuaFunction>> blockingFunctions = new List<Pair<string, LuaFunction>>();
 
         public static void Init()
         {
@@ -45,7 +46,7 @@ namespace RTS
         {
             if (!globals.ContainsKey(global_variable))
             {
-                string setter_method = "function GlobalVariableSetter" + global_variable + "(val)\n" + global_variable + " = val\nend";
+                string setter_method = string.Format("{0}{1}{2}{3}{4}", "function GlobalVariableSetter", global_variable, "(val)\n", global_variable, " = val\nend");
                 LuaFunction setter_func = null;
                 try
                 {
@@ -73,19 +74,12 @@ namespace RTS
         {
             if (!customScripts.ContainsKey(custom_function_name) && customScripts.ContainsKey(state_checker_name))
             {
-                try
-                {
-                    LuaFunction lf = null;
-                    environment.DoString(func_definition);
-                    lf = environment.GetFunction(custom_function_name);
-                    customScripts[custom_function_name] = lf;
+                LuaFunction lf = null;
+                environment.DoString(func_definition);
+                lf = environment.GetFunction(custom_function_name);
+                customScripts[custom_function_name] = lf;
 
-                    blockingFunctions.Add(new Pair<string, LuaFunction>(custom_function_name, customScripts[state_checker_name]));
-                }
-                catch (NLua.Exceptions.LuaException e)
-                {
-                    throw e;
-                }
+                blockingFunctions.Add(new Pair<string, LuaFunction>(custom_function_name, customScripts[state_checker_name]));
             }
             else
             {
@@ -101,17 +95,10 @@ namespace RTS
         {
             if (!customScripts.ContainsKey(function_name))
             {
-                try
-                {
-                    LuaFunction lf = null;
-                    environment.DoString(function_definition);
-                    lf = environment.GetFunction(function_name);
-                    customScripts[function_name] = lf;
-                }
-                catch (NLua.Exceptions.LuaException e)
-                {
-                    throw e;
-                }
+                LuaFunction lf = null;
+                environment.DoString(function_definition);
+                lf = environment.GetFunction(function_name);
+                customScripts[function_name] = lf;
             }
             else
             {
@@ -127,15 +114,15 @@ namespace RTS
 
         private static LuaFunction GenerateUserFunction(string source)
         {
-            string user_func_name = "UDS_" + createdUserScripts.ToString();
-            string src = "function " + user_func_name + "()\n" + source + "\nend";
+            var user_func_name = string.Format("{0}{1}", "UDS_", createdUserScripts);
+            var src = string.Format("{0} {1}{2}{3}{4}","function", user_func_name, "()\n", source, "\nend");
 
             try
             {
                 environment.DoString(src);
                 createdUserScripts++;
             }
-            catch (NLua.Exceptions.LuaException e)
+            catch (NLua.Exceptions.LuaException)
             {
                 var ex = new NLua.Exceptions.LuaException(source);
                 throw ex;
@@ -152,8 +139,8 @@ namespace RTS
             Stack<ConditionalStatement> block_depth = new Stack<ConditionalStatement>();
 
             Pair<string, LuaFunction> blocking_func_pair = null;
-            string func_buffer = "";
-            string[] loc = user_defined_script.Split(new string[] { "\r\n", "\n" }, System.StringSplitOptions.None);
+            var func_buffer = "";
+            var loc = user_defined_script.Split(new[] { "\r\n", "\n" }, System.StringSplitOptions.None);
 
             Regex re_if = new Regex("(\\s+if\\s|^if\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sthen($|\\s)");
             Regex re_elseif = new Regex("(\\s+elseif\\s|^elseif\\s)(?<ConditionExp>[a-zA-Z0-9\\s=+\\/*-<>~]*)\\sthen($|\\s)");
@@ -291,14 +278,10 @@ namespace RTS
                     {
                         //regexp byłyby wydajniejszy?
                         string[] variants = { f.First + " ", f.First + "\t", f.First + "(" };
-                        foreach (string v in variants)
+                        if (variants.Any(v => line.Contains(v)))
                         {
-                            if (line.Contains(v))
-                            {
-                                found_blocking_func = true;
-                                blocking_func_pair = f;
-                                break;
-                            }
+                            found_blocking_func = true;
+                            blocking_func_pair = f;
                         }
 
                         if (found_blocking_func)
@@ -344,15 +327,13 @@ namespace RTS
 
         public static string FindErrorInBuffer(string scriptWithError)
         {
-            var lines = scriptWithError.Split('\n');
-
             foreach (var line in scriptWithError.Split('\n'))
             {
                 try
                 {
                     environment.DoString(line);
                 }
-                catch(NLua.Exceptions.LuaException le)
+                catch(NLua.Exceptions.LuaException)
                 {
                     return line;
                 }

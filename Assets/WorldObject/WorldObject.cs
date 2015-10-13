@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
@@ -50,7 +51,7 @@ public class WorldObject : NetworkBehaviour {
         try
         {
             scriptExecutionQueue = ScriptManager.RegisterUserIngameScript(unitScript);
-            player.hud.scriptErrorString = string.Format("[{0}] {1}", System.DateTime.Now.ToString("HH:mm:ss"), "Skompilowane i działa!");
+            player.hud.scriptErrorString = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), "Skompilowane i działa!");
         }
         catch (NLua.Exceptions.LuaException e)
         {
@@ -62,7 +63,7 @@ public class WorldObject : NetworkBehaviour {
             }
             else
             {
-                var cut = unitScript.Remove(unitScript.IndexOf(lineWithError));
+                var cut = unitScript.Remove(unitScript.IndexOf(lineWithError, StringComparison.Ordinal));
                 var lineCount = cut.Split('\n').Length;
 
                 player.hud.scriptErrorString = string.Format("Błąd w lini: {0}\n#> \"{1}\"\n\n{2}", lineCount, lineWithError, player.hud.scriptErrorString);
@@ -218,7 +219,7 @@ public class WorldObject : NetworkBehaviour {
     protected virtual void DecideWhatToDo()
     {
         //determine what should be done by the world object at the current point in time
-        Vector3 currentPosition = transform.position;
+        /*Vector3 currentPosition = transform.position;
         nearbyObjects = WorkManager.FindNearbyObjects(currentPosition, detectionRange);
         if (CanAttack())
         {
@@ -231,7 +232,7 @@ public class WorldObject : NetworkBehaviour {
             }
             WorldObject closestObject = WorkManager.FindNearestWorldObjectInListToPosition(enemyObjects, currentPosition);
             if (closestObject) BeginAttack(closestObject);
-        }
+        }*/
     }
 
 
@@ -269,12 +270,7 @@ public class WorldObject : NetworkBehaviour {
 		Vector3 targetLocation = target.transform.position;
 		Vector3 direction = targetLocation - transform.position;
 
-		if(direction.sqrMagnitude < weaponRange * weaponRange)
-		{
-			return true;
-		}
-
-		return false;
+		return direction.sqrMagnitude < weaponRange * weaponRange;
 	}
 
 	private void AdjustPosition()
