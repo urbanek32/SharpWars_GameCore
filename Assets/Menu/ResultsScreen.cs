@@ -10,7 +10,7 @@ public class ResultsScreen : MonoBehaviour
     public string DescriptionWin { get; set; }
     public string PlayerWinner { get; set; }
 
-    private VictoryCondition metVictoryCondition;
+    //private VictoryCondition metVictoryCondition;
 
 
     void OnGUI()

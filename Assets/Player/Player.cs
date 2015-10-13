@@ -54,17 +54,6 @@ public class Player : NetworkBehaviour {
 
             _gameManager.LoadDetails();
 	    }
-
-	    /* TO DEAL WITH
-         * HARDCODED EXAMPLE LIST
-         */
-        scriptList.Add(new Pair<string, string>("PanzerVor", @"v = Vector3(0, 0, -10)
-while v.x > -100 do
-    PanzerVor(v)
-    v.x = v.x - 10
-end"));
-        scriptList.Add(new Pair<string, string>("Janusz Testowy", "Debug.Log(\"Czesc Jestem Janusz\")"));
-        scriptList.Add(new Pair<string, string>("Pusta #3", ""));
 	}
 	
 	// Update is called once per frame
