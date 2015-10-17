@@ -235,8 +235,14 @@ public class WorldObject : NetworkBehaviour {
         }*/
     }
 
-
-
+    //czemu object? ano żeby się nie wywaliło jak n00b zapoda inta, stringa, whatever...
+    public void ScriptAttackObject(object obj)
+    {
+        if (CanAttack() && obj is WorldObject && ((WorldObject)obj).player != player)
+        {
+            BeginAttack((WorldObject)obj);
+        }
+    }
 
 
 

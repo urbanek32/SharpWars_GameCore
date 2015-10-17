@@ -28,6 +28,10 @@ public class GameObjectList : MonoBehaviour
 			// Register IsDestinationReached
             ScriptManager.RegisterNBCustomFuntion("IsDestinationReached", "function IsDestinationReached()\n if this:isUnit() then\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if CompareF(dst.x, src.x) and CompareF(dst.z, src.z) then\n		return true\n	else\n		return false\n	end\n else return true\n end \n end");
 			
+            // TO DO, przerobić na synchroniczną funkcję
+            // Attack Object
+            ScriptManager.RegisterNBCustomFuntion("Attack", "function Attack(obj)\n this:ScriptAttackObject(obj) \n end");
+
             // Blocking functions
             // Register PanzerVor
             ScriptManager.RegisterCustomFunction("PanzerVor", "function PanzerVor(pos)\n if this:isUnit() then this:StartMove(pos)\n end end", "IsDestinationReached");
