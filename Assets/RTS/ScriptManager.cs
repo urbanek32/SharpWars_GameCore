@@ -91,7 +91,7 @@ namespace RTS
         }
 
         //Registering non-blocking custom functions
-        public static void RegisterNBCustomFuntion(string function_name, string function_definition)
+        public static void RegisterNBCustomFunction(string function_name, string function_definition)
         {
             if (!customScripts.ContainsKey(function_name))
             {
@@ -289,13 +289,14 @@ namespace RTS
 
                     }
 
-                    func_buffer += line + "\n";
+                    
 
                     if (found_blocking_func)
                     {
                         try
                         {
-                            ncs_block.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), blocking_func_pair.Second));
+                            ncs_block.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(func_buffer), null));
+                            ncs_block.Add(new Pair<LuaFunction, LuaFunction>(GenerateUserFunction(line + "\n"), blocking_func_pair.Second));
 
                             func_buffer = "";
                         }
@@ -303,6 +304,10 @@ namespace RTS
                         {
                             throw e;
                         }
+                    }
+                    else
+                    {
+                        func_buffer += line + "\n";
                     }
                 }
             }

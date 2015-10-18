@@ -20,7 +20,8 @@ public class Harvester : Unit {
 	protected override void Start()
 	{
 		base.Start();
-		harvestType = ResourceType.Unknown; 
+		harvestType = ResourceType.Unknown;
+        resourceMaxScanDistance = 70.0f;
 	}
 
 	protected override void Update()
@@ -173,7 +174,7 @@ public class Harvester : Unit {
 
 	// Private Methods
 
-	private void StartHarvest(Resource resource)
+	protected override void StartHarvest(Resource resource)
 	{
 		resourceDeposit = resource;
 		if(currentLoad >= capacity)

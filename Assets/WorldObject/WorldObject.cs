@@ -42,6 +42,9 @@ public class WorldObject : NetworkBehaviour {
 	private float currentWeaponChargeTime;
     private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
 
+    protected float resourceMaxScanDistance = 0.0f;
+    protected float enemyMaxScanDistance = 10.0f;
+
 
 	//splited script <blocking func part, execution checker that return true or false>
     protected List<ConditionalStatement> scriptExecutionQueue = new List<ConditionalStatement>();
@@ -244,6 +247,65 @@ public class WorldObject : NetworkBehaviour {
         }
     }
 
+    public void ScriptHarvestResource(object obj)
+    {
+        if (isHarvester() && obj is Resource)
+        {
+            StartHarvest((Resource)obj);
+        }
+    }
+
+    public Resource[] ScriptGetArrayOfResources()
+    {
+        //get all ore depos
+        var resource = new List<OreDeposit>();
+
+        foreach (var od in FindObjectsOfType<OreDeposit>())
+        {
+            if (Vector3.Distance(transform.position, od.transform.position) > resourceMaxScanDistance)
+                continue;
+
+            resource.Add(od);
+        }
+
+        return resource.ToArray();
+    }
+
+    public WorldObject[] ScriptGetArrayOfEnemies()
+    {
+        var enemies = new List<WorldObject>();
+
+        foreach(var p in FindObjectsOfType<Player>())
+        {
+            if (p == player)
+                continue;
+
+            //Add all enemy units
+            foreach(var u in p.GetComponentsInChildren<Unit>())
+            {
+                if (Vector3.Distance(transform.position, u.transform.position) > enemyMaxScanDistance)
+                    continue;
+
+                enemies.Add(u);
+            }
+
+            //Add all enemy buildings
+            foreach(var b in p.GetComponentsInChildren<Building>())
+            {
+                if (Vector3.Distance(transform.position, b.transform.position) > enemyMaxScanDistance)
+                    continue;
+
+                enemies.Add(b);
+            }
+        }
+
+        return enemies.ToArray();
+    }
+
+    public Vector3 GetPosition()
+    {
+        return transform.position;
+    }
 
 
 	private void ChangeSelection(WorldObject worldObject, Player controller)
@@ -644,6 +706,10 @@ public class WorldObject : NetworkBehaviour {
     public bool isResource()
     {
         return (this is Resource);
+    }
+
+    protected virtual void StartHarvest(Resource resource)
+    {
     }
 
 }

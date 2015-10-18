@@ -16,7 +16,7 @@ public class Tank : Unit
 	{
 		base.Start ();
 
-
+        enemyMaxScanDistance = 100.0f;
 
 
 	}

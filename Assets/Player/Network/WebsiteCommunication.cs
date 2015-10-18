@@ -116,7 +116,7 @@ public class WebsiteCommunication : MonoBehaviour
         };
 
         var jsonData = JsonConvert.SerializeObject(playerCredentials);
-        var rawData = System.Text.Encoding.ASCII.GetBytes(jsonData);
+        var rawData = System.Text.Encoding.UTF8.GetBytes(jsonData);
 
         var wwwReq = new WWW(url, rawData, headers);
 
@@ -128,7 +128,6 @@ public class WebsiteCommunication : MonoBehaviour
     public void GetScriptsFromCloud(string username, string token, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
         var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/list");
-
         var headers = new Dictionary<string, string>();
 
         headers["Content-Type"] = "application/json";
@@ -163,7 +162,7 @@ public class WebsiteCommunication : MonoBehaviour
         };
 
         var scriptRequest = JsonConvert.SerializeObject(scriptBody);
-        var rawData = System.Text.Encoding.ASCII.GetBytes(scriptRequest);
+        var rawData = System.Text.Encoding.UTF8.GetBytes(scriptRequest);
 
         var wwwReq = new WWW(url, rawData, headers);
 
@@ -181,7 +180,7 @@ public class WebsiteCommunication : MonoBehaviour
     //zwraca true jeśli chmura zatwierdzi, inaczej false
     public void EditScriptInCloud(string username, string token, string script_name, string script_description, string script_code, HandleOnError hoe, HandleOnSuccess hos, object caller)
     {
-        var url = string.Format("{0}{1}{2}{3}{4}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/update/", script_name.Replace(" ", "%20"));
+        var url = string.Format("{0}{1}{2}{3}{4}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, username, "/scripts/update/", System.Uri.EscapeUriString(script_name));
         
         var headers = new Dictionary<string, string>();
 
@@ -201,7 +200,7 @@ public class WebsiteCommunication : MonoBehaviour
         };
 
         var scriptRequest = JsonConvert.SerializeObject(scriptBody);
-        var rawData = System.Text.Encoding.ASCII.GetBytes(scriptRequest);
+        var rawData = System.Text.Encoding.UTF8.GetBytes(scriptRequest);
 
         var wwwReq = new WWW(url, rawData, headers);
 
@@ -257,7 +256,7 @@ public class WebsiteCommunication : MonoBehaviour
         };
 
         var scoreRequest = JsonConvert.SerializeObject(scoreBody);
-        var rawData = System.Text.Encoding.ASCII.GetBytes(scoreRequest);
+        var rawData = System.Text.Encoding.UTF8.GetBytes(scoreRequest);
 
         var wwwReq = new WWW(url, rawData, headers);
 
