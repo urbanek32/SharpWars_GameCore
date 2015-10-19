@@ -241,17 +241,19 @@ public class WorldObject : NetworkBehaviour {
     //czemu object? ano żeby się nie wywaliło jak n00b zapoda inta, stringa, whatever...
     public void ScriptAttackObject(object obj)
     {
-        if (CanAttack() && obj is WorldObject && ((WorldObject)obj).player != player)
+        var wo = obj as WorldObject;
+        if (CanAttack() && wo != null && wo.player != player)
         {
-            BeginAttack((WorldObject)obj);
+            BeginAttack(wo);
         }
     }
 
     public void ScriptHarvestResource(object obj)
     {
-        if (isHarvester() && obj is Resource)
+        var res = obj as Resource;
+        if (isHarvester() && res != null)
         {
-            StartHarvest((Resource)obj);
+            StartHarvest(res);
         }
     }
 
@@ -300,11 +302,6 @@ public class WorldObject : NetworkBehaviour {
         }
 
         return enemies.ToArray();
-    }
-
-    public Vector3 GetPosition()
-    {
-        return transform.position;
     }
 
 
