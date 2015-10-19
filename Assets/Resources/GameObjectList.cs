@@ -42,6 +42,8 @@ public class GameObjectList : MonoBehaviour
             ScriptManager.RegisterNBCustomFunction("GoEast", "function GoEast(x_times)\n if x_times == nil then x_times = 1 end local going_east_position12345 = this.transform.position \n going_east_position12345.x = going_east_position12345.x + (5*x_times) \n return going_east_position12345\n end ");
             // GoWest
             ScriptManager.RegisterNBCustomFunction("GoWest", "function GoWest(x_times)\n if x_times == nil then x_times = 1 end local going_west_position12345 = this.transform.position \n going_west_position12345.x = going_west_position12345.x - (5*x_times) \n return going_west_position12345\n end ");
+            // DebugPrint
+            ScriptManager.RegisterNBCustomFunction("DebugPrint", "function DebugPrint(to_be_printed)\n this:GetPlayer().hud.scriptErrorString = tostring(to_be_printed,\"\\n\", this:GetPlayer().hud.scriptErrorString) \n end");
 
             // TO DO, przerobić na synchroniczne funkcje
             // Attack Object
