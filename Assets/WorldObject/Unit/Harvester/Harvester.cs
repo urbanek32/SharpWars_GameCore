@@ -14,6 +14,8 @@ public class Harvester : Unit {
 	private ResourceType harvestType;
 	private Resource resourceDeposit;
 	private float currentDeposit = 0.0f;
+    public static readonly float resourceMaxScanDistance = 70.0f;
+
 
 	// Game Engine methods, all can be overridden by subclass
 
@@ -21,7 +23,6 @@ public class Harvester : Unit {
 	{
 		base.Start();
 		harvestType = ResourceType.Unknown;
-        resourceMaxScanDistance = 70.0f;
 	}
 
 	protected override void Update()

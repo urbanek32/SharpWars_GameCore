@@ -42,7 +42,6 @@ public class WorldObject : NetworkBehaviour {
 	private float currentWeaponChargeTime;
     private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
 
-    protected float resourceMaxScanDistance = 0.0f;
     protected float enemyMaxScanDistance = 10.0f;
 
 
@@ -262,12 +261,15 @@ public class WorldObject : NetworkBehaviour {
         //get all ore depos
         var resource = new List<OreDeposit>();
 
-        foreach (var od in FindObjectsOfType<OreDeposit>())
+        if (this is Harvester)
         {
-            if (Vector3.Distance(transform.position, od.transform.position) > resourceMaxScanDistance)
-                continue;
+            foreach (var od in FindObjectsOfType<OreDeposit>())
+            {
+                if (Vector3.Distance(transform.position, od.transform.position) > Harvester.resourceMaxScanDistance)
+                    continue;
 
-            resource.Add(od);
+                resource.Add(od);
+            }
         }
 
         return resource.ToArray();
@@ -703,6 +705,11 @@ public class WorldObject : NetworkBehaviour {
     public bool isResource()
     {
         return (this is Resource);
+    }
+
+    public bool isWonder()
+    {
+        return (this is Wonder);
     }
 
     protected virtual void StartHarvest(Resource resource)
