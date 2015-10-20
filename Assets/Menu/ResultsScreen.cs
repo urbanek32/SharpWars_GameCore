@@ -9,6 +9,7 @@ public class ResultsScreen : MonoBehaviour
     public GUISkin Skin;
     public string DescriptionWin { get; set; }
     public string PlayerWinner { get; set; }
+    public bool LocalPlayerWin { get; set; }
 
     //private VictoryCondition metVictoryCondition;
 
@@ -19,19 +20,27 @@ public class ResultsScreen : MonoBehaviour
         GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
         GUI.depth = 0;
 
+        Cursor.visible = true;
+        string message;
+
         //display 
         float padding = ResourceManager.Padding;
         float itemHeight = ResourceManager.ButtonHeight;
         float buttonWidth = ResourceManager.ButtonWidth;
         float leftPos = padding;
         float topPos = padding;
-        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
-        string message = "Game Over";
-        Cursor.visible = true;
-        //if (winner)
+        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");      
+        
+        if (LocalPlayerWin)
         {
-            message = string.Format("Congratulations {0}!\nHave won by {1}", PlayerWinner, DescriptionWin);
+            message = string.Format("Congratulations {0}!\nYou have won by {1}", PlayerWinner, DescriptionWin);
+            
         }
+        else
+        {
+            message = string.Format("You loose!\nThe {0} have won by {1}", PlayerWinner, DescriptionWin);
+        }
+
         GUI.Label(new Rect(leftPos, topPos, Screen.width - 2 * padding, itemHeight), message);
         leftPos = Screen.width / 2f - padding / 2f - buttonWidth;
         topPos += itemHeight + padding;
@@ -55,7 +64,7 @@ public class ResultsScreen : MonoBehaviour
             //Application.LoadLevel("MainMenu");
             Cursor.visible = true;
             Debug.Log("Do smtg usefull and QUIT!");
-            Application.OpenURL("http://xvideos.com");
+            //Application.OpenURL("http://xvideos.com");
             Application.Quit();
         }
 

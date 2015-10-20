@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
 	    foreach (var victoryCondition in victoryConditions.Where(victoryCondition => victoryCondition.GameFinished()))
 	    {
             _localPlayer.Cmd_PlayerWin(victoryCondition.GetWinner().netId, victoryCondition.GetDescription());
+	        this.enabled = false;
 	    }
 	}
 }

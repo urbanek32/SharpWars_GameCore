@@ -38,7 +38,7 @@ public class GameParameters : MonoBehaviour
             Parameters[words[0]] = words[1];
 	    }
 
-	    ResourceManager.PlayerName = Parameters["username"];
+	    //ResourceManager.PlayerName = Parameters["username"];
 
         // TODO Uncomment on deploy
         /*var customLobby = GameObject.FindObjectOfType(typeof(CustomLobbyManager)) as CustomLobbyManager;

@@ -61,7 +61,8 @@ public class WebsiteCommunication : MonoBehaviour
 
         // just 4 testing
         ResourceManager.PlayerToken = _token.token;
-        ResourceManager.PlayerName = "janusz";
+        //ResourceManager.PlayerName = "janusz";
+        //player.Cmd_SetPlayerName(player.netId, ResourceManager.PlayerName);
 
         Debug.Log("Token set to: " + p.token);
     }

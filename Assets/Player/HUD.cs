@@ -244,10 +244,12 @@ public class HUD : MonoBehaviour {
 
     public void DisplayResultScreen(NetworkInstanceId playerId, string descriptionWon)
     {
+        var playerTheWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
         var resultsScreen = GetComponent<ResultsScreen>();
         //resultsScreen.SetMetVictoryCondition(victoryCondition);
         resultsScreen.DescriptionWin = descriptionWon;
-        resultsScreen.PlayerWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>().username;
+        resultsScreen.PlayerWinner = playerTheWinner.username;
+        resultsScreen.LocalPlayerWin = playerTheWinner.isLocalPlayer;
         resultsScreen.enabled = true;
         Time.timeScale = 0.0f;
         Cursor.visible = true;
