@@ -11,7 +11,7 @@ public class CustomNetworkManager : NetworkManager
     void Start()
     {
         //Debug.Log("CNM Start");
-        _gameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
+        //_gameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
@@ -20,7 +20,7 @@ public class CustomNetworkManager : NetworkManager
 
         if (NetworkServer.connections.Count >= PlayersToStartGame)
         {
-            _gameManager.LoadDetails();
+            //_gameManager.LoadDetails();
             Debug.LogFormat("Ilosc graczy: {0}", NetworkServer.connections.Count);
         }
     }
@@ -30,7 +30,7 @@ public class CustomNetworkManager : NetworkManager
         base.OnStartServer();
         //Debug.Log("Server started");
 
-        _gameManager.enabled = true;
+        //_gameManager.enabled = true;
     }
 
     public override void OnStopServer()
@@ -38,7 +38,7 @@ public class CustomNetworkManager : NetworkManager
         base.OnStopServer();
         //Debug.Log("Server stopped");
 
-        _gameManager.enabled = false;
+        //_gameManager.enabled = false;
     }
 
     public override void OnStartClient(NetworkClient client)
@@ -46,7 +46,7 @@ public class CustomNetworkManager : NetworkManager
         base.OnStartClient(client);
         Debug.Log("Client started");
 
-        _gameManager.enabled = true;
+        //_gameManager.enabled = true;
     }
 
     public override void OnStopClient()
@@ -54,6 +54,6 @@ public class CustomNetworkManager : NetworkManager
         base.OnStopClient();
         Debug.Log("Client stopped");
 
-        _gameManager.enabled = false;
+        //_gameManager.enabled = false;
     }
 }

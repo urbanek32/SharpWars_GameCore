@@ -52,8 +52,9 @@ public class Player : NetworkBehaviour {
 	        Cmd_SpawnStartBuilding();
 	        Cmd_SpawnStartUnit();
 
-            _gameManager.LoadDetails();
+            
 	    }
+        _gameManager.LoadDetails();
 	}
 	
 	// Update is called once per frame

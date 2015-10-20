@@ -11,7 +11,12 @@ public class GameParameters : MonoBehaviour
     public Dictionary<string, string> Parameters = new Dictionary<string, string>(); 
 
     private string _tempParams = @"sharpwars://master=true&username=test&token=SUPERTOKENBULWO123321!@#%^OLE&server_ip=62.61.60.7&server_port=4321/";
-	
+
+    void Awake()
+    {
+        
+    }
+
 	void Start () 
     {
 	    //var param = Environment.GetCommandLineArgs();
@@ -36,6 +41,12 @@ public class GameParameters : MonoBehaviour
 	    ResourceManager.PlayerName = Parameters["username"];
 
         // TODO Uncomment on deploy
+        /*var customLobby = GameObject.FindObjectOfType(typeof(CustomLobbyManager)) as CustomLobbyManager;
+	    if (customLobby != null)
+	    {
+	        customLobby.StartClient();
+	    }*/
+
 	    /*var nm = GameObject.FindObjectOfType(typeof (CustomNetworkManager)) as CustomNetworkManager;
 	    if (nm != null)
 	    {

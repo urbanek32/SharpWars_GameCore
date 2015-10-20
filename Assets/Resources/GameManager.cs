@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Initialise();
+        //Initialise();
     }
 
     public void Initialise()
