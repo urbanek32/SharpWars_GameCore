@@ -4,6 +4,7 @@ using System.Collections;
 using Newtonsoft.Json;
 
 using RTS;
+using UnityEngine.Networking;
 
 public class ResultsScreen : MonoBehaviour
 {
@@ -53,7 +54,16 @@ public class ResultsScreen : MonoBehaviour
             //ResourceManager.MenuOpen = false;
             //Application.LoadLevel("Map");
             //var wc = GetComponentInParent<Player>().WebsiteCommunication;
-            Player.WebsiteCommunication.FakeSendScoreToCloud(Convert.ToInt32(Player.netId.Value), (int)Time.timeSinceLevelLoad, LocalPlayerWin);
+            //Player.WebsiteCommunication.FakeSendScoreToCloud(Convert.ToInt32(Player.netId.Value), (int)Time.timeSinceLevelLoad, LocalPlayerWin);
+            foreach(var p in GameObject.FindObjectsOfType(typeof(Player)))
+            {
+                var lp = p as Player;
+                if (lp.isLocalPlayer)
+                {
+                    lp.WebsiteCommunication.SendScoreToCloud(Convert.ToInt32(lp.netId.Value), (int)Time.timeSinceLevelLoad, LocalPlayerWin);
+                    break;
+                }   
+            }
 
             //MakeGetRequest();
             //MakePostRequest();

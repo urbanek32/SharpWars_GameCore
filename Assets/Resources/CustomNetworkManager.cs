@@ -6,7 +6,7 @@ public class CustomNetworkManager : NetworkManager
 {
     public int PlayersToStartGame = 2;
 
-    private GameManager _gameManager;
+    //private GameManager _gameManager;
 
     void Start()
     {

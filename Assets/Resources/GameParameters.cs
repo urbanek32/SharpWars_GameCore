@@ -11,7 +11,8 @@ public class GameParameters : MonoBehaviour
     public Dictionary<string, string> Parameters = new Dictionary<string, string>();
 
     private string _tempParams =
-        @"sharpwars://master=0&username=test2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QyIiwiaWF0IjoxNDQ1MzY1MTk4LCJleHAiOjE0NDUzODMxOTh9.tSujcV3-9isS6ihsls1zSDEfGLkFgJoEZN2_E-4ZCEk&server_ip=62.61.60.7&server_port=1234/";
+        @"sharpwars://master=0&username=test2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QyIiwiaWF0IjoxNDQ1MzY1MTk4LCJleHAiOjE0NDUzODMxOTh9.tSujcV3-9isS6ihsls1zSDEfGLkFgJoEZN2_E-4ZCEk&server_ip=62.61.60.7&server_port=1234/";
+
 
 
     void Awake()

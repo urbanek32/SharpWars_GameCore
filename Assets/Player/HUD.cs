@@ -244,18 +244,18 @@ public class HUD : MonoBehaviour {
 
     public void DisplayResultScreen(NetworkInstanceId playerId, string descriptionWon)
     {
-            var playerTheWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
-            var resultsScreen = GetComponent<ResultsScreen>();
-            //resultsScreen.SetMetVictoryCondition(victoryCondition);
-            resultsScreen.Player = player;
-            resultsScreen.DescriptionWin = descriptionWon;
-            resultsScreen.PlayerWinner = playerTheWinner.username;
-            resultsScreen.LocalPlayerWin = playerTheWinner.isLocalPlayer;
-            resultsScreen.enabled = true;
-            Time.timeScale = 0.0f;
-            Cursor.visible = true;
-            ResourceManager.MenuOpen = true;
-            this.enabled = false;      
+        var playerTheWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
+        var resultsScreen = GetComponent<ResultsScreen>();
+        //resultsScreen.SetMetVictoryCondition(victoryCondition);
+        resultsScreen.Player = player;
+        resultsScreen.DescriptionWin = descriptionWon;
+        resultsScreen.PlayerWinner = playerTheWinner.username;
+        resultsScreen.LocalPlayerWin = playerTheWinner.isLocalPlayer;
+        resultsScreen.enabled = true;
+        Time.timeScale = 0.0f;
+        Cursor.visible = true;
+        ResourceManager.MenuOpen = true;
+        this.enabled = false;      
     }
 
 

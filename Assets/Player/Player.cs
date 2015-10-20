@@ -42,13 +42,11 @@ public class Player : NetworkBehaviour {
 		hud = GetComponentInChildren< HUD >();
         _gameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
 
-        gameObject.AddComponent<WebsiteCommunication>();
-        WebsiteCommunication = GetComponent<WebsiteCommunication>();
 	    if (isLocalPlayer)
 	    {
             //dodanie komponentu do komunikacji ze stroną
-            //gameObject.AddComponent<WebsiteCommunication>();
-	        //WebsiteCommunication = GetComponent<WebsiteCommunication>();
+            gameObject.AddComponent<WebsiteCommunication>();
+	        WebsiteCommunication = GetComponent<WebsiteCommunication>();
             
             // gowno potrzebne, zeby dac graczowi budynek startowy
 	        Cmd_SpawnStartBuilding();
