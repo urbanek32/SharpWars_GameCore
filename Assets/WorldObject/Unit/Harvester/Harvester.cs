@@ -237,14 +237,14 @@ public class Harvester : Unit {
 			{
 				depositType = ResourceType.Money;
 			}
-			player.AddResource(depositType, deposit);
+            player.Cmd_AddResource(player.netId, depositType, deposit);
 		}
 	}
 
 	private void FindClosestRafinery()
 	{
-		Building[] builds = player.GetComponentsInChildren<Building>();
-		foreach(Building b in builds)
+		var builds = player.GetComponentsInChildren<Building>();
+		foreach(var b in builds)
 		{
 			if(b is Rafinery)
 			{

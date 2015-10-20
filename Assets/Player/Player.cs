@@ -8,7 +8,7 @@ using STL;
 
 public class Player : NetworkBehaviour {
 
-	public string username;
+	[SyncVar]public string username;
     public string token;
 	public bool human;
 	public HUD hud;
@@ -54,6 +54,7 @@ public class Player : NetworkBehaviour {
 
             
 	    }
+	    _gameManager.enabled = true;
         _gameManager.LoadDetails();
 	}
 	
@@ -85,6 +86,13 @@ public class Player : NetworkBehaviour {
 	{
 		resources[type] += amount;
 	}
+
+    [Command]
+    public void Cmd_AddResource(NetworkInstanceId playerId, ResourceType type, int amount)
+    {
+        var player = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
+        player.AddResource(type, amount);
+    }
 	
 	public void IncrementResourceLimit(ResourceType type, int amount) 
 	{
@@ -357,6 +365,12 @@ public class Player : NetworkBehaviour {
     {
         //Debug.LogFormat("Player: {0} won by: {1}", playerId, wonBy);
         hud.DisplayResultScreen(playerId, wonBy);
+    }
+
+    [Command]
+    public void Cmd_SetPlayerName(NetworkInstanceId playerId, string newName)
+    {
+        ClientScene.objects[playerId].gameObject.GetComponent<Player>().username = newName;
     }
 	
 	

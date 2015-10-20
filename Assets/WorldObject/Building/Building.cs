@@ -216,7 +216,7 @@ public class Building : WorldObject
 	{
 		if(player)
 		{
-			player.AddResource(ResourceType.Money, sellValue);
+            player.Cmd_AddResource(player.netId, ResourceType.Money, sellValue);
 			if(currentlySelected)
 			{
 				SetSelection(false, playingArea);

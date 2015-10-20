@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        //Initialise();
+        Initialise();
     }
 
     public void Initialise()
@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
 	
 	void Update ()
 	{
-	    if (!initialised || !_localPlayer)
+        if ((!initialised || !_localPlayer || !_localPlayer.isServer))
 	    {
 	        return;
 	    }
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
 	    if (victoryConditions == null) return;
 	    foreach (var victoryCondition in victoryConditions.Where(victoryCondition => victoryCondition.GameFinished()))
 	    {
-            _localPlayer.Cmd_PlayerWin(_localPlayer.netId, victoryCondition.GetDescription());
+            _localPlayer.Cmd_PlayerWin(victoryCondition.GetWinner().netId, victoryCondition.GetDescription());
 	    }
 	}
 }

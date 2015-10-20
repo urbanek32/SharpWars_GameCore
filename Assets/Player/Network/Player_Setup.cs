@@ -24,6 +24,7 @@ public class Player_Setup : NetworkBehaviour {
 		    camPosition.z = player.transform.position.z - 50f;
 		    Camera.main.transform.position = camPosition;
 		}
+        //player.Cmd_SetPlayerName(player.netId, player.username);
 	}
 	
 

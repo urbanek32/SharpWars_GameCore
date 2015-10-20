@@ -27,6 +27,7 @@ public class ResultsScreen : MonoBehaviour
         float topPos = padding;
         GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
         string message = "Game Over";
+        Cursor.visible = true;
         //if (winner)
         {
             message = string.Format("Congratulations {0}!\nHave won by {1}", PlayerWinner, DescriptionWin);
