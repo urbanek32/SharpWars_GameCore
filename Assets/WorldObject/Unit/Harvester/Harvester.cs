@@ -14,13 +14,15 @@ public class Harvester : Unit {
 	private ResourceType harvestType;
 	private Resource resourceDeposit;
 	private float currentDeposit = 0.0f;
+    public static readonly float resourceMaxScanDistance = 70.0f;
+
 
 	// Game Engine methods, all can be overridden by subclass
 
 	protected override void Start()
 	{
 		base.Start();
-		harvestType = ResourceType.Unknown; 
+		harvestType = ResourceType.Unknown;
 	}
 
 	protected override void Update()
@@ -173,7 +175,7 @@ public class Harvester : Unit {
 
 	// Private Methods
 
-	private void StartHarvest(Resource resource)
+	protected override void StartHarvest(Resource resource)
 	{
 		resourceDeposit = resource;
 		if(currentLoad >= capacity)

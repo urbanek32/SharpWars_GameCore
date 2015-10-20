@@ -42,6 +42,8 @@ public class WorldObject : NetworkBehaviour {
 	private float currentWeaponChargeTime;
     private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
 
+    protected float enemyMaxScanDistance = 10.0f;
+
 
 	//splited script <blocking func part, execution checker that return true or false>
     protected List<ConditionalStatement> scriptExecutionQueue = new List<ConditionalStatement>();
@@ -235,9 +237,74 @@ public class WorldObject : NetworkBehaviour {
         }*/
     }
 
+    //czemu object? ano żeby się nie wywaliło jak n00b zapoda inta, stringa, whatever...
+    public void ScriptAttackObject(object obj)
+    {
+        var wo = obj as WorldObject;
+        if (CanAttack() && wo != null && wo.player != player)
+        {
+            BeginAttack(wo);
+        }
+    }
 
+    public void ScriptHarvestResource(object obj)
+    {
+        var res = obj as Resource;
+        if (isHarvester() && res != null)
+        {
+            StartHarvest(res);
+        }
+    }
 
+    public Resource[] ScriptGetArrayOfResources()
+    {
+        //get all ore depos
+        var resource = new List<OreDeposit>();
 
+        if (this is Harvester)
+        {
+            foreach (var od in FindObjectsOfType<OreDeposit>())
+            {
+                if (Vector3.Distance(transform.position, od.transform.position) > Harvester.resourceMaxScanDistance)
+                    continue;
+
+                resource.Add(od);
+            }
+        }
+
+        return resource.ToArray();
+    }
+
+    public WorldObject[] ScriptGetArrayOfEnemies()
+    {
+        var enemies = new List<WorldObject>();
+
+        foreach(var p in FindObjectsOfType<Player>())
+        {
+            if (p == player)
+                continue;
+
+            //Add all enemy units
+            foreach(var u in p.GetComponentsInChildren<Unit>())
+            {
+                if (Vector3.Distance(transform.position, u.transform.position) > enemyMaxScanDistance)
+                    continue;
+
+                enemies.Add(u);
+            }
+
+            //Add all enemy buildings
+            foreach(var b in p.GetComponentsInChildren<Building>())
+            {
+                if (Vector3.Distance(transform.position, b.transform.position) > enemyMaxScanDistance)
+                    continue;
+
+                enemies.Add(b);
+            }
+        }
+
+        return enemies.ToArray();
+    }
 
 
 	private void ChangeSelection(WorldObject worldObject, Player controller)
@@ -638,6 +705,15 @@ public class WorldObject : NetworkBehaviour {
     public bool isResource()
     {
         return (this is Resource);
+    }
+
+    public bool isWonder()
+    {
+        return (this is Wonder);
+    }
+
+    protected virtual void StartHarvest(Resource resource)
+    {
     }
 
 }
