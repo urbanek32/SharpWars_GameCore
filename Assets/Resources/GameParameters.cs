@@ -8,9 +8,11 @@ using UnityEngine.Networking;
 
 public class GameParameters : MonoBehaviour
 {
-    public Dictionary<string, string> Parameters = new Dictionary<string, string>(); 
+    public Dictionary<string, string> Parameters = new Dictionary<string, string>();
 
-    private string _tempParams = @"sharpwars://master=true&username=test&token=SUPERTOKENBULWO123321!@#%^OLE&server_ip=62.61.60.7&server_port=4321/";
+    private string _tempParams =
+        @"sharpwars://master=0&username=test2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QyIiwiaWF0IjoxNDQ1MzY1MTk4LCJleHAiOjE0NDUzODMxOTh9.tSujcV3-9isS6ihsls1zSDEfGLkFgJoEZN2_E-4ZCEk&server_ip=62.61.60.7&server_port=1234/";
+
 
     void Awake()
     {
@@ -21,7 +23,12 @@ public class GameParameters : MonoBehaviour
     {
 	    //var param = Environment.GetCommandLineArgs();
 	    //Debug.Log(param[0]); // exe path
-	    //Debug.Log(param[1]); // our params
+        //Debug.Log(Environment.GetCommandLineArgs()[1]); // our params
+	    if (Environment.GetCommandLineArgs().Length >= 2)
+	    {
+            _tempParams = Environment.GetCommandLineArgs()[1];
+	    }
+	    //_tempParams = Environment.GetCommandLineArgs()[1];
 
 	    _tempParams = _tempParams.Remove(_tempParams.Length - 1); // remove '/' at the end
 	    var protocol = _tempParams.Remove(12);
@@ -38,10 +45,11 @@ public class GameParameters : MonoBehaviour
             Parameters[words[0]] = words[1];
 	    }
 
-	    //ResourceManager.PlayerName = Parameters["username"];
+	    ResourceManager.PlayerName = Parameters["username"];
+	    ResourceManager.PlayerToken = Parameters["token"];
 
-        // TODO Uncomment on deploy
-        /*var customLobby = GameObject.FindObjectOfType(typeof(CustomLobbyManager)) as CustomLobbyManager;
+	    // TODO Uncomment on deploy
+	    /*var customLobby = GameObject.FindObjectOfType(typeof(CustomLobbyManager)) as CustomLobbyManager;
 	    if (customLobby != null)
 	    {
 	        customLobby.StartClient();

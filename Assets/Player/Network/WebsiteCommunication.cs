@@ -1,5 +1,6 @@
 ﻿//Zrobione w oparciu o wiki z dnia 03-04.10.2015
 
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -56,15 +57,11 @@ public class WebsiteCommunication : MonoBehaviour
         var player = caller as Player;
         if (player == null) return;
 
-        Player p = player;
-        p.token = _token.token;
-
         // just 4 testing
         ResourceManager.PlayerToken = _token.token;
         //ResourceManager.PlayerName = "janusz";
-        //player.Cmd_SetPlayerName(player.netId, ResourceManager.PlayerName);
 
-        Debug.Log("Token set to: " + p.token);
+        Debug.Log("Token set to: " + ResourceManager.PlayerToken);
     }
 
     public static void HandleScriptList(string scripts, object caller)
@@ -96,7 +93,7 @@ public class WebsiteCommunication : MonoBehaviour
     void Awake()
     {
         //EXAMPLUM
-        GetToken("janusz", "testowy", null, HandleToken, gameObject.GetComponent<Player>());
+        //GetToken("janusz", "testowy", null, HandleToken, gameObject.GetComponent<Player>());
     }
 
     //POST
@@ -240,7 +237,7 @@ public class WebsiteCommunication : MonoBehaviour
         }*/
     }
 
-    public void SendScoreToCloud(int score, int gameTime)
+    public void SendScoreToCloud(int score, int gameTime, bool win)
     {
         Debug.Log("Sending score...");
         var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, "janusz", "/game/scores");
@@ -253,7 +250,8 @@ public class WebsiteCommunication : MonoBehaviour
         var scoreBody = new ScoreRequest
         {
             score = score,
-            gameTime = gameTime
+            gameTime = gameTime,
+            winner = Convert.ToInt32(win),
         };
 
         var scoreRequest = JsonConvert.SerializeObject(scoreBody);
@@ -262,5 +260,10 @@ public class WebsiteCommunication : MonoBehaviour
         var wwwReq = new WWW(url, rawData, headers);
 
         StartCoroutine(WaitForRequest(wwwReq, null, null, null));
+    }
+
+    public void FakeSendScoreToCloud(int score, int gameTime, bool win)
+    {
+        Debug.LogFormat("Wysylam: {0} {1} {2}", score, gameTime, win);
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
 
@@ -12,6 +13,7 @@ public class ResultsScreen : MonoBehaviour
     public bool LocalPlayerWin { get; set; }
 
     //private VictoryCondition metVictoryCondition;
+    public Player Player;
 
 
     void OnGUI()
@@ -50,8 +52,8 @@ public class ResultsScreen : MonoBehaviour
             Time.timeScale = 1.0f;
             //ResourceManager.MenuOpen = false;
             //Application.LoadLevel("Map");
-            var wc = GetComponentInParent<Player>().WebsiteCommunication;
-            wc.SendScoreToCloud(666, (int)Time.timeSinceLevelLoad);
+            //var wc = GetComponentInParent<Player>().WebsiteCommunication;
+            Player.WebsiteCommunication.FakeSendScoreToCloud(Convert.ToInt32(Player.netId.Value), (int)Time.timeSinceLevelLoad, LocalPlayerWin);
 
             //MakeGetRequest();
             //MakePostRequest();
@@ -60,11 +62,10 @@ public class ResultsScreen : MonoBehaviour
         leftPos += padding + buttonWidth;
         if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "Quit"))
         {
-            ResourceManager.LevelName = "";
+            //ResourceManager.LevelName = "";
             //Application.LoadLevel("MainMenu");
-            Cursor.visible = true;
+            
             Debug.Log("Do smtg usefull and QUIT!");
-            //Application.OpenURL("http://xvideos.com");
             Application.Quit();
         }
 

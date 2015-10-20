@@ -244,17 +244,18 @@ public class HUD : MonoBehaviour {
 
     public void DisplayResultScreen(NetworkInstanceId playerId, string descriptionWon)
     {
-        var playerTheWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
-        var resultsScreen = GetComponent<ResultsScreen>();
-        //resultsScreen.SetMetVictoryCondition(victoryCondition);
-        resultsScreen.DescriptionWin = descriptionWon;
-        resultsScreen.PlayerWinner = playerTheWinner.username;
-        resultsScreen.LocalPlayerWin = playerTheWinner.isLocalPlayer;
-        resultsScreen.enabled = true;
-        Time.timeScale = 0.0f;
-        Cursor.visible = true;
-        ResourceManager.MenuOpen = true;
-        this.enabled = false;
+            var playerTheWinner = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
+            var resultsScreen = GetComponent<ResultsScreen>();
+            //resultsScreen.SetMetVictoryCondition(victoryCondition);
+            resultsScreen.Player = player;
+            resultsScreen.DescriptionWin = descriptionWon;
+            resultsScreen.PlayerWinner = playerTheWinner.username;
+            resultsScreen.LocalPlayerWin = playerTheWinner.isLocalPlayer;
+            resultsScreen.enabled = true;
+            Time.timeScale = 0.0f;
+            Cursor.visible = true;
+            ResourceManager.MenuOpen = true;
+            this.enabled = false;      
     }
 
 
@@ -501,10 +502,8 @@ public class HUD : MonoBehaviour {
 
                     var wc = GetComponentInParent<WebsiteCommunication>();
 
-                    //TODO TO DO FIX
-                    //janusz => username
-                    wc.EditScriptInCloud("janusz",
-                        player.token,
+                    wc.EditScriptInCloud(ResourceManager.PlayerName,
+                        ResourceManager.PlayerToken,
                         player.scriptList[scriptSelectionBox.SelectedItemIndex].First,
                         "Default",
                         player.scriptList[scriptSelectionBox.SelectedItemIndex].Second,
@@ -649,9 +648,7 @@ public class HUD : MonoBehaviour {
 
             var wc = GetComponentInParent<WebsiteCommunication>();
 
-            //TODO TO DO FIX
-            //username => variable
-            wc.AddScriptToCloud("janusz", player.token, newScriptName, "Default", " ", null, null, this);
+            wc.AddScriptToCloud(ResourceManager.PlayerName, ResourceManager.PlayerToken, newScriptName, "Default", " ", null, null, this);
 
             newScriptName = "";
         }

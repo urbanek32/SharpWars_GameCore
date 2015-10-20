@@ -9,7 +9,7 @@ using STL;
 public class Player : NetworkBehaviour {
 
 	[SyncVar]public string username;
-    public string token;
+    //public string token;
 	public bool human;
 	public HUD hud;
 	public WorldObject SelectedObject { get; set; }
@@ -42,11 +42,13 @@ public class Player : NetworkBehaviour {
 		hud = GetComponentInChildren< HUD >();
         _gameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
 
+        gameObject.AddComponent<WebsiteCommunication>();
+        WebsiteCommunication = GetComponent<WebsiteCommunication>();
 	    if (isLocalPlayer)
 	    {
             //dodanie komponentu do komunikacji ze stroną
-            gameObject.AddComponent<WebsiteCommunication>();
-	        WebsiteCommunication = GetComponent<WebsiteCommunication>();
+            //gameObject.AddComponent<WebsiteCommunication>();
+	        //WebsiteCommunication = GetComponent<WebsiteCommunication>();
             
             // gowno potrzebne, zeby dac graczowi budynek startowy
 	        Cmd_SpawnStartBuilding();
@@ -70,12 +72,11 @@ public class Player : NetworkBehaviour {
 	        tempBuilding.SetTransparentMaterial(CanPlaceBuilding() ? allowedMaterial : notAllowedMaterial, false);
 	    }
 
-        if (ScriptFromCloudStatus == GetScriptStatus.NotYet && !string.IsNullOrEmpty(token))
+        if (ScriptFromCloudStatus == GetScriptStatus.NotYet && !string.IsNullOrEmpty(ResourceManager.PlayerToken))
         {
             var wc = GetComponentInChildren<WebsiteCommunication>();
-            //TO DO
-            //prawdziwy username
-            wc.GetScriptsFromCloud("janusz", token, null, WebsiteCommunication.HandleScriptList, this);
+
+            wc.GetScriptsFromCloud(ResourceManager.PlayerName, ResourceManager.PlayerToken, null, WebsiteCommunication.HandleScriptList, this);
             ScriptFromCloudStatus = GetScriptStatus.Downloading;
         }
 	}
@@ -363,7 +364,8 @@ public class Player : NetworkBehaviour {
     [ClientRpc]
     public void Rpc_PlayerWin(NetworkInstanceId playerId, string wonBy)
     {
-        //Debug.LogFormat("Player: {0} won by: {1}", playerId, wonBy);
+        Debug.LogFormat("Called {0}  Player: {1} won by: {2}", netId, playerId, wonBy);
+        
         hud.DisplayResultScreen(playerId, wonBy);
     }
 
