@@ -22,14 +22,12 @@ public class GameParameters : MonoBehaviour
 
 	void Start () 
     {
-	    //var param = Environment.GetCommandLineArgs();
 	    //Debug.Log(param[0]); // exe path
         //Debug.Log(Environment.GetCommandLineArgs()[1]); // our params
 	    if (Environment.GetCommandLineArgs().Length >= 2)
 	    {
             _tempParams = Environment.GetCommandLineArgs()[1];
 	    }
-	    //_tempParams = Environment.GetCommandLineArgs()[1];
 
 	    _tempParams = _tempParams.Remove(_tempParams.Length - 1); // remove '/' at the end
 	    var protocol = _tempParams.Remove(12);
@@ -53,14 +51,21 @@ public class GameParameters : MonoBehaviour
 	    /*var customLobby = GameObject.FindObjectOfType(typeof(CustomLobbyManager)) as CustomLobbyManager;
 	    if (customLobby != null)
 	    {
-	        customLobby.StartClient();
+	        if (Parameters["master"] == "1")
+	        {
+	            customLobby.StartServer();
+	        }
+	        else
+	        {
+                customLobby.StartClient();
+            }
 	    }*/
 
-	    /*var nm = GameObject.FindObjectOfType(typeof (CustomNetworkManager)) as CustomNetworkManager;
+	    var nm = GameObject.FindObjectOfType(typeof (CustomLobbyManager)) as CustomLobbyManager;
 	    if (nm != null)
 	    {
 	        nm.networkAddress = Parameters["server_ip"];
 	        nm.networkPort = int.Parse(Parameters["server_port"]);
-	    }*/
+	    }
     }
 }

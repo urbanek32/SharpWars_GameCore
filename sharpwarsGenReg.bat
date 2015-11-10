@@ -10,5 +10,5 @@ echo.  >> InstalujProtokol.reg
 echo [HKEY_CLASSES_ROOT\sharpwars\shell\open] >> InstalujProtokol.reg
 echo.  >> InstalujProtokol.reg
 echo [HKEY_CLASSES_ROOT\sharpwars\shell\open\command] >> InstalujProtokol.reg
-echo @="\"%CD:\=\\%\\SharpWars.exe\" \"%1\"" >> InstalujProtokol.reg
+echo @="\"%CD:\=\\%\\SharpWars.exe\" \"%%1\"" >> InstalujProtokol.reg
 echo.  >> InstalujProtokol.reg
