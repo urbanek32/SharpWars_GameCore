@@ -448,7 +448,8 @@ public class HUD : MonoBehaviour {
 		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, 64)); // 0->64 bo scriptWindow
 		if(GUI.Button(new Rect(22, 10, 128, 60), "Skryptowe okno"))
 		{
-            player.Cmd_AddResource(player.netId, ResourceType.Money, 5);
+            //DEBUG RESOURCE MONEY INCREASE
+            //player.Cmd_AddResource(player.netId, ResourceType.Money, 5);
 			scriptWindowOpen = !scriptWindowOpen;
 		}
 		GUI.EndGroup();

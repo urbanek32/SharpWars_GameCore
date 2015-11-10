@@ -1,3 +1,4 @@
+chcp 65001
 echo Windows Registry Editor Version 5.00 >> InstalujProtokol.reg
 echo.  >> InstalujProtokol.reg
 echo [HKEY_CLASSES_ROOT\sharpwars] >> InstalujProtokol.reg
