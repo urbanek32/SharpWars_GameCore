@@ -13,9 +13,10 @@ public class ResultsScreen : MonoBehaviour
     public string PlayerWinner { get; set; }
     public bool LocalPlayerWin { get; set; }
 
+    private bool _scoreSended = false;
+
     //private VictoryCondition metVictoryCondition;
     public Player Player;
-
 
     void OnGUI()
     {
@@ -25,6 +26,7 @@ public class ResultsScreen : MonoBehaviour
 
         Cursor.visible = true;
         string message;
+        
 
         //display 
         float padding = ResourceManager.Padding;
@@ -47,34 +49,33 @@ public class ResultsScreen : MonoBehaviour
         GUI.Label(new Rect(leftPos, topPos, Screen.width - 2 * padding, itemHeight), message);
         leftPos = Screen.width / 2f - padding / 2f - buttonWidth;
         topPos += itemHeight + padding;
-        if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "Send score"))
+
+        if (!_scoreSended)
         {
-            //makes sure that the loaded level runs at normal speed
-            Time.timeScale = 1.0f;
-            //ResourceManager.MenuOpen = false;
-            //Application.LoadLevel("Map");
-            //var wc = GetComponentInParent<Player>().WebsiteCommunication;
-            //Player.WebsiteCommunication.FakeSendScoreToCloud(Convert.ToInt32(Player.netId.Value), (int)Time.timeSinceLevelLoad, LocalPlayerWin);
-            foreach(var p in GameObject.FindObjectsOfType(typeof(Player)))
+            _scoreSended = true;
+
+            foreach (var p in FindObjectsOfType(typeof (Player)))
             {
                 var lp = p as Player;
                 if (lp.isLocalPlayer)
                 {
-                    lp.WebsiteCommunication.SendScoreToCloud(Convert.ToInt32(lp.netId.Value), (int)Time.timeSinceLevelLoad, LocalPlayerWin);
+                    ResourceManager.SendingScoreButtonLabel = "Sending score...";
+                    lp.WebsiteCommunication.SendScoreToCloud(Convert.ToInt32(lp.netId.Value), (int) Time.timeSinceLevelLoad, LocalPlayerWin);
                     break;
-                }   
+                }
             }
+        }
 
-            //MakeGetRequest();
-            //MakePostRequest();
-
+        if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), ResourceManager.SendingScoreButtonLabel))
+        {
+            //makes sure that the loaded level runs at normal speed
+            Time.timeScale = 1.0f;
+            Application.LoadLevel("Mapa_Offline");
+            ResourceManager.SendingScoreButtonLabel = "Na wuj klikasz";
         }
         leftPos += padding + buttonWidth;
         if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "Quit"))
         {
-            //ResourceManager.LevelName = "";
-            //Application.LoadLevel("MainMenu");
-            
             Debug.Log("Do smtg usefull and QUIT!");
             Application.Quit();
         }

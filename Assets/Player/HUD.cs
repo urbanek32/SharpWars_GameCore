@@ -58,8 +58,11 @@ public class HUD : MonoBehaviour {
     private int tabInsertPos = -1;
 
 	// Use this for initialization
-	void Start () 
+	void Start ()
 	{
+	    enabled = true;
+	    ResourceManager.MenuOpen = false;
+
 		player = transform.root.GetComponent< Player >();
 
 		ResourceManager.StoreSelectBoxItems(selectBoxSkin, healthy, damaged, critical);
@@ -356,8 +359,13 @@ public class HUD : MonoBehaviour {
 				}
 				DrawScriptButton();
                 DrawRunScriptButton();
-				DrawActions(player.SelectedObject.GetActions());
-				// store the current selection
+
+			    if (ValidateIfBuildingIsBuild(player.SelectedObject))
+			    {
+			        DrawActions(player.SelectedObject.GetActions());
+			    }
+
+			    // store the current selection
 				lastSelection = player.SelectedObject;
 
 				Building selectedBuilding = lastSelection.GetComponent< Building >();
@@ -378,6 +386,16 @@ public class HUD : MonoBehaviour {
 
 		GUI.EndGroup();
 	}
+
+    private bool ValidateIfBuildingIsBuild(WorldObject wo)
+    {
+        var building = wo as Building;
+        if (building != null)
+        {
+            return !building.IsBuilt;
+        }
+        return true;
+    }
 
 	private void DrawResourceBar()
 	{
@@ -449,7 +467,7 @@ public class HUD : MonoBehaviour {
 		if(GUI.Button(new Rect(22, 10, 128, 60), "Skryptowe okno"))
 		{
             //DEBUG RESOURCE MONEY INCREASE
-            //player.Cmd_AddResource(player.netId, ResourceType.Money, 5);
+            player.Cmd_AddResource(player.netId, ResourceType.Money, 5);
 			scriptWindowOpen = !scriptWindowOpen;
 		}
 		GUI.EndGroup();

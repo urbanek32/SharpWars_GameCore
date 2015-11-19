@@ -13,7 +13,7 @@ using STL;
 public class WebsiteCommunication : MonoBehaviour
 {
     public delegate void HandleOnSuccess(string response_value, object caller);
-    public delegate void HandleOnError(object caller);
+    public delegate void HandleOnError(string responseValue, object caller);
 
     //Kiedyś nastanie era HTTP/TLS...
     private const string SOCIAL_WEBSITE = "http://eti.endrius.tk";
@@ -45,7 +45,7 @@ public class WebsiteCommunication : MonoBehaviour
 
             if (hoe != null)
             {
-                hoe(caller);
+                hoe(wwwReq.error, caller);
             }
         }
     }
@@ -59,7 +59,6 @@ public class WebsiteCommunication : MonoBehaviour
 
         // just 4 testing
         ResourceManager.PlayerToken = _token.token;
-        //ResourceManager.PlayerName = "janusz";
 
         Debug.Log("Token set to: " + ResourceManager.PlayerToken);
     }
@@ -227,20 +226,13 @@ public class WebsiteCommunication : MonoBehaviour
         var wwwReq = new WWW(url, null, headers);
 
         StartCoroutine(WaitForRequest(wwwReq, hoe, hos, caller));
-
-        /*var lsr = JsonConvert.DeserializeObject<ListScriptResponse>(www_req.text);
-
-        if (lsr != null)
-        {
-            return new Pair<string, string>(lsr.name, lsr.code);
-        }*/
     }
 
     public void SendScoreToCloud(int score, int gameTime, bool win)
     {
         Debug.Log("Sending score...");
-        var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, "janusz", "/game/scores");
-
+        var url = string.Format("{0}{1}{2}{3}", SOCIAL_WEBSITE, SOCIAL_AUTH_BASE, ResourceManager.PlayerName, "/game/scores");
+        
         var headers = new Dictionary<string, string>();
 
         headers["Content-Type"] = "application/json";
@@ -257,8 +249,20 @@ public class WebsiteCommunication : MonoBehaviour
         var rawData = System.Text.Encoding.UTF8.GetBytes(scoreRequest);
 
         var wwwReq = new WWW(url, rawData, headers);
+        Debug.Log(url);
+        StartCoroutine(WaitForRequest(wwwReq, HandleScoreFailure, HandleScoreSuccess, null));
+    }
 
-        StartCoroutine(WaitForRequest(wwwReq, null, null, null));
+    private static void HandleScoreSuccess(string response, object caller)
+    {
+        Debug.Log(response);
+        ResourceManager.SendingScoreButtonLabel = "Score sent YUHU";
+    }
+
+    private static void HandleScoreFailure(string response, object caller)
+    {
+        Debug.Log("Jebło");
+        ResourceManager.SendingScoreButtonLabel = response;
     }
 
     public void FakeSendScoreToCloud(int score, int gameTime, bool win)

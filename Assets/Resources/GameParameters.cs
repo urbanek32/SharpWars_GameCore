@@ -11,7 +11,7 @@ public class GameParameters : MonoBehaviour
     public Dictionary<string, string> Parameters = new Dictionary<string, string>();
 
     private string _tempParams =
-        @"sharpwars://master=0&username=test2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QyIiwiaWF0IjoxNDQ1MzY1MTk4LCJleHAiOjE0NDUzODMxOTh9.tSujcV3-9isS6ihsls1zSDEfGLkFgJoEZN2_E-4ZCEk&server_ip=62.61.60.7&server_port=1234/";
+        @"sharpwars://master=1&username=test&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE0NDc5NTI5MjYsImV4cCI6MTQ0Nzk3MDkyNn0.2GzZqS0hLgzdHndRq7EQ1h9TEuYQvWYvyzSxYg5L1o4&server_ip=62.61.60.7&server_port=1234/";
 
 
 
@@ -46,6 +46,8 @@ public class GameParameters : MonoBehaviour
 
 	    ResourceManager.PlayerName = Parameters["username"];
 	    ResourceManager.PlayerToken = Parameters["token"];
+
+        Debug.Log(_tempParams);
 
 	    // TODO Uncomment on deploy
 	    /*var customLobby = GameObject.FindObjectOfType(typeof(CustomLobbyManager)) as CustomLobbyManager;

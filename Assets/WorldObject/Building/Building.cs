@@ -19,9 +19,15 @@ public class Building : WorldObject
 	[SyncVar] private bool needsBuilding = false;
     [SyncVar] public bool instantbuild = false;
 
+    public bool IsBuilt
+    {
+        get
+        {
+            return needsBuilding;
+        }
+    }
 
-
-	protected override void Awake()
+    protected override void Awake()
 	{
 		base.Awake();
 
