@@ -73,7 +73,11 @@ public class Building : WorldObject
 
 	protected void CreateUnit(string unitName)
 	{
-		buildQueue.Enqueue(unitName);
+	    if (player.GetResourceAmount(ResourceType.Money) >= cost)
+	    {
+	        player.Cmd_AddResource(player.netId, ResourceType.Money, -cost);
+            buildQueue.Enqueue(unitName);
+        }
 	}
 
 	protected void ProcessBuildQueue()

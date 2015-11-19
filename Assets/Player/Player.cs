@@ -99,10 +99,10 @@ public class Player : NetworkBehaviour {
 	}
 
 	[Command] 
-	public void Cmd_AddUnit(NetworkInstanceId identity, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
+	public void Cmd_AddUnit(NetworkInstanceId ownerId, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation /*,Building creator*/)
 	{
 		var newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-        newUnit.GetComponent<WorldObject>().ownerId = identity;
+        newUnit.GetComponent<WorldObject>().ownerId = ownerId;
 	    NetworkServer.Spawn(newUnit);
 		var unitObject = newUnit.GetComponent< Unit >();
 
@@ -180,14 +180,22 @@ public class Player : NetworkBehaviour {
 		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(buildingName), buildPoint, new Quaternion());
 		//if(tempBuilding) Destroy(tempBuilding.gameObject); // prevent spawning ghosty buildings
 		tempBuilding = newBuilding.GetComponent< Building >();
+	    
 		if (tempBuilding) 
 		{
-			//tempCreator = creator;
-			findingPlacement = true;
-			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
-			tempBuilding.SetColliders(false);
-			tempBuilding.SetPlayingArea(playingArea);
-            tempBuilding.hitPoints = 0;
+		    if (GetResourceAmount(ResourceType.Money) < tempBuilding.cost)
+		    {
+                Destroy(tempBuilding.gameObject);
+		        tempBuilding = null;
+		        return;
+		    }
+
+		    //tempCreator = creator;
+		    findingPlacement = true;
+		    tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
+		    tempBuilding.SetColliders(false);
+		    tempBuilding.SetPlayingArea(playingArea);
+		    tempBuilding.hitPoints = 0;
 		} 
 		else 
 		{
@@ -255,7 +263,7 @@ public class Player : NetworkBehaviour {
 
         CancelBuildingPlacement();
         Cmd_StartConstruction(this.netId, tempBuilding.GetType().ToString(), tempBuilding.transform.position, tempBuilding.transform.rotation);
-	}
+    }
 
 	[Command]
     public void Cmd_StartConstruction(NetworkInstanceId ownerId, string name, Vector3 pos, Quaternion rot)
@@ -264,6 +272,7 @@ public class Player : NetworkBehaviour {
         var build = newBuilding.GetComponent<Building>();
         build.ownerId = ownerId;
         build.StartConstruction();
+        Cmd_AddResource(ownerId, ResourceType.Money, -build.cost);
         NetworkServer.Spawn(newBuilding);
 	}
 
