@@ -16,4 +16,21 @@ public class CustomLobbyManager : NetworkLobbyManager
         return base.OnLobbyServerSceneLoadedForPlayer(lobbyPlayer, gamePlayer);
     }
 
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        Debug.Log("uciekł");
+        base.OnClientDisconnect(conn);
+    }
+
+    public override void OnLobbyClientDisconnect(NetworkConnection conn)
+    {
+        Debug.Log("uciekł 2");
+        base.OnLobbyClientDisconnect(conn);
+    }
+
+    public override void OnLobbyClientExit()
+    {
+        Debug.Log("uciekł 3");
+        base.OnLobbyClientExit();
+    }
 }

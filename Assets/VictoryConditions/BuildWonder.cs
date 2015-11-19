@@ -10,7 +10,12 @@ public class BuildWonder : VictoryCondition
 
     public override bool PlayerMeetsConditions(Player player)
     {
-        Wonder wonder = player.GetComponentInChildren<Wonder>();
+        if (player == null)
+        {
+            return false;
+        }
+
+        var wonder = player.GetComponentInChildren<Wonder>();
         return player && !player.IsDead() && wonder && !wonder.UnderConstruction();
     }
 }

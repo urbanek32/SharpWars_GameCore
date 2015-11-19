@@ -91,6 +91,19 @@ public class Player : NetworkBehaviour {
     {
         var player = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
         player.AddResource(type, amount);
+        Rpc_AddResource(playerId, type, amount);
+    }
+
+    [ClientRpc]
+    public void Rpc_AddResource(NetworkInstanceId playerId, ResourceType type, int amount)
+    {
+        if (isServer)
+        {
+            return;
+        }
+
+        var player = ClientScene.objects[playerId].gameObject.GetComponent<Player>();
+        player.AddResource(type, amount);
     }
 	
 	public void IncrementResourceLimit(ResourceType type, int amount) 
