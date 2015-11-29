@@ -56,7 +56,7 @@ public class Tank : Unit
 		spawnPoint.y += 2.4f;
 		spawnPoint.z += (2.1f * transform.forward.z);
 
-        player.Cmd_SpawnBullet("HomingMissile", spawnPoint, transform.rotation, netId, target.netId);
+        player.Cmd_SpawnBullet("TankProjectile", spawnPoint, transform.rotation, netId, target.netId);
 
 		/*GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TankProjectile"), spawnPoint, transform.rotation);
         Debug.Log("spawn na: " + spawnPoint);
