@@ -381,7 +381,7 @@ public class HUD : MonoBehaviour {
 		{
 			int topPos = buildAreaHeight + BUTTON_SPACING;
 			int leftPos = BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH / 2;
-			GUI.Label(new Rect(leftPos, topPos, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT), selectionName);
+			GUI.Label(new Rect(leftPos, /*topPos*/ 0, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT), selectionName);
 		}
 
 		GUI.EndGroup();
