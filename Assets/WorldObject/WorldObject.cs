@@ -716,4 +716,9 @@ public class WorldObject : NetworkBehaviour {
     {
     }
 
+    public float GetHealth()
+    {
+        return healthPercentage * 100.0f;
+    }
+
 }
