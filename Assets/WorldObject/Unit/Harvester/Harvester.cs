@@ -256,14 +256,15 @@ public class Harvester : Unit {
 		}
 	}
 
+    public float GetCollectedResourceAmount()
+    {
+        return (player && player.human) ? currentLoad : -1.0f;
+    }
 
-
-
-
-
-
-
-
+    public bool IsReturningToDepot()
+    {
+        return emptying;
+    }
 
 
 
