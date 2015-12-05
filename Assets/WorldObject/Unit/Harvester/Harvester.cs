@@ -266,7 +266,11 @@ public class Harvester : Unit {
         return emptying;
     }
 
-
+    //exposed to scripts
+    public void StopHarvesting()
+    {
+        StopHarvest();
+    }
 
 
 }

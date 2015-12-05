@@ -32,8 +32,10 @@ public class GameObjectList : MonoBehaviour
             ScriptManager.RegisterNBCustomFunction("ScanForResources", "function ScanForResources()\n return this:ScriptGetArrayOfResources() \n end");
             // ScanForEnemies
             ScriptManager.RegisterNBCustomFunction("ScanForEnemies", "function ScanForEnemies()\n return this:ScriptGetArrayOfEnemies() \n end");
+            // GetObjectPosition
+            ScriptManager.RegisterNBCustomFunction("GetObjectPosition", "function GetObjectPosition(oth_obj)\n return oth_obj.transform.position\n end");
             // GetPosition
-            ScriptManager.RegisterNBCustomFunction("GetPosition", "function GetPosition()\n return this.transform.position end");
+            ScriptManager.RegisterNBCustomFunction("GetPosition", "function GetPosition()\n return this.transform.position\n end");
             // GoNorth
             ScriptManager.RegisterNBCustomFunction("GoNorth", "function GoNorth(x_times)\n if x_times == nil then x_times = 1 end local going_north_position12345 = this.transform.position \n going_north_position12345.z = going_north_position12345.z + (5*x_times) \n return going_north_position12345\n end ");
             // GoSouth
