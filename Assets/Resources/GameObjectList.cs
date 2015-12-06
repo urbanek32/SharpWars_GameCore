@@ -28,6 +28,18 @@ public class GameObjectList : MonoBehaviour
 			// Register IsDestinationReached
             ScriptManager.RegisterNBCustomFunction("IsDestinationReached", "function IsDestinationReached()\n if this:isUnit() then\n	local dst = this:GetDestination()\n	local src = this.transform.position\n	if CompareF(dst.x, src.x) and CompareF(dst.z, src.z) then\n		return true\n	else\n		return false\n	end\n else return true\n end \n end");
 
+            //AddWorkerToBuildQueue
+            ScriptManager.RegisterNBCustomFunction("AddWorkerToBuildQueue", "function AddWorkerToBuildQueue()\n --if this:isRafinery() then\n Debug.Log(\"Not implemented natively...\") --this:PreformAction(\"Worker\") \n --end \n end");
+            //AddHarvesterToBuildQueue
+            ScriptManager.RegisterNBCustomFunction("AddHarvesterToBuildQueue", "function AddHarvesterToBuildQueue()\n if this:isRafinery() then\n this:PreformAction(\"Harvester\") \n end \n end");
+            //AddTankToBuildQueue
+            ScriptManager.RegisterNBCustomFunction("AddTankToBuildQueue", "function AddTankToBuildQueue()\n if this:isWarFactory() then\n this:PreformAction(\"Tank\") \n end \n end");
+            //GetWorkerCount
+            ScriptManager.RegisterNBCustomFunction("GetWorkerCount", "function GetWorkerCount()\n return this:GetUnitCount(\"worker\") \n end");
+            //GetHarvesterCount
+            ScriptManager.RegisterNBCustomFunction("GetHarvesterCount", "function GetHarvesterCount()\n return this:GetUnitCount(\"harvester\") \n end");
+            //GetTankCount
+            ScriptManager.RegisterNBCustomFunction("GetTankCount", "function GetTankCount()\n return this:GetUnitCount(\"tank\") \n end");
             // ScanForResources
             ScriptManager.RegisterNBCustomFunction("ScanForResources", "function ScanForResources()\n return this:ScriptGetArrayOfResources() \n end");
             // ScanForEnemies

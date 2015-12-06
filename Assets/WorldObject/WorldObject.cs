@@ -721,4 +721,23 @@ public class WorldObject : NetworkBehaviour {
         return healthPercentage * 100.0f;
     }
 
+    public int GetUnitCount(string strType)
+    {
+        strType = strType.ToLower();
+
+        if (strType == "worker")
+        {
+            return player.GetComponentsInChildren<Worker>().Length;
+        }
+        if (strType == "harvester")
+        {
+            return player.GetComponentsInChildren<Harvester>().Length;
+        }
+        if (strType == "tank")
+        {
+            return player.GetComponentsInChildren<Tank>().Length;
+        }
+
+        return -1;
+    }
 }

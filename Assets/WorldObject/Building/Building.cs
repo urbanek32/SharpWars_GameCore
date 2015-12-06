@@ -19,6 +19,11 @@ public class Building : WorldObject
 	[SyncVar] private bool needsBuilding = false;
     [SyncVar] public bool instantbuild = false;
 
+    public int GetBuildQueueSize()
+    {
+        return buildQueue.Count;
+    }
+
     public bool IsBuilt
     {
         get
