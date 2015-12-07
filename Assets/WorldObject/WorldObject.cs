@@ -10,7 +10,8 @@ using NLua;
 using Script;
 
 
-public class WorldObject : NetworkBehaviour {
+public class WorldObject : NetworkBehaviour
+{
 
 	[SyncVar] public NetworkInstanceId ownerId;
 
@@ -25,7 +26,12 @@ public class WorldObject : NetworkBehaviour {
 	public float weaponAimSpeed = 5.0f;
     public float detectionRange = 20.0f;
 
-	protected Player player;
+    public AudioClip attackSound, selectSound, useWeaponSound;
+    public float attackVolume = 1.0f, selectVolume = 1.0f, useWeaponVolume = 1.0f;
+
+    protected AudioElement audioElement;
+
+    protected Player player;
 	protected string[] actions = {};
 	protected bool currentlySelected = false;
 	protected Bounds selectionBounds;
@@ -99,6 +105,8 @@ public class WorldObject : NetworkBehaviour {
 			SetTeamColor();
 		}
         selectedScript = -1;
+
+        InitialiseAudio();
 	}
 	
 	// Update is called once per frame
@@ -122,6 +130,29 @@ public class WorldObject : NetworkBehaviour {
 	{
 
 	}
+
+    protected virtual void InitialiseAudio()
+    {
+        var sounds = new List<AudioClip>();
+        var volumes = new List<float>();
+
+        if (attackVolume < 0.0f) attackVolume = 0.0f;
+        if (attackVolume > 1.0f) attackVolume = 1.0f;
+        sounds.Add(attackSound);
+        volumes.Add(attackVolume);
+
+        if (selectVolume < 0.0f) selectVolume = 0.0f;
+        if (selectVolume > 1.0f) selectVolume = 1.0f;
+        sounds.Add(selectSound);
+        volumes.Add(selectVolume);
+
+        if (useWeaponVolume < 0.0f) useWeaponVolume = 0.0f;
+        if (useWeaponVolume > 1.0f) useWeaponVolume = 1.0f;
+        sounds.Add(useWeaponSound);
+        volumes.Add(useWeaponVolume);
+
+        audioElement = new AudioElement(sounds, volumes, objectName + netId, this.transform);
+    }
 
 	protected virtual void OnGUI()
 	{
@@ -492,6 +523,11 @@ public class WorldObject : NetworkBehaviour {
 		if(selected)
 		{
 			this.playingArea = playingArea;
+
+		    if (audioElement != null)
+		    {
+		        audioElement.Play(selectSound);
+		    }
 		}
 	}
 

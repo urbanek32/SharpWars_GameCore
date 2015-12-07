@@ -16,7 +16,7 @@ public class WebsiteCommunication : MonoBehaviour
     public delegate void HandleOnError(string responseValue, object caller);
 
     //Kiedyś nastanie era HTTP/TLS...
-    private const string SOCIAL_WEBSITE = "http://eti.endrius.tk";
+    private const string SOCIAL_WEBSITE = "http://91.189.37.207:9000";
     private const string SOCIAL_GETTOKEN = "/api/users/login";
     private const string SOCIAL_AUTH_BASE = "/auth/api/users/";
 

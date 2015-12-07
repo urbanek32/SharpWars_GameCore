@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Worker : Unit {
 
 	public int buildSpeed;
 
-	private Building currentProject;
+    public AudioClip finishedJobSound;
+    public float finishedJobVolume = 1.0f;
+
+    private Building currentProject;
 	private bool building = false;
 	private float amountBuilt = 0.0f;
 
@@ -35,11 +39,32 @@ public class Worker : Unit {
 					if(!currentProject.UnderConstruction())
 					{
 						building = false;
-					}
+
+					    if (audioElement != null)
+					    {
+					        audioElement.Play(finishedJobSound);
+					    }
+                    }
 				}
 			}
 		}
 	}
+
+    protected override void InitialiseAudio()
+    {
+        base.InitialiseAudio();
+
+        if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
+        if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
+
+        var sounds = new List<AudioClip>();
+        var volumes = new List<float>();
+
+        sounds.Add(finishedJobSound);
+        volumes.Add(finishedJobVolume);
+
+        audioElement.Add(sounds, volumes);
+    }
 
     protected override bool ShouldMakeDecision()
     {

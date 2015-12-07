@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 using RTS;
 
 public class Harvester : Unit {
@@ -9,7 +9,10 @@ public class Harvester : Unit {
 	public Building resourceStore;
 	public float collectionAmount, depositAmount;
 
-	private bool harvesting = false, emptying = false;
+    public AudioClip emptyHarvestSound, harvestSound, startHarvestSound;
+    public float emptyHarvestVolume = 0.5f, harvestVolume = 0.5f, startHarvestVolume = 1.0f;
+
+    private bool harvesting = false, emptying = false;
 	private float currentLoad = 0.0f;
 	private ResourceType harvestType;
 	private Resource resourceDeposit;
@@ -89,7 +92,32 @@ public class Harvester : Unit {
 		}
 	}
 
-	protected override void DrawSelectionBox(Rect selectBox)
+    protected override void InitialiseAudio()
+    {
+        base.InitialiseAudio();
+
+        var sounds = new List<AudioClip>();
+        var volumes = new List<float>();
+
+        if (emptyHarvestVolume < 0.0f) emptyHarvestVolume = 0.0f;
+        if (emptyHarvestVolume > 1.0f) emptyHarvestVolume = 1.0f;
+        sounds.Add(emptyHarvestSound);
+        volumes.Add(emptyHarvestVolume);
+
+        if (harvestVolume < 0.0f) harvestVolume = 0.0f;
+        if (harvestVolume > 1.0f) harvestVolume = 1.0f;
+        sounds.Add(harvestSound);
+        volumes.Add(harvestVolume);
+
+        if (startHarvestVolume < 0.0f) startHarvestVolume = 0.0f;
+        if (startHarvestVolume > 1.0f) startHarvestVolume = 1.0f;
+        sounds.Add(startHarvestSound);
+        volumes.Add(startHarvestVolume);
+
+        audioElement.Add(sounds, volumes);
+    }
+
+    protected override void DrawSelectionBox(Rect selectBox)
 	{
 		base.DrawSelectionBox(selectBox);
 
@@ -177,7 +205,12 @@ public class Harvester : Unit {
 
 	protected override void StartHarvest(Resource resource)
 	{
-		resourceDeposit = resource;
+	    if (audioElement != null)
+	    {
+	        audioElement.Play(startHarvestSound);
+	    }
+
+        resourceDeposit = resource;
 		if(currentLoad >= capacity)
 		{
 			StartMove(resourceStore.transform.position, resourceStore.gameObject);
@@ -211,7 +244,12 @@ public class Harvester : Unit {
 
 	private void Collect()
 	{
-		float collect = collectionAmount * Time.deltaTime;
+	    if (audioElement != null)
+	    {
+	        audioElement.Play(harvestSound);
+	    }
+
+        float collect = collectionAmount * Time.deltaTime;
 
 		//make sure that the harvester cannot collect more than it can carry
 		if(currentLoad + collect > capacity) 
@@ -224,7 +262,12 @@ public class Harvester : Unit {
 
 	private void Deposit()
 	{
-		currentDeposit += depositAmount * Time.deltaTime;
+	    if (audioElement != null)
+	    {
+	        audioElement.Play(emptyHarvestSound);
+	    }
+
+        currentDeposit += depositAmount * Time.deltaTime;
 		int deposit = Mathf.FloorToInt(currentDeposit);
 		if(deposit >= 1)
 		{

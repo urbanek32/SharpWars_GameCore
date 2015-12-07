@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.Networking;
 
 using RTS;
 
-public class Unit : WorldObject {
+public class Unit : WorldObject
+{
+    public AudioClip driveSound, moveSound;
+    public float driveVolume = 0.5f, moveVolume = 1.0f;
 
-	public float moveSpeed, rotateSpeed;
+    public float moveSpeed, rotateSpeed;
 
 	protected bool moving, rotating;
 
@@ -61,8 +65,28 @@ public class Unit : WorldObject {
 
 		CalculateBounds(); // navmesh
 	}
-	
-	protected override void OnGUI() 
+
+    protected override void InitialiseAudio()
+    {
+        base.InitialiseAudio();
+
+        var sounds = new List<AudioClip>();
+        var volumes = new List<float>();
+
+        if (driveVolume < 0.0f) driveVolume = 0.0f;
+        if (driveVolume > 1.0f) driveVolume = 1.0f;
+        volumes.Add(driveVolume);
+        sounds.Add(driveSound);
+
+        if (moveVolume < 0.0f) moveVolume = 0.0f;
+        if (moveVolume > 1.0f) moveVolume = 1.0f;
+        sounds.Add(moveSound);
+        volumes.Add(moveVolume);
+
+        audioElement.Add(sounds, volumes);
+    }
+
+    protected override void OnGUI() 
 	{
 		base.OnGUI();
 	}
@@ -165,8 +189,13 @@ public class Unit : WorldObject {
 	{
 		if(player.isLocalPlayer)
 		{
-	        // if nothing to deal with
-	        if (this.destination == destination)
+		    if (audioElement != null)
+		    {
+		        audioElement.Play(moveSound);
+		    }
+
+            // if nothing to deal with
+            if (this.destination == destination)
 	        	return; 
 
 
